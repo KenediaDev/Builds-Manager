@@ -9,25 +9,43 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Kenedia.Modules.BuildsManager
 {
+    public class SkillID
+    {
+        public int PaletteID;
+        public int ID;
+    }
     public class iTexture
     {
         public Texture2D Texture;
         public string FileName;
 
     }
+    public class _UpgradeIDs
+    {
+        public _UpgradeIDs(List<int> runes, List<int> sigils)
+        {
+            _Sigils = new List<int>(sigils);
+            _Runes = new List<int>(runes);
+        }
+        public List<int> _Sigils { get; private set; }
+        public List<int> _Runes { get; private set; }
+    }
 
     public class iDataManager
     {
+        public _UpgradeIDs _UpgradeIDs;
         public List<Texture2D> _Backgrounds = new List<Texture2D>();
         public List<Texture2D> _Icons = new List<Texture2D>();
         public List<Texture2D> _Emblems = new List<Texture2D>();
         public List<Texture2D> _Controls = new List<Texture2D>();
 
-        private Blish_HUD.Modules.Managers.ContentsManager ContentsManager;
+        public Blish_HUD.Modules.Managers.ContentsManager ContentsManager;
+        public Blish_HUD.Modules.Managers.DirectoriesManager DirectoriesManager;
 
-        public iDataManager(Blish_HUD.Modules.Managers.ContentsManager contentsManager)
+        public iDataManager(Blish_HUD.Modules.Managers.ContentsManager contentsManager, Blish_HUD.Modules.Managers.DirectoriesManager  directoriesManager)
         {
             ContentsManager = contentsManager;
+            DirectoriesManager = directoriesManager;
 
             var values = Enum.GetValues(typeof(_Backgrounds));
             _Backgrounds = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
@@ -60,6 +78,15 @@ namespace Kenedia.Modules.BuildsManager
                 var texture = ContentsManager.GetTexture(@"textures\controls\" + (int)num + ".png");
                 _Controls.Insert((int)num, texture);
             }
+
+
+            string runesJson = new StreamReader(ContentsManager.GetFileStream(@"data\runes.json")).ReadToEnd();
+            List<int> runes = JsonConvert.DeserializeObject<List<int>>(runesJson);
+
+            string sigilsJson = new StreamReader(ContentsManager.GetFileStream(@"data\sigils.json")).ReadToEnd();
+            List<int> sigils = JsonConvert.DeserializeObject<List<int>>(sigilsJson);
+
+            _UpgradeIDs = new _UpgradeIDs(runes, sigils);
         }
 
         public Texture2D getBackground(_Backgrounds background)

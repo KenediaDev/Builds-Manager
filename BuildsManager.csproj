@@ -65,14 +65,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildsManager.cs" />
+    <Compile Include="Classes\Build.cs" />
+    <Compile Include="Classes\BuildTemplate.cs" />
+    <Compile Include="Classes\ClassExtensions.cs" />
     <Compile Include="Classes\Data.cs" />
     <Compile Include="Classes\GW2API.cs" />
     <Compile Include="Classes\ItemImage.cs" />
+    <Compile Include="Classes\LocalTexture.cs" />
     <Compile Include="Classes\MainWindow.cs" />
+    <Compile Include="Classes\Paths.cs" />
     <Compile Include="Classes\ProgressBar.cs" />
     <Compile Include="Classes\Ticks.cs" />
     <Compile Include="Classes\DataManager.cs" />
     <Compile Include="Classes\Enum.cs" />
+    <Compile Include="Classes\TraitLine.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AsyncClipboardService, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">

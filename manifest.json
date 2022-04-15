@@ -2,22 +2,20 @@
   "name": "Builds Manager",
   "version": "0.0.1",
   "namespace": "Kenedia.Modules.BuildsManager",
-  "package": "Builds.dll",
+  "package": "BuildsManager.dll",
   "manifest_version": 1,
 
   "description": "A Blish approach to enhance your gameplay experience with the 'Legendary Armory' and 'Build Templates'. A must have for everyone with a lot of builds!",
   "dependencies": {
     "bh.blishhud": ">=0.11.7"
   },
-  "url": "https://github.com/blish-hud/Blish-HUD",
+  "url": "https://github.com/KenediaDev/Builds-Manager.git",
   "contributors": [
     {
       "url": "https://github.com/KenediaDev",
       "name": "Kenedia"
     }
   ],
-
-  "directories": [ "builds-manager", "builds-manager/api", "builds-manager/api/traits", "builds-manager/api/traits/icons", "builds-manager/api/facts", "builds-manager/api/skills", "builds-manager/api/skills/icons", "builds-manager/api/specs", "builds-manager/api/specs/backgrounds", "builds-manager/api/specs/icons", "builds-manager/api/stats", "builds-manager/api/armory", "builds-manager/api/armory/icons" ],
   "enabled_without_gw2": false,
 
   "api_permissions": {
@@ -33,5 +31,6 @@
       "optional": true,
       "details": "Needed to get your armory items."
     }
-  }
+  },
+  "directories": [ "builds-manager"]
 }

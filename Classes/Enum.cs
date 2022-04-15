@@ -16,6 +16,17 @@
         GlidingFill,
         GlidingFill_Gray,
         TabActive,
+        SpecHighlight,
+        Line,
+        Land,
+        Water,
+        EliteFrame,
+        PlaceHolder_Traitline,
+        SpecFrame,
+        SpecSideSelector,
+        SpecSideSelector_Hovered,
+        SkillSelector,
+        SkillSelector_Hovered,
     }
     public enum _Icons
     {

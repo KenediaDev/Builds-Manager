@@ -13,6 +13,7 @@ using Blish_HUD;
 using Blish_HUD.Input;
 using Color = Microsoft.Xna.Framework.Color;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using Gw2Sharp.ChatLinks;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -53,12 +54,19 @@ namespace Kenedia.Modules.BuildsManager
     public class iMainWindow : TabbedWindow2
     {
         iDataManager DataManager;
+        public TextBox TemplateBox;
+        public StandardButton Reset_Button;
+        public StandardButton Copy_Button;
         public FlowPanel Gear_View;
         public FlowPanel Build_View;
+        public Build Build;
+
+
         public iTab Gear_Tab;
         public iTab Build_Tab;
         public iTab active_Tab;
         public iTab hovered_Tab;
+        public Rectangle Tab_Indicator;
         public List<iTab> iTabs = new List<iTab>();
 
         public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, iDataManager dataManager, Container parent) : base (background, windowRegion, contentRegion)
@@ -71,6 +79,7 @@ namespace Kenedia.Modules.BuildsManager
             SavesPosition = true;
             Id = $"BuildsManager";
 
+
             Gear_View = new FlowPanel()
             {
                 Parent = this,
@@ -79,6 +88,7 @@ namespace Kenedia.Modules.BuildsManager
                 Visible = true,
                 CanScroll = true,
             };
+
             Gear_Tab = new iTab()
             {
                 Icon = DataManager.getIcon(_Icons.Helmet),
@@ -105,28 +115,74 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = this,
             };
             iTabs.Add(Build_Tab);
-            hovered_Tab = Build_Tab;    
+
+            TemplateBox = new TextBox()
+            {
+                Parent = this,
+                Width = Build.SpecializationLine._Width - 200,
+                Font = GameService.Content.DefaultFont12,
+            };
+
+            TemplateBox.TextChanged += delegate
+            {
+                if (TemplateBox.Focused)
+                {
+                    Build.BuildTemplateCode = TemplateBox.Text;
+                }
+            };
+
+            Reset_Button = new StandardButton()
+            {
+                Parent = this,
+                Width = 100,
+                Location = TemplateBox.Location.Add(new Point(TemplateBox.Width + 5, 0)),
+                Text = "Reset",
+            };
+            Reset_Button.Click += delegate
+            {
+                BuildChatLink build = new BuildChatLink();
+                var bytes = build.ToArray();
+                build.Parse(bytes);
+                var player = GameService.Gw2Mumble.PlayerCharacter;
+                build.Profession = player != null ? player.Profession : Gw2Sharp.Models.ProfessionType.Guardian;
+
+                Build.BuildTemplateCode = build.ToString();
+            };
+
+            Copy_Button = new StandardButton()
+            {
+                Parent = this,
+                Width = 100,
+                Location = TemplateBox.Location.Add(new Point(TemplateBox.Width + 105, 0)),
+                Text = "Copy",
+            };
+            Copy_Button.Click += delegate 
+            {
+                System.Windows.Forms.Clipboard.SetText(TemplateBox.Text);
+            };
         }
 
         private const int TAB_VERTICALOFFSET = 40;
 
         private const int TAB_HEIGHT = 50;
         private const int TAB_WIDTH = 84;
+        private const int TAB_CLICKWIDTH = 45;
 
         private void UpdateTabStates()
         {
             SideBarHeight = TAB_VERTICALOFFSET + TAB_HEIGHT * iTabs.Count;
             hovered_Tab = null;
 
-                for (int i = 0; i < iTabs.Count; i++)
+            for (int i = 0; i < iTabs.Count; i++)
+            {
+                var rect = new Rectangle(new Point(SidebarActiveBounds.X, SidebarActiveBounds.Y + (TAB_HEIGHT * i) + TAB_VERTICALOFFSET), new Point(TAB_CLICKWIDTH, TAB_HEIGHT));
+
+                if (rect.Contains(RelativeMousePosition))
                 {
-                    var rect = new Rectangle(new Point(SidebarActiveBounds.X, SidebarActiveBounds.Y + (TAB_HEIGHT * i) + TAB_VERTICALOFFSET), new Point(TAB_WIDTH, TAB_HEIGHT));
-                    if (rect.Contains(RelativeMousePosition))
-                    {
-                        hovered_Tab = iTabs[i];
-                        BasicTooltipText = hovered_Tab?.Name;
-                    }
+                    hovered_Tab = iTabs[i];
+                    BasicTooltipText = hovered_Tab?.Name;
                 }
+            }
         }
         protected override void OnClick(MouseEventArgs e)
         {
@@ -190,6 +246,18 @@ namespace Kenedia.Modules.BuildsManager
                          hovered);
 
                 tabIndex++;
+            }
+
+            if(Tab_Indicator != null)
+            {
+                spriteBatch.DrawOnCtrl(Parent,
+                       ContentService.Textures.Pixel,
+                       Tab_Indicator.Add(Location),
+                       Tab_Indicator,
+                       Color.Red,
+                       0f,
+                       Vector2.Zero
+                       );
             }
         }
     }
