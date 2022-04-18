@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Slot = Gw2Sharp.WebApi.V2.Models.ItemEquipmentSlotType;
 using Gw2Sharp.ChatLinks;
 using Blish_HUD;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -29,10 +30,6 @@ namespace Kenedia.Modules.BuildsManager
         }
     }
 
-    public class GearTemplate
-    {
-        List<GW2API.Item> Equipment = new List<GW2API.Item>();
-    }
     public class SpecLine
     {
         public GW2API.Specialization Specialization;

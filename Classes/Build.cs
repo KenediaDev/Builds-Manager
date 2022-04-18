@@ -14,7 +14,8 @@ using Gw2Sharp.ChatLinks;
 namespace Kenedia.Modules.BuildsManager
 {
     public class Build : Control
-    {        
+    {
+        public string newToolTip;
         class ConnectorLine
         {
             public Rectangle Bounds;
@@ -65,10 +66,10 @@ namespace Kenedia.Modules.BuildsManager
         public class SpecializationLine
         {
             public bool Elite;
-            public Control Parent;
+            public Build Parent;
             public SkillBar_Element SkillBar;
 
-            public SpecializationLine(Control c)
+            public SpecializationLine(Build c)
             {
                 Parent = c;
 
@@ -125,6 +126,7 @@ namespace Kenedia.Modules.BuildsManager
             private Rectangle DefaultSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, 15, _Height);
             private Rectangle DefaultSpecSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height);
             private Rectangle DefaultHighlightBounds;
+            public Rectangle ControlBounds { get; private set; }
 
             private List<Rectangle> LineBounds = new List<Rectangle>();
             private Rectangle AbsoluteBounds = new Rectangle(0,0, _Width + _FrameWidth, _Height + _FrameWidth);
@@ -329,7 +331,7 @@ namespace Kenedia.Modules.BuildsManager
                         i++;
                     }
 
-                    if (selectedTrait != null)
+                    if (selectedTrait != null && Specialization != null)
                     {
                         foreach (TraitIcon trait in _MajorTraits)
                         {
@@ -347,6 +349,8 @@ namespace Kenedia.Modules.BuildsManager
 
                     if (SelectorActive)
                     {
+                        SelectorActive = false;
+
                         foreach (SpecializationLine_Specialization spec in Specializations)
                         {
                             if (spec.Hovered)
@@ -362,7 +366,6 @@ namespace Kenedia.Modules.BuildsManager
                                     SelectedTraits.Clear();
                                 }
 
-                                SelectorActive = false;
                                 return true;
                             }
                         }
@@ -425,7 +428,7 @@ namespace Kenedia.Modules.BuildsManager
             public void UpdateLayout(Point p, double scale = default)
             {
                 if (scale != default) _Scale = scale;
-
+                ControlBounds = DefaultAbsoluteBounds.Add(Location).Scale(_Scale);
                 AbsoluteBounds = DefaultAbsoluteBounds.Add(Location).Scale(_Scale);
                 ContentBounds = DefaultBounds.Add(Location).Scale(_Scale);
                 HighlightBounds = DefaultHighlightBounds.Add(Location).Scale(_Scale);
@@ -437,11 +440,14 @@ namespace Kenedia.Modules.BuildsManager
                 foreach (TraitIcon trait in _MinorTraits)
                 {
                     trait.Bounds = trait.DefaultBounds.Add(Location).Scale(_Scale);
+                    trait.Hovered = !SelectorActive && trait.Bounds.Contains(p);
+                    if (trait.Hovered && trait.Trait != null) Parent.newToolTip = trait.Trait.Name;
                 }
                 foreach (TraitIcon trait in _MajorTraits)
                 {
                     trait.Bounds = trait.DefaultBounds.Add(Location).Scale(_Scale);
                     trait.Hovered = !SelectorActive && trait.Bounds.Contains(p);
+                    if (trait.Hovered && trait.Trait != null) Parent.newToolTip = trait.Trait.Name;
 
                     //Lines
                     if (trait.Selected)
@@ -487,6 +493,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     spec.Bounds = new Rectangle(offset + i * (_SpecSelectSize + 5), (_Height - _SpecSelectSize) / 2, _SpecSelectSize, _SpecSelectSize).Add(Location).Scale(_Scale);
                     spec.Hovered = (!spec.Specialization.Elite || Elite) && spec.Bounds.Contains(p);
+                    if (spec.Hovered && spec.Specialization != null && SelectorActive) Parent.newToolTip = spec.Specialization.Name;
                     i++;
                 }
             }
@@ -668,6 +675,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public class SkillBar_Element
         {
+            public Rectangle ControlBounds { get; private set; }
             public class SkillElement
             {
                 public Rectangle SelectorBounds;
@@ -676,6 +684,7 @@ namespace Kenedia.Modules.BuildsManager
                 public GW2API.Skill Skill;
                 public LoadingTexture Texture = new LoadingTexture();
                 public bool Hovered = false;
+                public bool availableInWater = true;
                 public int Slot;
                 public string Type;
                 public List<SkillElement> List = new List<SkillElement>();
@@ -688,7 +697,7 @@ namespace Kenedia.Modules.BuildsManager
                 public List<SkillElement> Aquatic = new List<SkillElement>();                   
             }
 
-            public Control Parent;
+            public Build Parent;
             public List<SpecializationLine> SpecializationLines;
 
             private int _EliteSpecialization;
@@ -707,7 +716,10 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             if (skill.Skill.Specialization == null || skill.Skill.Specialization == value)
                             {
+
                                 skill.Slot = skill.Skill.Slot.Value;
+                                skill.availableInWater = skill.Skill.Flags.Find(e => e.RawValue == "NoUnderwater") == null;
+
                                 Skills.SelectableSkills.Add(skill);    
                             }
                         }
@@ -733,10 +745,6 @@ namespace Kenedia.Modules.BuildsManager
                         }
                     }
                 }
-            }
-            void getSlot()
-            {
-
             }
 
             private GW2API.Profession _Profession;
@@ -772,6 +780,8 @@ namespace Kenedia.Modules.BuildsManager
                                 if (skill.Skill.Specialization == null || skill.Skill.Specialization == _EliteSpecialization)
                                 {
                                     skill.Slot = skill.Skill.Slot.Value;
+                                    skill.availableInWater = skill.Skill.Flags.Find(e => e.RawValue == "NoUnderwater") == null;
+
                                     Skills.SelectableSkills.Add(skill);
                                 }
                             }
@@ -871,6 +881,8 @@ namespace Kenedia.Modules.BuildsManager
             private Texture2D _SelectorTextureHovered;
             private Texture2D _SkillSelectorBackground;
             private Texture2D _SkillPlaceHolder;
+            private Texture2D _NoWaterTexture;
+            private Texture2D _Selector;
 
             private SkillElement SkillSelector_Active;
             private List<SkillElement> SkillSelector_List;
@@ -880,11 +892,11 @@ namespace Kenedia.Modules.BuildsManager
             private int _IdenticatorSize = 48;
 
             private int _FrameWidth = 1;
-            private int _Width = 643;
-            private int _Height = 105;
+            private const int _Width = 643;
+            private const int _Height = 105;
             private int _SkillSize = 60;
 
-            private Rectangle Default_Rectangle;
+            public Rectangle Default_Rectangle { get; private set; }
 
             private Rectangle Default_SkillSelectRectangle;
             private Rectangle SkillSelectRectangle;
@@ -903,7 +915,7 @@ namespace Kenedia.Modules.BuildsManager
             public bool isActive;
             public bool CanClick = true;
 
-            public SkillBar_Element(Control control)
+            public SkillBar_Element(Build control)
             {
                 Parent = control;
                 Default_Rectangle = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2));
@@ -911,7 +923,6 @@ namespace Kenedia.Modules.BuildsManager
                 var subBar_Width = (Default_Rectangle.Width - 15) / 2;
                 Default_WaterBar = new Rectangle(0, 0, subBar_Width, Default_Rectangle.Height);
                 Default_TerrestialBar = new Rectangle(subBar_Width + 22, 0, subBar_Width, Default_Rectangle.Height);
-                Default_Rectangle = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2));
                 Default_SkillSelectRectangle = new Rectangle(0, 0, 250, 350);
 
                 _TerrestialTexture = BuildsManager.DataManager.getControlTexture(_Controls.Land);
@@ -922,6 +933,8 @@ namespace Kenedia.Modules.BuildsManager
                 _SelectorTextureHovered = BuildsManager.DataManager.getControlTexture(_Controls.SkillSelector_Hovered);
                 _SkillSelectorBackground = BuildsManager.DataManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
                 _SkillPlaceHolder = BuildsManager.DataManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
+                _NoWaterTexture = BuildsManager.DataManager.getControlTexture(_Controls.NoWaterTexture).GetRegion(16, 16, 96, 96);
+                _Selector = BuildsManager.DataManager.getControlTexture(_Controls.Selector);
 
                 _IdenticatorSize = 32;
 
@@ -990,39 +1003,6 @@ namespace Kenedia.Modules.BuildsManager
             {
                 if (CanClick)
                 {
-                    if (SkillSelector_Active != null)
-                    {
-                        SkillElement editedSkill = null;
-                        foreach (SkillElement skill in Skills.SelectableSkills)
-                        {
-                            if (skill.Hovered)
-                            {
-                                SkillSelector_Active.Skill = skill.Skill;
-                                SkillSelector_Active.Texture = new LoadingTexture();
-                                editedSkill = SkillSelector_Active;
-
-                                SkillSelector_Active = null;
-                            }
-                        }
-
-                        if (editedSkill != null)
-                        {
-                            foreach (SkillElement skill in SkillSelector_List)
-                            {
-                                if (skill != editedSkill && skill.Skill != null && skill.Skill.Id == editedSkill.Skill.Id)
-                                {
-                                    skill.Skill = null;
-                                    skill.Texture = new LoadingTexture()
-                                    {
-                                        Loaded = true,
-                                        Texture = _SkillPlaceHolder,
-                                    };
-                                }
-                            }
-                            return true;
-                        }
-                    }
-
                     foreach (SkillElement skill in Skills.Aquatic)
                     {
                         if (skill.Hovered)
@@ -1045,6 +1025,8 @@ namespace Kenedia.Modules.BuildsManager
                                         if (sSkill.Skill.Specialization == null || sSkill.Skill.Specialization == _EliteSpecialization)
                                         {
                                             sSkill.Slot = sSkill.Skill.Slot.Value;
+                                            sSkill.availableInWater = sSkill.Skill.Flags.Find(e => e.RawValue == "NoUnderwater") == null;
+
                                             Skills.SelectableSkills.Add(sSkill);
                                         }
                                     }
@@ -1076,12 +1058,49 @@ namespace Kenedia.Modules.BuildsManager
                                         if (sSkill.Skill.Specialization == null || sSkill.Skill.Specialization == _EliteSpecialization)
                                         {
                                             sSkill.Slot = sSkill.Skill.Slot.Value;
+                                            sSkill.availableInWater = sSkill.Skill.Flags.Find(e => e.RawValue == "NoUnderwater") == null;
+
                                             Skills.SelectableSkills.Add(sSkill);
                                         }
                                     }
                                 }
                             }
 
+                            return true;
+                        }
+                    }
+
+                    if (SkillSelector_Active != null)
+                    {
+                        bool isLand = SkillSelector_List == Skills.Terrestial;
+
+                        SkillElement editedSkill = null;
+                        foreach (SkillElement skill in Skills.SelectableSkills)
+                        {
+                            if (skill.Hovered && (isLand || skill.availableInWater))
+                            {
+                                SkillSelector_Active.Skill = skill.Skill;
+                                SkillSelector_Active.Texture = new LoadingTexture();
+                                editedSkill = SkillSelector_Active;
+                            }
+                        }
+
+                        SkillSelector_Active = null;
+
+                        if (editedSkill != null)
+                        {
+                            foreach (SkillElement skill in SkillSelector_List)
+                            {
+                                if (skill != editedSkill && skill.Skill != null && skill.Skill.Id == editedSkill.Skill.Id)
+                                {
+                                    skill.Skill = null;
+                                    skill.Texture = new LoadingTexture()
+                                    {
+                                        Loaded = true,
+                                        Texture = _SkillPlaceHolder,
+                                    };
+                                }
+                            }
                             return true;
                         }
                     }
@@ -1094,6 +1113,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 int i;
                 var size = _SkillSize;
+                ControlBounds = Default_Rectangle.Add(Location).Scale(_Scale);
 
                 i = 0;
                 TerrestialBar_Rectangle = Default_TerrestialBar.Add(Location).Scale(_Scale);
@@ -1105,6 +1125,8 @@ namespace Kenedia.Modules.BuildsManager
                     skill.Bounds = new Rectangle(Default_TerrestialBar.X + i * (size + (_FrameWidth *2)), Default_TerrestialBar.Y + (Default_TerrestialBar.Height - size), size, size).Add(Location).Scale(_Scale);
                     skill.SelectorBounds = new Rectangle(Default_TerrestialBar.X + i * (size + (_FrameWidth * 2)), (Default_TerrestialBar.Height - size) - 10, size, 10).Add(Location).Scale(_Scale);
                     skill.Hovered = skill.Bounds.Contains(p) || skill.SelectorBounds.Contains(p);
+                    if (skill.Hovered && skill.Skill != null) Parent.newToolTip = skill.Skill.Name;
+
                     i++;
                 }
 
@@ -1118,38 +1140,51 @@ namespace Kenedia.Modules.BuildsManager
                     skill.Bounds = new Rectangle(Default_WaterBar.X + i * (size + (_FrameWidth * 2)), Default_WaterBar.Y + (Default_WaterBar.Height - size), size, size).Add(Location).Scale(_Scale);
                     skill.SelectorBounds = new Rectangle(Default_WaterBar.X + i * (size + (_FrameWidth * 2)), (Default_WaterBar.Height - size) - 10, size, 10).Add(Location).Scale(_Scale);
                     skill.Hovered = skill.Bounds.Contains(p) || skill.SelectorBounds.Contains(p);
+                    if (skill.Hovered && skill.Skill != null) Parent.newToolTip = skill.Skill.Name;
                     i++;
                 }
 
                 isActive = SkillSelector_Active != null;
                 if (SkillSelector_Active != null)
                 {
-                    var loc = new Point(SkillSelector_Active.Bounds.X, SkillSelector_Active.Bounds.Bottom);
+                    var ImgSize = _SkillSize.Scale(_Scale);
+                    var ImgGap = 2.Scale(_Scale);
+
                     var rows = Math.Min(Skills.SelectableSkills.Count, 6);
                     var columns = (int)Math.Ceiling((double)Skills.SelectableSkills.Count / (double)rows);
                     rows = Skills.SelectableSkills.Count / columns;
 
-                    SkillSelectRectangle = new Rectangle(Default_SkillSelectRectangle.X, Default_SkillSelectRectangle.Y, 2 + columns * (_SkillSize + 2), rows * (_SkillSize) + 4).Add(loc).Scale(_Scale);
-                    SkillSelectBackground = new Rectangle(0, _Height + 5, _Width, 5 + SpecializationLine._Height * 3).Add(Location).Scale(_Scale);
+                    var width = (columns)* (ImgSize + ImgGap);
+                    var loc = new Point(Math.Min(SkillSelector_Active.Bounds.X, _Width.Scale(_Scale) - width), SkillSelector_Active.Bounds.Bottom);
 
+                    //BuildsManager.Logger.Debug("X: {0}, Width - width {1}", Default_SkillSelectRectangle.Scale(_Scale).X, Default_SkillSelectRectangle.Scale(_Scale).Right - 5 - width);
+
+                    SkillSelectRectangle = new Rectangle(Default_SkillSelectRectangle.Scale(_Scale).X, Default_SkillSelectRectangle.Scale(_Scale).Y, ImgGap + columns * (ImgSize + ImgGap), ImgGap + rows * (ImgSize + ImgGap)).Add(loc);
+                    SkillSelectBackground = new Rectangle(0, _Height + 5.Scale(_Scale), _Width + 5.Scale(_Scale), 5 + SpecializationLine._Height * 3).Add(Location).Scale(_Scale);
 
                     var row = 0;
                     var column = -1;
-                    var pos = new Point(SkillSelector_Active.Bounds.X - 5, 0);
+                    //var pos = new Point(SkillSelector_Active.Bounds.X, SkillSelector_Active.Bounds.Y);
+
                     foreach (SkillElement skill in Skills.SelectableSkills)
                     {
                         column++;
-                        var rect = new Rectangle(2 + column * (_SkillSize + 2), SkillSelectRectangle.Top - 2 + (row * _SkillSize), _SkillSize, _SkillSize).Add(Location).Add(pos).Scale(_Scale);
+                        //var rect = new Rectangle(2 + column * (_SkillSize + 2), SkillSelectRectangle.Top - 2 + (row * (_SkillSize + 2)), _SkillSize, _SkillSize).Add(Location).Add(pos).Scale(_Scale);
+                        var rect = new Rectangle(SkillSelectRectangle.X + ImgGap + column * (ImgSize + ImgGap), ImgGap + SkillSelectRectangle.Y + (row * (ImgSize + ImgGap)), ImgSize, ImgSize);
+                        //var rect = new Rectangle(column * (_SkillSize.Scale(_Scale)) + Location.X + pos.X, (row * _SkillSize.Scale(_Scale)) + Location.Y + pos.Y, _SkillSize.Scale(_Scale), _SkillSize.Scale(_Scale));
+
                         if (!SkillSelectRectangle.Contains(rect))
                         {
                             column = 0;
                             row++;
 
-                            rect = new Rectangle(2 + column * (_SkillSize + 2), SkillSelectRectangle.Top - 2 + (row * _SkillSize), _SkillSize, _SkillSize).Add(Location).Add(pos).Scale(_Scale);
+                            // rect = new Rectangle(2 + column * (_SkillSize + 2), SkillSelectRectangle.Top - 2 + (row * _SkillSize), _SkillSize, _SkillSize).Add(Location).Add(pos).Scale(_Scale);
+                            rect = new Rectangle(SkillSelectRectangle.X + ImgGap + column * (ImgSize + ImgGap), ImgGap + SkillSelectRectangle.Y + (row * (ImgSize + ImgGap)), ImgSize, ImgSize);
                         }
 
                         skill.Bounds = rect;
                         skill.Hovered = rect.Contains(p);
+                        if (skill.Hovered && skill.Skill != null) Parent.newToolTip = skill.Skill.Name;
                     }
                 }
             }
@@ -1291,6 +1326,18 @@ namespace Kenedia.Modules.BuildsManager
                                            0f,
                                            Vector2.Zero
                                            );
+
+                    if (SkillSelector_Active == skill)
+                    {
+                        spriteBatch.DrawOnCtrl(Parent,
+                                               _Selector,
+                                               skill.Bounds,
+                                               _Selector.Bounds,
+                                               Color.White,
+                                               0f,
+                                               Vector2.Zero
+                                               );
+                    }
                 }
 
                 // Water Skills
@@ -1321,6 +1368,7 @@ namespace Kenedia.Modules.BuildsManager
 
                 foreach (SkillElement skill in Skills.Aquatic)
                 {
+
                     spriteBatch.DrawOnCtrl(Parent,
                                            skill.Texture.Texture,
                                            skill.Bounds,
@@ -1338,10 +1386,23 @@ namespace Kenedia.Modules.BuildsManager
                                            0f,
                                            Vector2.Zero
                                            );
+                    if (SkillSelector_Active == skill)
+                    {
+                        spriteBatch.DrawOnCtrl(Parent,
+                                               _Selector,
+                                               skill.Bounds,
+                                               _Selector.Bounds,
+                                               Color.White,
+                                               0f,
+                                               Vector2.Zero
+                                               );
+                    }
                 }
 
                 if (SkillSelector_Active != null)
                 {
+                    var isLand = SkillSelector_List == Skills.Terrestial;
+                    
                     spriteBatch.DrawOnCtrl(Parent,
                                            ContentService.Textures.Pixel,
                                            SkillSelectBackground,
@@ -1377,11 +1438,23 @@ namespace Kenedia.Modules.BuildsManager
                                                skill.Texture.Texture,
                                                skill.Bounds,
                                                skill.Texture.Texture.Bounds,
-                                               Color.White,
+                                               (isLand || skill.availableInWater) ? Color.White : Color.LightGray,
                                                0f,
                                                Vector2.Zero
                                                );
-                    }
+
+                        if (! (isLand || skill.availableInWater))
+                        {
+                            spriteBatch.DrawOnCtrl(Parent,
+                                                   _NoWaterTexture,
+                                                   skill.Bounds,
+                                                  _NoWaterTexture.Bounds,
+                                                  Color.White,
+                                                   0f,
+                                                   Vector2.Zero
+                                                   );
+                        }
+                    }                
                 }
             }
         }
@@ -1391,6 +1464,7 @@ namespace Kenedia.Modules.BuildsManager
         private int Build_Width = 900;
         private int Skillbar_Height = 110;
         private int Build_Height = 125 + (150 * 3);
+        public Rectangle ControlBounds { get; private set; }
 
         private SkillBar_Element SkillBar;
         private List<SpecializationLine> SpecializationsLines;
@@ -1476,6 +1550,8 @@ namespace Kenedia.Modules.BuildsManager
 
                 if (SkillBar.Click()) OnTemplateChange();
             };
+
+            ControlBounds = new Rectangle(SkillBar.Location.X, SkillBar.Location.Y, Math.Max(SpecializationsLines[0].ControlBounds.Width, SkillBar.ControlBounds.Width), SpecializationsLines[2].ControlBounds.Bottom - SkillBar.ControlBounds.Top);
         }
 
         public event EventHandler TemplateChanged;
@@ -1565,7 +1641,7 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            double scale = 1;
+            newToolTip = null;
 
             spriteBatch.DrawOnCtrl(Parent,
                                    ContentService.Textures.Pixel,
@@ -1578,68 +1654,12 @@ namespace Kenedia.Modules.BuildsManager
 
             foreach (SpecializationLine specializationLine in SpecializationsLines)
             {
-                specializationLine.Paint(spriteBatch, bounds, RelativeMousePosition, scale);
+                specializationLine.Paint(spriteBatch, bounds, RelativeMousePosition, Scale);
             }
 
-            SkillBar.Paint(spriteBatch, bounds, RelativeMousePosition, scale);
-
-             
+            SkillBar.Paint(spriteBatch, bounds, RelativeMousePosition, Scale);
+            BasicTooltipText = newToolTip;
+            ControlBounds = new Rectangle(SkillBar.Location.X, SkillBar.Location.Y, Math.Max(SpecializationsLines[0].ControlBounds.Width, SkillBar.ControlBounds.Width), SpecializationsLines[2].ControlBounds.Bottom - SkillBar.ControlBounds.Top);
         }
     }
-}
-
-namespace Kenedia.Modules.BuildsManager
-{
-    public class BuildOG : Panel
-    {
-        private int DEFAULT_WIDTH = 643;
-        private int DEFAULT_HEIGHT = 134;
-
-        private FlowPanel TraitsPanel;
-        enum SpecializationLineSlot
-        {
-            First,
-            Second,
-            Elite,
-        }
-        private List<int> _Specializations = new List<int>();
-        public List<int> Specializations
-        {
-            get => _Specializations;
-            set 
-            {
-                _Specializations = value;
-                for (int i = 0; i < _Specializations.Count; i++)
-                {
-                    BuildsManager.Logger.Debug("Spec ID; " + _Specializations[i]);
-                    if(_TraitLines.Count > i)
-                    {
-                        _TraitLines[i].Specialization = BuildsManager.Data.Specializations.Find(e => e.Id == _Specializations[i]);
-                        BuildsManager.Logger.Debug("Spec found: " + (_TraitLines[i].Specialization != null));
-                    }
-                }
-            }
-        }
-        public List<TraitLineOG> _TraitLines = new List<TraitLineOG>();
-
-        public BuildOG()
-        {
-            ShowBorder = true;
-
-            TraitsPanel = new FlowPanel()
-            {
-                Parent = this,
-                Location = new Point(0, 100),
-                FlowDirection = ControlFlowDirection.SingleTopToBottom,
-                Size = new Point(DEFAULT_WIDTH, DEFAULT_HEIGHT * 3),
-            };
-
-            _TraitLines.AddRange(new TraitLineOG[] {
-                new TraitLineOG() { Parent = TraitsPanel},
-                new TraitLineOG() { Parent = TraitsPanel},
-                new TraitLineOG() { Parent = TraitsPanel},
-            });
-        }
-    }
-
 }

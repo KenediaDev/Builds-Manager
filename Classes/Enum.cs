@@ -3,11 +3,99 @@
     public enum _Backgrounds
     {
         MainWindow,
+        BlueishMainWindow,
     }
 
     public enum _Emblems
     {
         SwordAndShield,
+    }
+    public enum _EquipmentTextures
+    {
+        Helmet,
+        Shoulders,
+        Chest,
+        Gloves,
+        Leggings,
+        Boots,
+        Mainhand_Weapon,
+        Offhand_Weapon,
+        Aquabreather,
+        AquaticWeapon,
+        Back,
+        Amulet,
+        Ring1,
+        Ring2,
+        Accessoire1,
+        Accessoire2,
+        Rune,
+        Sickle,
+        Axe,
+        Pickaxe,
+    }
+    public enum _EquipmentStats
+    {
+        Cavaliers = 583,
+        Berserkers = 584,
+        Rabid = 585,
+        Soldiers = 586,
+        Celestial = 588,
+        Clerics = 656,
+        Knights = 657,
+        Rampagers = 658,
+        Apothecarys = 659,
+        Captains = 660,
+        Settlers = 690,
+        Sentinels = 1035,
+        Magis = 1037,
+        Carrion = 1038,
+        Assassins = 1040,
+        Nomads = 1063,
+        Sinister = 1064,
+        Shamans = 1097,
+        Crusader = 1098,
+        Dire = 1114,
+        Trailblazers = 1115,
+        Valkyrie = 1119,
+        Commanders = 1125,
+        Vipers = 1130,
+        Minstrels = 1134,
+        Vigilant = 1139,
+        Marauder = 1145,
+        Wanderers = 1162,
+        Zealots = 1163,
+        Seraph = 1220,
+        Grieving = 1329,
+        Marshals = 1337,
+        Harriers = 1345,
+        Givers = 1430,
+        Bringers = 1436,
+        Plaguedoctors = 1486,
+        Diviners = 1538,
+        Dragons = 1691,
+        Ritualists = 1694,
+    }
+    public enum _EquipmentSlots
+    {
+        Helmet,
+        Shoulders,
+        Chest,
+        Gloves,
+        Leggings,
+        Boots,
+        Weapon1_MainHand,
+        Weapon1_OffHand,
+        AquaticWeapon1,
+        Weapon2_MainHand,
+        Weapon2_OffHand,
+        AquaticWeapon2,
+        Aquabreather,
+        Back,
+        Amulet,
+        Ring1,
+        Ring2,
+        Accessoire1,
+        Accessoire2,
     }
 
     public enum _Controls
@@ -27,6 +115,12 @@
         SpecSideSelector_Hovered,
         SkillSelector,
         SkillSelector_Hovered,
+        NoWaterTexture,
+        TabBorderLeft,
+        TabBorderRight,
+        TabBar_FadeIn,
+        TabBar_Line,
+        Selector,
     }
     public enum _Icons
     {
@@ -40,5 +134,16 @@
         Cog_White,
         Undo,
         Undo_White,
+        Checkmark_White,
+        Checkmark_Color,
+        Checkmark_Highlight,
+        Stop_White,
+        Stop_Color,
+        Stop_Highlight,
+        Search,
+        Search_Highlight,
+        Edit_Feather,
+        Edit_Feather_Highlight,
+        Edit_Feather_Pressed,
     }
 }

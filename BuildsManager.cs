@@ -83,10 +83,10 @@ namespace Kenedia.Modules.BuildsManager
                 //var code = "[&DQIEKRYqPTlwAAAAogEAAGoAAACvAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]";
                 //var template = new BuildTemplate(code);
 
-                //ScreenNotification.ShowNotification("Rebuilding UI!", ScreenNotification.NotificationType.Error);
-               // MainWindow.Dispose();
-                //CreateUI(); 
-               // MainWindow.Show();
+                ScreenNotification.ShowNotification("Rebuilding UI!", ScreenNotification.NotificationType.Error);
+                MainWindow.Dispose();
+               CreateUI(); 
+                MainWindow.Show();
 
                 //MainWindow.Build.UpdateTemplate();
                 //MainWindow.TemplateBox.Text = MainWindow.Build.ParsedBuildTemplateCode;
@@ -1085,12 +1085,11 @@ namespace Kenedia.Modules.BuildsManager
                 downloadBar.Location = new Point(cornerIcon.Location.X, cornerIcon.Location.Y + cornerIcon.Height + 5 + 3);
             };
 
+
             //getUpgrades();
             //Load_APIData();
 
-
             CreateUI();
-
 
             // Base handler must be called
             base.OnModuleLoaded(e);
@@ -1103,7 +1102,7 @@ namespace Kenedia.Modules.BuildsManager
             MainWindow = new iMainWindow(
                 DataManager.getBackground(_Backgrounds.MainWindow),
                 new Rectangle(30, 30, Width, Height + 30),
-                new Rectangle(85, 15, Width - 55, Height + 15),
+                new Rectangle(30, 5, Width - 5, Height - 30),
                 DataManager,
                 GameService.Graphics.SpriteScreen);
 
@@ -1111,22 +1110,13 @@ namespace Kenedia.Modules.BuildsManager
 
             var base_path = Paths.BasePath;
 
-            MainWindow.Build = new Build()
-            {
-                Parent = MainWindow,
-                //BuildTemplate = new BuildTemplate("[&DQIEKRYqPTlwAAAAogEAAGoAAACvAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]"),
-                //BuildTemplate = new BuildTemplate("[&DQEQGzEvPjZLF0sXehZ6FjYBNgFTF1MXcRJxEgAAAAAAAAAAAAAAAAAAAAA=]"),
-                //BuildTemplate = new BuildTemplate("[&DQIEBhYVPT9wAKYAPQGoALMAagCpAOIBnADuAAAAAAAAAAAAAAAAAAAAAAA=]"), // All Filled
-                //BuildTemplate = new BuildTemplate("[&DQIkAAAAEgAAAAAAqQAAAAAAAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]"), // Partly Empty
-                BuildTemplate = new BuildTemplate("[&DQIzAAAACwAAAAAAAAAAAD0BAAAAAAAAAADuAAAAAAAAAAAAAAAAAAAAAAA=]"), // Minimum Empty
-                // BuildTemplate = new BuildTemplate("[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]"), //Empty
-                //BuildTemplate = new BuildTemplate("[&DQMGOyYvOSsqDwAAhgAAACYBAABXFgAA8BUAAAAAAAAAAAAAAAAAAAAAAAA=]"),
-                Location = new Point(0, 35),
-            };
-            MainWindow.Build.TemplateChanged += delegate
-            {
-                MainWindow.TemplateBox.Text = MainWindow.Build.ParsedBuildTemplateCode;
-            };
+            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEKRYqPTlwAAAAogEAAGoAAACvAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]");
+            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQEQGzEvPjZLF0sXehZ6FjYBNgFTF1MXcRJxEgAAAAAAAAAAAAAAAAAAAAA=]");
+            MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEBhYVPT9wAKYAPQGoALMAagCpAOIBnADuAAAAAAAAAAAAAAAAAAAAAAA=]"); // All Filled
+            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIkAAAAEgAAAAAAqQAAAAAAAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]"); // Partly Empty
+            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIzAAAACwAAAAAAAAAAAD0BAAAAAAAAAADuAAAAAAAAAAAAAAAAAAAAAAA=]"); // Minimum Empty
+            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]"); //Empty
+            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQMGOyYvOSsqDwAAhgAAACYBAABXFgAA8BUAAAAAAAAAAAAAAAAAAAAAAAA=]");
         }
 
         protected override void Update(GameTime gameTime)

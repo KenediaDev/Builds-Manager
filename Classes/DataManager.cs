@@ -38,6 +38,7 @@ namespace Kenedia.Modules.BuildsManager
         public List<Texture2D> _Icons = new List<Texture2D>();
         public List<Texture2D> _Emblems = new List<Texture2D>();
         public List<Texture2D> _Controls = new List<Texture2D>();
+        public List<Texture2D> _EquipmentTextures = new List<Texture2D>();
 
         public Blish_HUD.Modules.Managers.ContentsManager ContentsManager;
         public Blish_HUD.Modules.Managers.DirectoriesManager DirectoriesManager;
@@ -78,6 +79,14 @@ namespace Kenedia.Modules.BuildsManager
                 var texture = ContentsManager.GetTexture(@"textures\controls\" + (int)num + ".png");
                 _Controls.Insert((int)num, texture);
             }
+            
+            values = Enum.GetValues(typeof(_EquipmentTextures));
+            _EquipmentTextures = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            foreach (_EquipmentTextures num in values)
+            {
+                var texture = ContentsManager.GetTexture(@"textures\equipment slots\" + (int)num + ".png");
+                _EquipmentTextures.Insert((int)num, texture);
+            }
 
 
             string runesJson = new StreamReader(ContentsManager.GetFileStream(@"data\runes.json")).ReadToEnd();
@@ -109,6 +118,13 @@ namespace Kenedia.Modules.BuildsManager
         {
             var index = (int)emblem;
             if (index < _Emblems.Count && _Emblems[index] != null) return _Emblems[index];
+            return _Icons[0];
+        }
+
+        public Texture2D getEquipTexture (_EquipmentTextures equipment)
+        {
+            var index = (int)equipment;
+            if (index < _EquipmentTextures.Count && _EquipmentTextures[index] != null) return _EquipmentTextures[index];
             return _Icons[0];
         }
 

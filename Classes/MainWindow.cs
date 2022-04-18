@@ -19,25 +19,33 @@ namespace Kenedia.Modules.BuildsManager
 {
     public class iTab : Panel
     {
-        public TabbedWindow2 Parent;
+        public bool Hovered;
+        public Texture2D LeftBar;
+        public Texture2D RightBar;
         public Texture2D Icon;
         public string Name;
-        public Panel Panel;
+        public Rectangle TabBounds;
+        public Rectangle ContentBounds;
+        public Action OnActivate;
+        public Action OnDeactivate;
 
-        public iTab()
+        public iTab(Container parent)
         {
-            MouseEntered += delegate
-            {
-                BuildsManager.Logger.Debug("MOUSE ENTERED");
-                Parent.Invalidate();
-            };
+            Parent = parent;
+            WidthSizingMode = SizingMode.Fill;
+            HeightSizingMode = SizingMode.Fill;
+            CanScroll = true;
+
+            Icon = BuildsManager.DataManager.getIcon(_Icons.Bug);
+            LeftBar = BuildsManager.DataManager.getControlTexture(_Controls.TabBorderLeft);
+            RightBar = BuildsManager.DataManager.getControlTexture(_Controls.TabBorderRight);
+
+            Size = parent.ContentBounds;
         }
 
         public void Draw(Control tabbedControl, SpriteBatch spriteBatch, Rectangle bounds, bool selected, bool hovered)
         {
             if (this.Icon == null) return;
-
-            // TODO: If not enabled, draw darker to indicate it is disabled
 
             spriteBatch.DrawOnCtrl(tabbedControl,
                                    Icon,
@@ -51,77 +59,203 @@ namespace Kenedia.Modules.BuildsManager
         }
     }
 
-    public class iMainWindow : TabbedWindow2
+    public class iMainWindow : StandardWindow
     {
+        public Build Build;
+        public Equipment Gear;
+        Texture2D _TabBarTexture;
+        Texture2D _TabBar_Line;
+
+        Rectangle _TabBar_Bounds;
+        Rectangle _TabBar_LineBounds;
+        Rectangle _BuildSelection_Bounds;
+        Point _ControlsPadding = new Point(10, 5);
+
         iDataManager DataManager;
+
+        public Label NameLabel;
+
+        public Image EditName;
+        public Image SaveName;
+        public Image CancelName;
+
+        public TextBox NameBox;
         public TextBox TemplateBox;
         public StandardButton Reset_Button;
         public StandardButton Copy_Button;
-        public FlowPanel Gear_View;
-        public FlowPanel Build_View;
-        public Build Build;
-
 
         public iTab Gear_Tab;
         public iTab Build_Tab;
+
         public iTab active_Tab;
         public iTab hovered_Tab;
+
         public Rectangle Tab_Indicator;
         public List<iTab> iTabs = new List<iTab>();
+
+        int TabBarHeight = 40;
 
         public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, iDataManager dataManager, Container parent) : base (background, windowRegion, contentRegion)
         {
             DataManager = dataManager;
             Parent = parent;
+
+            _TabBarTexture = BuildsManager.DataManager.getControlTexture(_Controls.TabBar_FadeIn);
+            _TabBar_Line = BuildsManager.DataManager.getControlTexture(_Controls.TabBar_Line);
+
             Title = "Builds Manager";
             Emblem = DataManager.getEmblem(_Emblems.SwordAndShield);
             Subtitle = "Gear";
             SavesPosition = true;
             Id = $"BuildsManager";
+            ContentRegion = ContentRegion.Add(new Point(0, 50));
+
+            _BuildSelection_Bounds = new Rectangle(ContentBounds.X, 0 + TitleBarBounds.Height, 300, 40);
+
+            _TabBar_Bounds = new Rectangle(_BuildSelection_Bounds.Right, 0 + TitleBarBounds.Height, ContentRegion.Width - _BuildSelection_Bounds.Right, 40);
+            _TabBar_LineBounds = new Rectangle(_BuildSelection_Bounds.Right, 0 + TitleBarBounds.Height + _TabBar_Bounds.Height - 5, ContentRegion.Width - _BuildSelection_Bounds.Right, 10);
 
 
-            Gear_View = new FlowPanel()
-            {
-                Parent = this,
-                Size = ContentRegion.Size,
-                Location = new Point(5, 5),
-                Visible = true,
-                CanScroll = true,
-            };
-
-            Gear_Tab = new iTab()
-            {
-                Icon = DataManager.getIcon(_Icons.Helmet),
-                Name = "Gear",
-                Panel = Gear_View,
-                Parent = this,
-                CanScroll = true,
-            };
-            iTabs.Add(Gear_Tab);
-            active_Tab = Gear_Tab;
-
-            Build_View = new FlowPanel()
-            {
-                Parent = this,
-                Size = ContentRegion.Size,
-                Location = new Point(5,5),
-                Visible = false,
-            };
-            Build_Tab = new iTab()
+            Build_Tab = new iTab(this)
             {
                 Icon = DataManager.getIcon(_Icons.Template),
                 Name = "Build",
-                Panel = Build_View,
-                Parent = this,
+                Location = new Point(_BuildSelection_Bounds.Right, 65),
             };
             iTabs.Add(Build_Tab);
+            active_Tab = Build_Tab;
+
+            Build = new Build()
+            {
+                Parent = Build_Tab,
+                BuildTemplate = new BuildTemplate("[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]"),
+                Location = new Point(0, 0),
+                Scale = 0.93,
+                Visible = true,
+            };
+
+            Gear_Tab = new iTab(this)
+            {
+                Icon = DataManager.getIcon(_Icons.Helmet),
+                Location = new Point(_BuildSelection_Bounds.Right, 65),
+                Name = "Gear",
+                Visible = false,
+            };
+            iTabs.Add(Gear_Tab);
+            Gear_Tab.Resized += delegate { Gear.Size = Gear_Tab.Size; };
+
+            Gear = new Equipment(new GearTemplate())
+            {
+                Parent = Gear_Tab,
+                Scale = 1,
+                Visible = true,
+                Size = Gear_Tab.Size,
+            };
+
+            var font = Content.DefaultFont18;
+            NameBox = new TextBox()
+            {
+                Parent = this,
+                Location = new Point(_BuildSelection_Bounds.Right, 0),
+                Visible = false,
+                Font = font,
+                Height = font.LineHeight + (4 * 2),
+            };
+            NameBox.Width = Build.ControlBounds.Width - 35 - (NameBox.Height * 2);
+
+            NameLabel = new Label()
+            {
+                Text = "This Builds Name",
+                Parent = this,
+                Width = NameBox.Width,
+                VerticalAlignment = VerticalAlignment.Middle,
+                Location = new Point(_BuildSelection_Bounds.Right, 0),
+                AutoSizeHeight = true,
+                Font = font,
+            };
+            NameLabel.Click += delegate
+            {
+                NameBox.Show();
+                NameLabel.Hide();
+                CancelName.Show();
+                SaveName.Show();
+                NameBox.Text = NameLabel.Text;
+            };
+
+
+            SaveName = new Image()
+            {
+                Texture = BuildsManager.DataManager.getIcon(_Icons.Checkmark_Color),
+                Parent = this,
+                Location = new Point(NameBox.LocalBounds.Right + (NameBox.Height * 1), 0),
+                Size = new Point(NameBox.Height, NameBox.Height),
+                Visible = false,
+            };
+            SaveName.Click += delegate
+            {
+                NameLabel.Text = NameBox.Text;
+                NameBox.Text = "";
+
+                NameLabel.Show();
+                NameBox.Hide();
+                CancelName.Hide();
+                SaveName.Hide();
+            };
+            NameBox.EnterPressed += delegate
+            {
+                NameLabel.Text = NameBox.Text;
+                NameBox.Text = "";
+
+                NameLabel.Show();
+                NameBox.Hide();
+                CancelName.Hide();
+                SaveName.Hide();
+            };
+            SaveName.MouseEntered += delegate
+            {
+                SaveName.Texture = BuildsManager.DataManager.getIcon(_Icons.Checkmark_Highlight);
+
+            };
+            SaveName.MouseLeft += delegate
+            {
+                SaveName.Texture = BuildsManager.DataManager.getIcon(_Icons.Checkmark_Color);
+
+            };
+
+            CancelName = new Image()
+            {
+                Texture = BuildsManager.DataManager.getIcon(_Icons.Stop_Color),
+                Parent = this,
+                Location = new Point(NameBox.LocalBounds.Right, 0),
+                Size = new Point(NameBox.Height, NameBox.Height),
+                Visible = false,
+            };
+            CancelName.Click += delegate
+            {
+                NameBox.Text = "";
+
+                NameLabel.Show();
+                NameBox.Hide();
+                CancelName.Hide();
+                SaveName.Hide();
+            };
+            CancelName.MouseEntered += delegate
+            {
+                CancelName.Texture = BuildsManager.DataManager.getIcon(_Icons.Stop_Highlight);
+            };
+            CancelName.MouseLeft += delegate
+            {
+                CancelName.Texture = BuildsManager.DataManager.getIcon(_Icons.Stop_Color);
+            };
 
             TemplateBox = new TextBox()
             {
-                Parent = this,
-                Width = Build.SpecializationLine._Width - 200,
+                Parent = Build_Tab,
+                Width = Build.ControlBounds.Width - 35 - 100,
                 Font = GameService.Content.DefaultFont12,
+                Location = new Point(Build.Location.X, Build.ControlBounds.Bottom + 10 ),
             };
+            TemplateBox.Text = Build.BuildTemplateCode;
 
             TemplateBox.TextChanged += delegate
             {
@@ -135,8 +269,9 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Parent = this,
                 Width = 100,
-                Location = TemplateBox.Location.Add(new Point(TemplateBox.Width + 5, 0)),
+                Location = new Point(TemplateBox.LocalBounds.Right, TemplateBox.LocalBounds.Top),
                 Text = "Reset",
+                Visible = false,
             };
             Reset_Button.Click += delegate
             {
@@ -151,49 +286,49 @@ namespace Kenedia.Modules.BuildsManager
 
             Copy_Button = new StandardButton()
             {
-                Parent = this,
+                Parent = Build_Tab,
                 Width = 100,
-                Location = TemplateBox.Location.Add(new Point(TemplateBox.Width + 105, 0)),
+                Location = new Point(TemplateBox.LocalBounds.Right, TemplateBox.LocalBounds.Top),
                 Text = "Copy",
             };
             Copy_Button.Click += delegate 
             {
                 System.Windows.Forms.Clipboard.SetText(TemplateBox.Text);
             };
+
+            Build.TemplateChanged += delegate
+            {
+                TemplateBox.Text = Build.ParsedBuildTemplateCode;
+            };
         }
-
-        private const int TAB_VERTICALOFFSET = 40;
-
-        private const int TAB_HEIGHT = 50;
-        private const int TAB_WIDTH = 84;
-        private const int TAB_CLICKWIDTH = 45;
 
         private void UpdateTabStates()
         {
-            SideBarHeight = TAB_VERTICALOFFSET + TAB_HEIGHT * iTabs.Count;
-            hovered_Tab = null;
 
-            for (int i = 0; i < iTabs.Count; i++)
+            var i = 0;
+            var width = _TabBar_Bounds.Width / iTabs.Count;
+            foreach (iTab tab in this.iTabs)
             {
-                var rect = new Rectangle(new Point(SidebarActiveBounds.X, SidebarActiveBounds.Y + (TAB_HEIGHT * i) + TAB_VERTICALOFFSET), new Point(TAB_CLICKWIDTH, TAB_HEIGHT));
-
-                if (rect.Contains(RelativeMousePosition))
-                {
-                    hovered_Tab = iTabs[i];
-                    BasicTooltipText = hovered_Tab?.Name;
-                }
+                tab.TabBounds = new Rectangle(i * width, _TabBar_Bounds.Top, width, _TabBar_Bounds.Height).Add(new Point(_TabBar_Bounds.Left, 0));
+                tab.Hovered = tab.TabBounds.Contains(RelativeMousePosition);
+                if (tab.Hovered) BasicTooltipText = tab?.Name;
+                
+                i++;
             }
         }
         protected override void OnClick(MouseEventArgs e)
         {
-            if (this.hovered_Tab != null)
+            foreach (iTab tab in this.iTabs)
             {
-                this.active_Tab.Panel.Hide();
+                if(tab.Hovered && tab != active_Tab)
+                {
+                    active_Tab.Hide();
+                    if (active_Tab.OnDeactivate != null) active_Tab.OnDeactivate();
 
-                this.active_Tab = this.hovered_Tab;
-                this.active_Tab.Panel.Show();
-
-                Subtitle = active_Tab.Name;
+                    active_Tab = tab;
+                    active_Tab.Show();
+                    if (active_Tab.OnActivate != null) active_Tab.OnActivate();
+                }
             }
 
             base.OnClick(e);
@@ -206,59 +341,92 @@ namespace Kenedia.Modules.BuildsManager
             base.UpdateContainer(gameTime);
         }
 
+        public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds)
+        {
+
+            base.PaintBeforeChildren(spriteBatch, bounds);
+        }
+
         public override void PaintAfterChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            base.PaintAfterChildren(spriteBatch, bounds);
+            spriteBatch.DrawOnCtrl(this,
+                                   _TabBarTexture,
+                                   _TabBar_Bounds,
+                                  _TabBarTexture.Bounds,
+                                  Color.White,
+                                  0f,
+                                  default);
 
-            int tabIndex = 0;
+            spriteBatch.DrawOnCtrl(this,
+                                   _TabBar_Line,
+                                   _TabBar_LineBounds,
+                                  _TabBar_Line.Bounds,
+                                  Color.White,
+                                  0f,
+                                  default);
+
+            var i = 0;
+            var width = _TabBar_Bounds.Width / iTabs.Count;
+
             foreach (iTab tab in this.iTabs)
             {
-                int tabTop = this.SidebarActiveBounds.Top + TAB_VERTICALOFFSET + tabIndex * TAB_HEIGHT;
+                tab.TabBounds = new Rectangle(i * width, _TabBar_Bounds.Top, width, _TabBar_Bounds.Height).Add(new Point(_TabBar_Bounds.Left, 0));
+                var leftLine = new Rectangle(tab.TabBounds.X, tab.TabBounds.Y, tab.LeftBar.Width, tab.TabBounds.Height);
+                var rightLine = new Rectangle(tab.TabBounds.Right - tab.RightBar.Width, tab.TabBounds.Y, tab.RightBar.Width, tab.TabBounds.Height);
+                var icon = tab.Icon.Bounds.Add(new Point(i * width + _TabBar_Bounds.Left, _TabBar_Bounds.Top + ((tab.TabBounds.Height - tab.Icon.Bounds.Height) / 2)));
+                var text = new Rectangle(icon.Right + 5, tab.TabBounds.Top, tab.TabBounds.Width - icon.Width, tab.TabBounds.Height);
+
+                var cnt = new ContentService();
+                var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)ContentService.FontSize.Size16, ContentService.FontStyle.Regular);
+
+                spriteBatch.DrawOnCtrl(this,
+                                      tab.LeftBar,
+                                      leftLine,
+                                      tab.LeftBar.Bounds,
+                                      Color.White,
+                                      0f,
+                                      default);
+
 
                 bool selected = tab == active_Tab;
                 bool hovered = tab == hovered_Tab;
 
                 if (selected)
                 {
-                    var tabBounds = new Rectangle(this.SidebarActiveBounds.Left - (TAB_WIDTH - this.SidebarActiveBounds.Width) + 2,
-                                                  tabTop,
-                                                  TAB_WIDTH,
-                                                  TAB_HEIGHT);
-
                     spriteBatch.DrawOnCtrl(this,
-                                           this.WindowBackground,
-                                           tabBounds,
-                                           new Rectangle(this.WindowRegion.Left + tabBounds.X,
-                                                         tabBounds.Y - (int)this.Padding.Top,
-                                                         tabBounds.Width,
-                                                         tabBounds.Height));
-
-                    spriteBatch.DrawOnCtrl(this, DataManager.getControlTexture(_Controls.TabActive), tabBounds);
+                                       this.WindowBackground,
+                                       tab.TabBounds,
+                                       tab.TabBounds,
+                                      Color.Gray
+                                       );
                 }
 
-                tab.Draw(this,
-                         spriteBatch,
-                         new Rectangle(this.SidebarActiveBounds.X,
-                                       tabTop,
-                                       this.SidebarActiveBounds.Width,
-                                       TAB_HEIGHT),
-                         selected,
-                         hovered);
+                spriteBatch.DrawOnCtrl(this,
+                                      tab.Icon,
+                                      icon,
+                                      tab.Icon.Bounds,
+                                      Color.White,
+                                      0f,
+                                      default);
 
-                tabIndex++;
+                spriteBatch.DrawStringOnCtrl(this,
+                                       tab.Name,
+                                       font,
+                                       text,
+                                       selected ? Color.White : Color.LightGray
+                                       );
+
+                spriteBatch.DrawOnCtrl(this,
+                                      tab.RightBar,
+                                      rightLine,
+                                      tab.RightBar.Bounds,
+                                      Color.White,
+                                      0f,
+                                      default);
+                i++;
             }
 
-            if(Tab_Indicator != null)
-            {
-                spriteBatch.DrawOnCtrl(Parent,
-                       ContentService.Textures.Pixel,
-                       Tab_Indicator.Add(Location),
-                       Tab_Indicator,
-                       Color.Red,
-                       0f,
-                       Vector2.Zero
-                       );
-            }
+            base.PaintAfterChildren(spriteBatch, bounds);
         }
     }
 
