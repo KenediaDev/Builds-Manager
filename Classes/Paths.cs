@@ -17,8 +17,8 @@ namespace Kenedia.Modules.BuildsManager
         public string traits_icons { get => BasePath + @"\api\traits\icons\"; }
         public string professions { get => BasePath + @"\api\professions\"; }
         public string profession_icons { get => BasePath + @"\api\professions\icons\"; }
-        public string facts { get => BasePath + @"\api\facts\"; }
-        public string fact_icons { get => BasePath + @"\api\facts\icons\"; }
+        //public string facts { get => BasePath + @"\api\facts\"; }
+        //public string fact_icons { get => BasePath + @"\api\facts\icons\"; }
         public string stats { get => BasePath + @"\api\stats\"; }
         public string stats_icons { get => BasePath + @"\api\stats\icons\"; }
         public string skills { get => BasePath + @"\api\skills\"; }

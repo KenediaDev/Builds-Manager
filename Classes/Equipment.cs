@@ -128,17 +128,19 @@ namespace Kenedia.Modules.BuildsManager
             foreach (_EquipmentStats stat in values)
             {
                 var info = BuildsManager.DataManager.getStat_Info(stat);
-
-                var temp = new Stat()
+                if (info != null)
                 {
-                    Name = info.Name,
-                    Id = (int)info.Id,
-                    Attributes = info.Attributes,
-                    Texture = BuildsManager.DataManager.getStat_Texture(stat),
-                    MainStat = info.Attributes.Aggregate((a, b) => a.Multiplier > b.Multiplier ? a : b).Attribute.RawValue,
-                };
+                    var temp = new Stat()
+                    {
+                        Name = info.Name,
+                        Id = (int)info.Id,
+                        Attributes = info.Attributes,
+                        Texture = BuildsManager.DataManager.getStat_Texture(stat),
+                        MainStat = info.Attributes.Aggregate((a, b) => a.Multiplier > b.Multiplier ? a : b).Attribute.RawValue,
+                    };
 
-                Stats.Add(temp);
+                    Stats.Add(temp);
+                }
             }
 
             Stats = Stats.OrderBy(x => x.Name)
@@ -316,11 +318,9 @@ namespace Kenedia.Modules.BuildsManager
         }
         public bool iClick(object sender, MouseEventArgs mouse)
         {
-            UpdateLayout(RelativeMousePosition);
             // SigilSelector = null;
             // RuneSelector = null;
             // ItemSelector = null;
-
 
             if (StatSelector != null)
             {

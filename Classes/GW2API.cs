@@ -594,6 +594,27 @@ namespace Kenedia.Modules.BuildsManager
 
     public class API
     {
+        public enum traitType
+        {
+            Minor = 1,
+            Major  = 2,
+        }
+        public enum skillSlot
+        {
+            Weapon_1 = 1,
+            Weapon_2 = 2,
+            Weapon_3 = 3,
+            Weapon_4 = 4,
+            Weapon_5 = 5,
+            Profession_1 = 6,
+            Profession_2 = 7,
+            Profession_3 = 8,
+            Profession_4 = 9,
+            Profession_5 = 10,
+            Heal = 11,
+            Utility = 12,
+            Elite  = 13,
+        }
         public enum itemSlot
         {
             Helmet = 6,
@@ -603,11 +624,23 @@ namespace Kenedia.Modules.BuildsManager
             Leggings = 7,
             Boots = 4,
         }
+        public enum trinketType
+        {
+            Back = 0,
+            Accessory = 1,
+            Amulet = 2,
+            Ring = 3,
+        }
         public enum armorWeight
         {
             Heavy = 1,
             Medium,
             Light,
+        }
+        public enum upgradeType
+        {
+            Rune = 3,
+            Sigil,
         }
         public enum weaponType
         {
@@ -632,27 +665,113 @@ namespace Kenedia.Modules.BuildsManager
             Trident  = 19,
         }
 
+        public class Icon
+        {
+          public  string Path;
+            public string Url;
+        }
+        #region Items
         public class Item
         {
-            string Name;
-            int Id;
-            string Url;
+            public string Name;
+            public int Id;
+            public Icon Icon;
+            public string ChatLink;
         }
-
         public class EquipmentItem : Item
         {
-            itemSlot Slot;
-            double AttributeAdjustment;
+            public itemSlot Slot;
+            public double AttributeAdjustment;
         }
-
         public class ArmorItem: EquipmentItem
         {
-            armorWeight ArmorWeight;
+            public armorWeight ArmorWeight;
 
         }
         public class WeaponItem: EquipmentItem
         {
-            weaponType WeaponType;
+            public weaponType WeaponType;
+        }
+        public class TrinketItem: EquipmentItem
+        {
+            public trinketType TrinketType;
+        }
+        public class RuneItem: Item
+        {
+            public upgradeType Type = upgradeType.Rune;
+            public List<string> Bonuses;
+        }
+        public class SigilItem: Item
+        {
+            public upgradeType Type = upgradeType.Sigil;
+            public string Description; //InfixUpgrade.Buff.Description
+        }
+        #endregion
+
+        public class Skill
+        {
+            public string Name;
+            public int Id;
+            public int Specialization;
+            public int PaletteId;
+            public Icon Icon;
+            public string ChatLink;
+            public string Description;
+            public skillSlot Slot;
+        }
+
+        public class Trait
+        {
+            public string Name;
+            public int Id;
+            public Icon Icon;
+            public int Specialization;
+            public string Description;
+            public int Tier;
+            public int Order;
+            public traitType Type;
+        }
+
+        public class Specialization
+        {
+            public string Name;
+            public int Id;
+            public Icon Icon;
+            public Icon Background;
+            public Icon ProfessionIconBig;
+            public Icon ProfessionIcon;
+            public string Profession;
+            public bool Elite;
+
+            public Trait WeaponTrait;
+            public List<Trait> MinorTraits = new List<Trait>();
+            public List<Trait> MajorTraits = new List<Trait>();
+        }
+
+        public class Profession
+        {
+            public string Name;
+            public string Id;
+            public Icon Icon;
+            public Icon IconBig;
+            public List<Specialization> Specializations = new List<Specialization>();
+            public List<weaponType> Weapons = new List<weaponType>();
+            public List<Skill> Skills = new List<Skill>();
+        }
+
+        public class StatAttribute
+        {
+            public int Id;
+            public string Name;
+            public double Multiplier;
+            public Icon Icon;
+        }
+        public class Stat
+        {
+            public int Id;
+            public string Name;
+            public List<StatAttribute> Attributes = new List<StatAttribute>();
+            public Icon Icon;
         }
     }
 }

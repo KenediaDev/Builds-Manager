@@ -104,9 +104,9 @@ namespace Kenedia.Modules.BuildsManager
                 _Stats.Insert((int)num, texture);
             }            
 
-            values = Enum.GetValues(typeof(_StatIcons));
+            values = Enum.GetValues(typeof(_EquipmentStats));
             _StatIcons = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
-            foreach (_StatIcons num in values) 
+            foreach (_EquipmentStats num in values) 
             { 
                 var value = (int) num;
                 var texture = ContentsManager.GetTexture(@"textures\stat icons\" + value + ".png");

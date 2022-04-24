@@ -711,7 +711,22 @@ namespace Kenedia.Modules.BuildsManager
             downloadBar.Progress = progress;
             downloadBar.Text = string.Format("{0} / 9", completed);
 
-            var stats = await Gw2ApiManager.Gw2ApiClient.V2.Itemstats.AllAsync();
+            var sigils = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(DataManager._UpgradeIDs._Sigils);
+            completed++;
+            downloadBar.Progress = completed / 9;
+            downloadBar.Text = string.Format("{0} / 9", completed);
+
+            var runes = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(DataManager._UpgradeIDs._Runes);
+            completed++;
+            downloadBar.Progress = completed / 9;
+            downloadBar.Text = string.Format("{0} / 9", completed);
+
+            var armory_items = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(ArmoryItems);
+            completed++;
+            downloadBar.Progress = completed / 9;
+            downloadBar.Text = string.Format("{0} / 9", completed);
+
+            var professions = await Gw2ApiManager.Gw2ApiClient.V2.Professions.AllAsync();
             completed++;
             downloadBar.Progress = completed / 9;
             downloadBar.Text = string.Format("{0} / 9", completed);
@@ -731,108 +746,70 @@ namespace Kenedia.Modules.BuildsManager
             downloadBar.Progress = completed / 9;
             downloadBar.Text = string.Format("{0} / 9", completed);
 
-            var sigils = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(DataManager._UpgradeIDs._Sigils);
+            var stats = await Gw2ApiManager.Gw2ApiClient.V2.Itemstats.AllAsync();
             completed++;
             downloadBar.Progress = completed / 9;
             downloadBar.Text = string.Format("{0} / 9", completed);
-
-            var runes = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(DataManager._UpgradeIDs._Runes);
-            completed++;
-            downloadBar.Progress = completed / 9;
-            downloadBar.Text = string.Format("{0} / 9", completed);
-
-            var professions = await Gw2ApiManager.Gw2ApiClient.V2.Professions.AllAsync();
-            completed++;
-            downloadBar.Progress = completed / 9;
-            downloadBar.Text = string.Format("{0} / 9", completed);
-
-            var skill_ids = new List<int>();
-            var armory_raw = await Gw2ApiManager.Gw2ApiClient.V2.LegendaryArmory.AllAsync();
-            completed++;
-            downloadBar.Progress = completed / 9;
-            downloadBar.Text = string.Format("{0} / 9", completed);
-
-            var armory_ids = new List<int>();
-
-
-            foreach (LegendaryArmory legendary in armory_raw)
-            {
-                armory_ids.Add(legendary.Id);
-            }
-
-            Logger.Debug("All base API Infos fetched. Checking Items ....");
-            Logger.Debug( string.Join(", ", armory_ids));
-
-            var armory_items = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(armory_ids);
-            completed++;
-            downloadBar.Progress = completed / 9;
-            downloadBar.Text = string.Format("{0} / 9", completed);
-
-            Logger.Debug("All API Infos fetched. Checking Images to downloading. Starting Items ....");
-
-            var professions_path = Paths.professions;
-            System.IO.File.WriteAllText(professions_path + @"/" + "professions [" + culture + "].json", JsonConvert.SerializeObject(professions.ToArray()));
-
-            foreach(Profession profession in professions)
-            {
-                foreach(KeyValuePair<int, int> ids in profession.SkillsByPalette)
-                {
-                    skill_ids.Add(ids.Value);
-                }
-
-                foreach(KeyValuePair<string, ProfessionWeapon> weapon in profession.Weapons)
-                {
-                    foreach(ProfessionWeaponSkill skill in weapon.Value.Skills)
-                    {
-                        skill_ids.Add(skill.Id);
-                    }
-                }
-            }
 
             var runes_path = Paths.runes;
+            List<API.RuneItem> Runes = new List<API.RuneItem>();
             foreach (ItemUpgradeComponent rune in runes)
             {
                 if (rune != null)
                 {
                     if (rune.Icon != null && rune.Icon.Url != null)
-                    {
-                        var file_name = Regex.Match(rune.Icon, "[0-9]*.png");
-                        var file_path = runes_path + @"/icons/" + file_name;
+                    {                        
+                      var temp = new API.RuneItem()
+                        {
+                            Name = rune.Name,
+                            Id = rune.Id,
+                            ChatLink = rune.ChatLink,
+                            Icon = new API.Icon() { Url = rune.Icon.Url.ToString(), Path = Paths.rune_icons + Regex.Match(rune.Icon, "[0-9]*.png") },
+                            Bonuses = rune.Details.Bonuses.ToList(),
+                        };
+                        Runes.Add(temp);
 
-                        if (!System.IO.File.Exists(file_path))
+                        if (!System.IO.File.Exists(temp.Icon.Path))
                         {
                             downloadList.Add(new APIDownload_Image()
                             {
                                 display_text = string.Format("Downloading Item Icon '{0}'", rune.Name),
-                                url = rune.Icon.Url.ToString(),
-                                path = file_path,
+                                url = temp.Icon.Url,
+                                path = temp.Icon.Path,
                             });
                         }
 
-                        rune.HttpResponseInfo = null;
                         total++;
                     }
                 }
             }
-            System.IO.File.WriteAllText(runes_path + @"/" + "runes [" + culture + "].json", JsonConvert.SerializeObject(runes.ToArray()));
+            System.IO.File.WriteAllText(runes_path + @"/" + "custom runes [" + culture + "].json", JsonConvert.SerializeObject(Runes.ToArray()));
 
             var sigil_path = Paths.sigils;
+            List<API.SigilItem> Sigils = new List<API.SigilItem>();
             foreach (ItemUpgradeComponent sigil in sigils)
             {
                 if (sigil != null)
                 {
                     if (sigil.Icon != null && sigil.Icon.Url != null)
                     {
-                        var file_name = Regex.Match(sigil.Icon, "[0-9]*.png");
-                        var file_path = sigil_path + @"/icons/" + file_name;
+                        var temp = new API.SigilItem()
+                        {
+                            Name = sigil.Name,
+                            Id = sigil.Id,
+                            ChatLink = sigil.ChatLink,
+                            Icon = new API.Icon() { Url = sigil.Icon.Url.ToString(), Path = Paths.sigil_icons + Regex.Match(sigil.Icon, "[0-9]*.png") },
+                            Description = sigil.Details.InfixUpgrade.Buff.Description,
+                        };
+                        Sigils.Add(temp);
 
-                        if (!System.IO.File.Exists(file_path))
+                        if (!System.IO.File.Exists(temp.Icon.Path))
                         {
                             downloadList.Add(new APIDownload_Image()
                             {
                                 display_text = string.Format("Downloading Item Icon '{0}'", sigil.Name),
-                                url = sigil.Icon.Url.ToString(),
-                                path = file_path,
+                                url = temp.Icon.Url,
+                                path = temp.Icon.Path,
                             });
                         }
 
@@ -841,195 +818,331 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
             }
-            System.IO.File.WriteAllText(sigil_path + @"/" + "sigils [" + culture + "].json", JsonConvert.SerializeObject(sigils.ToArray()));
+            System.IO.File.WriteAllText(sigil_path + @"/" + "custom sigils [" + culture + "].json", JsonConvert.SerializeObject(Sigils.ToArray()));
+
+            List<API.Stat> Stats = new List<API.Stat>();
+            foreach (Itemstat stat in stats)
+            {
+                if (stat != null && Enum.GetName(typeof(_EquipmentStats), stat.Id) != null)
+                {
+                    {
+                        var temp = new API.Stat()
+                        {
+                            Name = stat.Name,
+                            Id = stat.Id,
+                            Icon = new API.Icon() { Path = @"textures\stat icons\" + stat.Id + ".png" },
+                        };
+
+                        foreach(ItemstatAttribute attribute in stat.Attributes)
+                        {
+                            temp.Attributes.Add(new API.StatAttribute() 
+                            {
+                                Id = (int) attribute.Attribute.Value,
+                                Name = attribute.Attribute.RawValue,
+                                Multiplier = attribute.Multiplier,
+                                Icon = new API.Icon() { Path = @"textures\stats\" + (int)attribute.Attribute.Value + ".png" },
+                            });
+                        }
+
+                        Stats.Add(temp);
+                    }
+                }
+            }
+            System.IO.File.WriteAllText(Paths.stats + "custom stats [" + culture + "].json", JsonConvert.SerializeObject(Stats.ToArray()));
+
 
             var armory_path = Paths.armory;
-            var armory_local = new List<GW2API.LegendaryItem>();
-            foreach (Item item in armory_items)
+            List<API.ArmorItem> Armors = new List<API.ArmorItem>();
+            List<API.WeaponItem> Weapons = new List<API.WeaponItem>();
+            List<API.TrinketItem> Trinkets = new List<API.TrinketItem>();
+            foreach (Item i in armory_items)
             {
-                if (item != null)
+                if (i != null && i.Icon != null && i.Icon.Url != null)
                 {
-                    if (item.Icon != null && item.Icon.Url != null)
+                    if (i.Type.RawValue == "Armor")
                     {
-                        var file_name = Regex.Match(item.Icon, "[0-9]*.png");
-                        var file_path = armory_path + @"/icons/" + file_name;
+                        ItemArmor item = (ItemArmor)i;
 
-                        if (!System.IO.File.Exists(file_path))
+                        if (item != null)
                         {
-                            downloadList.Add(new APIDownload_Image()
+                            var temp = new API.ArmorItem()
                             {
-                                display_text = string.Format("Downloading Item Icon '{0}'", item.Name),
-                                url = item.Icon.Url.ToString(),
-                                path = file_path,
+                                Name = item.Name,
+                                Id = item.Id,
+                                ChatLink = item.ChatLink,
+                                Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                            };
+
+                            Enum.TryParse(item.Details.WeightClass.RawValue, out temp.ArmorWeight);
+                            Armors.Add(temp);
+                        }
+                    }
+
+                    if (i.Type.RawValue == "Weapon")
+                    {
+                        ItemWeapon item = (ItemWeapon)i;
+
+                        if (item != null)
+                        {
+                            var temp = new API.WeaponItem()
+                            {
+                                Name = item.Name,
+                                Id = item.Id,
+                                ChatLink = item.ChatLink,
+                                Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                            };
+
+                            Enum.TryParse(item.Details.Type.RawValue, out temp.WeaponType);
+                            Weapons.Add(temp);
+                        }
+                    }
+
+                    if (i.Type.RawValue == "Trinket")
+                    {
+                        ItemTrinket item = (ItemTrinket)i;
+
+                        if (item != null)
+                        {
+                            var temp = new API.TrinketItem()
+                            {
+                                Name = item.Name,
+                                Id = item.Id,
+                                ChatLink = item.ChatLink,
+                                Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                            };
+
+                            //Enum.TryParse(item.Details.Type.RawValue, out temp.TrinketType);
+                            Trinkets.Add(temp);
+                        }
+                    }
+
+                    if (i.Type.RawValue == "Back")
+                    {
+                        ItemBack item = (ItemBack)i;
+
+                        if (item != null)
+                        {
+                            Trinkets.Add(new API.TrinketItem()
+                            {
+                                Name = item.Name,
+                                Id = item.Id,
+                                ChatLink = item.ChatLink,
+                                Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                                TrinketType = API.trinketType.Back,
                             });
                         }
-
-                        item.HttpResponseInfo = null;
-                        total++;
                     }
+
+                    downloadList.Add(new APIDownload_Image()
+                    {
+                        display_text = string.Format("Downloading Item Icon '{0}'", i.Name),
+                        url = i.Icon,
+                        path = Paths.armory_icons + Regex.Match(i.Icon, "[0-9]*.png"),
+                    });
                 }
             }
-            Logger.Debug("Saving Files ....");
+            System.IO.File.WriteAllText(armory_path + @"/" + "custom armors [" + culture + "].json", JsonConvert.SerializeObject(Armors.ToArray()));
+            System.IO.File.WriteAllText(armory_path + @"/" + "custom weapons [" + culture + "].json", JsonConvert.SerializeObject(Weapons.ToArray()));
+            System.IO.File.WriteAllText(armory_path + @"/" + "custom trinkets [" + culture + "].json", JsonConvert.SerializeObject(Trinkets.ToArray()));
 
-            System.IO.File.WriteAllText(armory_path + @"/" + "armory.json", JsonConvert.SerializeObject(armory_raw.ToArray()));            
-            System.IO.File.WriteAllText(armory_path + @"/" + "armory [" + culture + "].json", JsonConvert.SerializeObject(armory_items.ToArray()));
-
-
-            Logger.Debug("Items done. Starting Stats ....");
-            var stats_path = Paths.stats;
-            System.IO.File.WriteAllText(stats_path + @"/" + "stats [" + culture + "].json", JsonConvert.SerializeObject(stats.ToArray()));
-
-            Logger.Debug("Stats done. Starting specs ....");
-            var fact_path = Paths.facts;
-            var spec_path = Paths.specs;
-            foreach (Specialization spec in specs)
-            {
-                if (spec != null)
-                {
-                    if (spec.Icon != null && spec.Icon.Url != null)
-                    {
-                        var file_name = Regex.Match(spec.Icon, "[0-9]*.png");
-                        var file_path = spec_path + @"/icons/" + file_name;
-
-                        if (!System.IO.File.Exists(file_path))
-                        {
-                            downloadList.Add(new APIDownload_Image() {
-                                display_text = string.Format("Downloading Specialization Icon '{0}'", spec.Name),
-                                url = spec.Icon,
-                                path = file_path,
-                            });
-                        }
-                        total++;
-                    }
-
-                    if (spec.Background != null && spec.Background.Url != null)
-                    {
-                        var file_name = Regex.Match(spec.Background, "[0-9]*.png");
-                        var file_path = spec_path + @"/backgrounds/" + file_name;
-
-                        if (!System.IO.File.Exists(file_path))
-                        {
-                            downloadList.Add(new APIDownload_Image()
-                            {
-                                display_text = string.Format("Downloading Specialization Background '{0}'", spec.Name),
-                                url = spec.Background,
-                                path = file_path,
-                            });
-                        }
-                        total++;
-                    }
-
-                    spec.HttpResponseInfo = null;
-                }
-            }
-            System.IO.File.WriteAllText(spec_path + @"/" + "specializations [" + culture + "].json", JsonConvert.SerializeObject(specs.ToArray()));
-
-            Logger.Debug("Specs done. Starting traits ....");
-            var trait_path = Paths.traits;
+            Logger.Debug("Preparing Traits ....");
+            List<API.Trait> Traits = new List<API.Trait> ();
             foreach (Trait trait in traits)
             {
-                if (trait != null)
+                if (trait != null && trait.Icon != null && trait.Icon.Url != null)
                 {
-                    if (trait.Icon != null && trait.Icon.Url != null)
+                    Traits.Add(new API.Trait()
                     {
-                        var file_name = Regex.Match(trait.Icon, "[0-9]*.png");
-                        var file_path = trait_path + @"/icons/" + file_name;
+                        Name = trait.Name,
+                        Description = trait.Description,
+                        Id = trait.Id,
+                        Icon = new API.Icon() { Url = trait.Icon.Url.ToString(), Path = Paths.traits_icons + Regex.Match(trait.Icon, "[0-9]*.png") },
+                        Specialization = trait.Specialization,
+                        Tier = trait.Tier,
+                        Order = trait.Order,
+                        Type = (API.traitType)Enum.Parse(typeof(API.traitType), trait.Slot.RawValue, true),
+                    });
+                }
+            }
 
-                        if (!System.IO.File.Exists(file_path))
+            Logger.Debug("Preparing Specializations ....");
+            List<API.Specialization> Specializations = new List<API.Specialization> ();
+            foreach (Specialization spec in specs)
+            {
+                if (spec != null && spec.Icon != null && spec.Icon.Url != null)
+                {
+                    var temp = new API.Specialization()
+                    {
+                        Name = spec.Name,
+                        Id = spec.Id,
+                        Icon = new API.Icon() { Url = spec.Icon.Url.ToString(), Path = Paths.spec_icons + Regex.Match(spec.Icon, "[0-9]*.png") },
+                        Background = new API.Icon() { Url = spec.Background.Url.ToString(), Path = Paths.spec_backgrounds + Regex.Match(spec.Background, "[0-9]*.png") },
+                        ProfessionIconBig = spec.ProfessionIconBig != null ? new API.Icon() { Url = spec.ProfessionIconBig.ToString(), Path = Paths.spec_icons + Regex.Match(spec.ProfessionIconBig, "[0-9]*.png") } : null,
+                        ProfessionIcon = spec.ProfessionIcon != null ? new API.Icon() { Url = spec.ProfessionIcon.ToString(), Path = Paths.spec_icons + Regex.Match(spec.ProfessionIcon, "[0-9]*.png") } : null,
+                        Profession = spec.Profession,
+                        Elite = spec.Elite,
+                    };
+
+                    temp.WeaponTrait = Traits.Find(e => e.Id == spec.WeaponTrait);
+                    foreach(int id in spec.MinorTraits)
+                    {
+                        var trait = Traits.Find(e => e.Id == id);
+
+                        if (trait != null)
                         {
-                            downloadList.Add(new APIDownload_Image()
+                            temp.MinorTraits.Add(trait);
+                            if (!System.IO.File.Exists(trait.Icon.Path)) downloadList.Add(new APIDownload_Image()
                             {
                                 display_text = string.Format("Downloading Trait Icon '{0}'", trait.Name),
-                                url = trait.Icon,
-                                path = file_path,
+                                url = trait.Icon.Url,
+                                path = trait.Icon.Path,
                             });
                         }
-                        total++;
                     }
-
-                    if (trait.Facts != null && trait.Facts.Count > 0)
+                    foreach(int id in spec.MajorTraits)
                     {
-                        foreach (TraitFact fact in trait.Facts)
-                        {
-                            if (fact.Icon != null && fact.Icon.HasValue)
-                            {
-                                var file_name = Regex.Match(fact.Icon, "[0-9]*.png");
-                                var file_path = fact_path + file_name;
+                        var trait = Traits.Find(e => e.Id == id);
 
-                                if (!System.IO.File.Exists(file_path))
-                                {
-                                    downloadList.Add(new APIDownload_Image()
-                                    {
-                                        display_text = string.Format("Downloading Fact Icon '{0}'", trait.Name),
-                                        url = fact.Icon,
-                                        path = file_path,
-                                    });
-                                }
-                                total++;
-                            }
+                        if (trait != null)
+                        {
+                            temp.MajorTraits.Add(trait);
+                            if (!System.IO.File.Exists(trait.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                            {
+                                display_text = string.Format("Downloading Trait Icon '{0}'", trait.Name),
+                                url = trait.Icon.Url,
+                                path = trait.Icon.Path,
+                            });
                         }
                     }
 
-                    trait.HttpResponseInfo = null;
+                    Specializations.Add(temp);
                 }
             }
-            System.IO.File.WriteAllText(trait_path + @"/" + "traits [" + culture + "].json", JsonConvert.SerializeObject(traits.ToArray()));
 
-            Logger.Debug("Traits done. Starting skills ....");
-            var skill_path = Paths.skills;
+            Logger.Debug("Preparing Skills ....");
+            List<API.Skill> Skills = new List<API.Skill>();
             foreach (Skill skill in skills)
             {
-                if (skill != null && skill_ids.Contains(skill.Id))
+                if (skill != null && skill.Icon != null && skill.Icon.Url != null && skill.Professions.Count == 1)
                 {
-                    if (skill.Icon != null && skill.Icon.Url != null)
+                    var temp = new API.Skill()
                     {
-                        var file_name = Regex.Match(skill.Icon, "[0-9]*.png");
-                        var file_path = skill_path + @"/icons/" + file_name;
+                        Name = skill.Name,
+                        Id = skill.Id,
+                        Icon = new API.Icon() { Url = skill.Icon.Url.ToString(), Path = Paths.skill_icons+ Regex.Match(skill.Icon, "[0-9]*.png") },
+                        ChatLink = skill.ChatLink,
+                        Description = skill.Description,
+                        Specialization = skill.Specialization != null ? (int) skill.Specialization : 0,
+                    };
 
-                        if (!System.IO.File.Exists(file_path))
-                        {
-                            downloadList.Add(new APIDownload_Image()
-                            {
-                                display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
-                                url = skill.Icon,
-                                path = file_path,
-                            });
-                        }
-                        total++;
-                    }
-
-                    if (skill.Facts != null && skill.Facts.Count > 0)
-                    {
-                        foreach (SkillFact fact in skill.Facts)
-                        {
-                            if (fact.Icon != null && fact.Icon.HasValue)
-                            {
-                                var file_name = Regex.Match(fact.Icon, "[0-9]*.png");
-                                var file_path = fact_path + file_name;
-
-                                if (!System.IO.File.Exists(file_path))
-                                {
-                                    downloadList.Add(new APIDownload_Image()
-                                    {
-                                        display_text = string.Format("Downloading Fact Icon '{0}'", skill.Name),
-                                        url = fact.Icon,
-                                        path = file_path,
-                                    });
-                                }
-                                total++;
-                            }
-                        }
-                    }
-
-                    skill.HttpResponseInfo = null;
+                    Enum.TryParse(skill.Slot.RawValue, out temp.Slot);
+                    Skills.Add(temp);
                 }
             }
-            System.IO.File.WriteAllText(skill_path + @"/" + "skills [" + culture + "].json", JsonConvert.SerializeObject(skills.ToArray()));
+
+            Logger.Debug("Preparing Professions ....");
+            List<API.Profession> Professions = new List<API.Profession>();
+            foreach (Profession profession in professions)
+            {
+                if (profession != null && profession.Icon != null && profession.Icon.Url != null)
+                {
+                    var temp = new API.Profession()
+                    {
+                        Name = profession.Name,
+                        Id = profession.Id,
+                        Icon = new API.Icon() { Url = profession.Icon.Url.ToString(), Path = Paths.profession_icons + Regex.Match(profession.Icon, "[0-9]*.png") },
+                        IconBig = new API.Icon() { Url = profession.IconBig.Url.ToString(), Path = Paths.profession_icons + Regex.Match(profession.IconBig, "[0-9]*.png") },
+                    };
+
+                    Logger.Debug("Adding Specs ....");
+                    foreach (int id in profession.Specializations) 
+                    {
+                        var spec = Specializations.Find(e => e.Id == id);
+                        if (spec != null)
+                        {
+                            temp.Specializations.Add(spec);
+
+                            if (!System.IO.File.Exists(spec.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                            {
+                                display_text = string.Format("Downloading Specialization Icon '{0}'", spec.Name),
+                                url = spec.Icon.Url,
+                                path = spec.Icon.Path,
+                            });
+
+                            if (!System.IO.File.Exists(spec.Background.Path)) downloadList.Add(new APIDownload_Image()
+                            {
+                                display_text = string.Format("Downloading Background '{0}'", spec.Name),
+                                url = spec.Background.Url,
+                                path = spec.Background.Path,
+                            });
+
+                            if (spec.ProfessionIcon != null && !System.IO.File.Exists(spec.ProfessionIcon.Path)) downloadList.Add(new APIDownload_Image()
+                            {
+                                display_text = string.Format("Downloading ProfessionIcon '{0}'", spec.Name),
+                                url = spec.ProfessionIcon.Url,
+                                path = spec.ProfessionIcon.Path,
+                            });
+
+                            if (spec.ProfessionIconBig != null && !System.IO.File.Exists(spec.ProfessionIconBig.Path)) downloadList.Add(new APIDownload_Image()
+                            {
+                                display_text = string.Format("Downloading ProfessionIconBig '{0}'", spec.Name),
+                                url = spec.ProfessionIconBig.Url,
+                                path = spec.ProfessionIconBig.Path,
+                            });
+                        }
+                    }
+
+                    Logger.Debug("Adding Weapons ....");
+                    foreach (KeyValuePair<string, ProfessionWeapon> weapon in profession.Weapons)
+                    {
+                        API.weaponType weaponType;
+                        Enum.TryParse(weapon.Key, out weaponType);
+                        temp.Weapons.Add(weaponType);
+                    }
+
+                    Logger.Debug("Adding Skills ....");
+                    foreach (KeyValuePair<int, int> skillIDs in profession.SkillsByPalette) 
+                    {
+                        var skill = Skills.Find(e => e.Id == skillIDs.Value);
+                        if(skill != null)
+                        {
+                            skill.PaletteId = skillIDs.Key;
+                            temp.Skills.Add(skill);
+
+                            if (!System.IO.File.Exists(skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                            {
+                                display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
+                                url = skill.Icon.Url,
+                                path = skill.Icon.Path,
+                            });
+                        }
+                    }
+
+
+                   if(!System.IO.File.Exists(temp.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                    {
+                        display_text = string.Format("Downloading Profession Icon '{0}'", temp.Name),
+                        url = temp.Icon.Url,
+                        path = temp.Icon.Path,
+                    });
+
+                    if (!System.IO.File.Exists(temp.IconBig.Path)) downloadList.Add(new APIDownload_Image()
+                    {
+                        display_text = string.Format("Downloading Profession Icon '{0}'", temp.Name),
+                        url = temp.IconBig.Url,
+                        path = temp.IconBig.Path,
+                    });
+
+                    Professions.Add(temp);
+                }
+            }
+
+            Logger.Debug("Saving Professions ....");
+            System.IO.File.WriteAllText(Paths.professions + "custom professions [" + culture + "].json", JsonConvert.SerializeObject(Professions.ToArray()));
 
             downloadBar.Progress = 0;
-            //total = stats.Count + specs.Count + traits.Count + skill_ids.Count + armory_raw.Count + armory_items.Count + sigils.Count + runes.Count + professions.Count;
-            //total = downloadList.Count;
-            completed = Math.Max((total - downloadList.Count), 0);
+            total = downloadList.Count;
+            completed = 0;
 
             Logger.Debug("All required Images queued. Downloading now ....");
             foreach (APIDownload_Image image in downloadList)
@@ -1042,7 +1155,7 @@ namespace Kenedia.Modules.BuildsManager
                 completed++;
                 progress = completed / total;
                 downloadBar.Progress = progress;
-                downloadBar.Text = Math.Round((progress * 100), 2).ToString() + "%";
+                downloadBar.Text = string.Format("{0} / {1} ({2})", completed, downloadList.Count, Math.Round((progress * 100), 2).ToString() + "%");
                 downloadBar.BasicTooltipText = image.display_text;
                 downloadBar._Label.BasicTooltipText = image.display_text;
                 downloadBar._BackgroundTexture.BasicTooltipText = image.display_text;
@@ -1051,6 +1164,8 @@ namespace Kenedia.Modules.BuildsManager
 
             loadingSpinner.Visible = false;
             downloadBar.Visible = false;
+
+            await CreateUI();
         }
 
         private async Task DownloadQueuedImages()
@@ -1147,9 +1262,9 @@ namespace Kenedia.Modules.BuildsManager
 
 
             //getUpgrades();
-            //Load_APIData();
+            Load_APIData();
 
-            CreateUI();
+            
 
             // Base handler must be called
             base.OnModuleLoaded(e);
