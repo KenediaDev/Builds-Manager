@@ -132,6 +132,7 @@ namespace Kenedia.Modules.BuildsManager
                 Location = new Point(0, 0),
                 Scale = 0.93,
                 Visible = true,
+                Gear = Gear,
             };
 
             Gear_Tab = new iTab(this)
@@ -150,6 +151,7 @@ namespace Kenedia.Modules.BuildsManager
                 Scale = 1,
                 Visible = true,
                 Size = Gear_Tab.Size,
+                Build = Build,
             };
 
             var font = Content.DefaultFont18;
@@ -159,7 +161,7 @@ namespace Kenedia.Modules.BuildsManager
                 Location = new Point(_BuildSelection_Bounds.Right, 0),
                 Visible = false,
                 Font = font,
-                Height = font.LineHeight + (4 * 2),
+                Height = font.LineHeight + (4 * 3),
             };
             NameBox.Width = Build.ControlBounds.Width - 35 - (NameBox.Height * 2);
 
@@ -170,7 +172,8 @@ namespace Kenedia.Modules.BuildsManager
                 Width = NameBox.Width,
                 VerticalAlignment = VerticalAlignment.Middle,
                 Location = new Point(_BuildSelection_Bounds.Right, 0),
-                AutoSizeHeight = true,
+                Height = font.LineHeight + (4 * 3),
+                //AutoSizeHeight = true,
                 Font = font,
             };
             NameLabel.Click += delegate
@@ -259,7 +262,7 @@ namespace Kenedia.Modules.BuildsManager
 
             TemplateBox.TextChanged += delegate
             {
-                if (TemplateBox.Focused)
+                if (TemplateBox.Focused && TemplateBox.Text != null && TemplateBox.Text != "")
                 {
                     Build.BuildTemplateCode = TemplateBox.Text;
                 }
@@ -329,7 +332,7 @@ namespace Kenedia.Modules.BuildsManager
                     active_Tab.Show();
                     if (active_Tab.OnActivate != null) active_Tab.OnActivate();
                 }
-            }
+            }            
 
             base.OnClick(e);
         }
@@ -349,6 +352,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public override void PaintAfterChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
+
             spriteBatch.DrawOnCtrl(this,
                                    _TabBarTexture,
                                    _TabBar_Bounds,
@@ -426,7 +430,10 @@ namespace Kenedia.Modules.BuildsManager
                 i++;
             }
 
+
             base.PaintAfterChildren(spriteBatch, bounds);
+            if(active_Tab == Gear_Tab) Gear.PaintAfterChildren(spriteBatch);
+            if (active_Tab == Build_Tab) Build.PaintAfterChildren(spriteBatch);
         }
     }
 

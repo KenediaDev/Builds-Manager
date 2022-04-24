@@ -15,7 +15,9 @@ namespace Kenedia.Modules.BuildsManager
 {
     public class Build : Control
     {
+        public bool canDraw;
         public string newToolTip;
+        public Equipment Gear;
         class ConnectorLine
         {
             public Rectangle Bounds;
@@ -1155,7 +1157,8 @@ namespace Kenedia.Modules.BuildsManager
                     rows = Skills.SelectableSkills.Count / columns;
 
                     var width = (columns)* (ImgSize + ImgGap);
-                    var loc = new Point(Math.Min(SkillSelector_Active.Bounds.X, _Width.Scale(_Scale) - width), SkillSelector_Active.Bounds.Bottom);
+                    //var loc = new Point(Math.Min(SkillSelector_Active.Bounds.X, _Width.Scale(_Scale) - width), SkillSelector_Active.Bounds.Bottom);
+                    var loc = new Point(SkillSelector_Active.Bounds.X, SkillSelector_Active.Bounds.Bottom);
 
                     //BuildsManager.Logger.Debug("X: {0}, Width - width {1}", Default_SkillSelectRectangle.Scale(_Scale).X, Default_SkillSelectRectangle.Scale(_Scale).Right - 5 - width);
 
@@ -1245,6 +1248,67 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
+            public void PaintAfterChildren(SpriteBatch spriteBatch)
+            {
+
+                if (SkillSelector_Active != null)
+                {
+                    var isLand = SkillSelector_List == Skills.Terrestial;
+
+                    spriteBatch.DrawOnCtrl(Parent,
+                                           ContentService.Textures.Pixel,
+                                           SkillSelectBackground,
+                                           SkillSelectBackground,
+                                           new Color(0, 0, 0, 175),
+                                           0f,
+                                           Vector2.Zero
+                                           );
+
+                    spriteBatch.DrawOnCtrl(Parent,
+                                           ContentService.Textures.Pixel,
+                                           SkillSelectRectangle.Add(-2, -2, 4, 4),
+                                           _SkillSelectorBackground.Bounds,
+                                           Color.Black,
+                                           0f,
+                                           Vector2.Zero
+                                           );
+
+                    spriteBatch.DrawOnCtrl(Parent,
+                                           _SkillSelectorBackground,
+                                           SkillSelectRectangle,
+                                           _SkillSelectorBackground.Bounds,
+                                           Color.DarkGray,
+                                           0f,
+                                           Vector2.Zero
+                                           );
+
+
+                    foreach (SkillElement skill in Skills.SelectableSkills)
+                    {
+
+                        spriteBatch.DrawOnCtrl(Parent,
+                                               skill.Texture.Texture,
+                                               skill.Bounds,
+                                               skill.Texture.Texture.Bounds,
+                                               (isLand || skill.availableInWater) ? Color.White : Color.LightGray,
+                                               0f,
+                                               Vector2.Zero
+                                               );
+
+                        if (!(isLand || skill.availableInWater))
+                        {
+                            spriteBatch.DrawOnCtrl(Parent,
+                                                   _NoWaterTexture,
+                                                   skill.Bounds,
+                                                  _NoWaterTexture.Bounds,
+                                                  Color.White,
+                                                   0f,
+                                                   Vector2.Zero
+                                                   );
+                        }
+                    }
+                }
+            }
             public void Paint(SpriteBatch spriteBatch, Rectangle bounds, Point p, double scale = default)
             {
                 CanClick = SpecializationLines.Find(e => e.isActive) == null;
@@ -1398,64 +1462,6 @@ namespace Kenedia.Modules.BuildsManager
                                                );
                     }
                 }
-
-                if (SkillSelector_Active != null)
-                {
-                    var isLand = SkillSelector_List == Skills.Terrestial;
-                    
-                    spriteBatch.DrawOnCtrl(Parent,
-                                           ContentService.Textures.Pixel,
-                                           SkillSelectBackground,
-                                           SkillSelectBackground,
-                                           new Color(0, 0, 0, 175),
-                                           0f,
-                                           Vector2.Zero
-                                           );
-
-                    spriteBatch.DrawOnCtrl(Parent,
-                                           ContentService.Textures.Pixel,
-                                           SkillSelectRectangle.Add(-2, -2, 4, 4),
-                                           _SkillSelectorBackground.Bounds,
-                                           Color.Black,
-                                           0f,
-                                           Vector2.Zero
-                                           );
-
-                    spriteBatch.DrawOnCtrl(Parent,
-                                           _SkillSelectorBackground,
-                                           SkillSelectRectangle,
-                                           _SkillSelectorBackground.Bounds,
-                                           Color.DarkGray,
-                                           0f,
-                                           Vector2.Zero
-                                           );
-
-
-                    foreach (SkillElement skill in Skills.SelectableSkills)
-                    {
-
-                        spriteBatch.DrawOnCtrl(Parent,
-                                               skill.Texture.Texture,
-                                               skill.Bounds,
-                                               skill.Texture.Texture.Bounds,
-                                               (isLand || skill.availableInWater) ? Color.White : Color.LightGray,
-                                               0f,
-                                               Vector2.Zero
-                                               );
-
-                        if (! (isLand || skill.availableInWater))
-                        {
-                            spriteBatch.DrawOnCtrl(Parent,
-                                                   _NoWaterTexture,
-                                                   skill.Bounds,
-                                                  _NoWaterTexture.Bounds,
-                                                  Color.White,
-                                                   0f,
-                                                   Vector2.Zero
-                                                   );
-                        }
-                    }                
-                }
             }
         }
 
@@ -1503,10 +1509,13 @@ namespace Kenedia.Modules.BuildsManager
             get => _BuildTemplateCode;
             set
             {
-                ParsedBuildTemplateCode = value;
-                _BuildTemplateCode = value;
-                _BuildTemplate = new BuildTemplate(value);
-                SetTemplate();
+                if (value != null && value != "")
+                {
+                    ParsedBuildTemplateCode = value;
+                    _BuildTemplateCode = value;
+                    _BuildTemplate = new BuildTemplate(value);
+                    SetTemplate();
+                }
             }
         }
 
@@ -1563,6 +1572,8 @@ namespace Kenedia.Modules.BuildsManager
 
         private void SetTemplate()
         {
+            var oldspec = SpecializationsLines[0].Profession;
+            canDraw = false;
             SpecializationsLines[0].Specialization = BuildTemplate.SpecLines[0].Specialization;
             SpecializationsLines[0].SelectedTraits = BuildTemplate.SpecLines[0].Traits;
             SpecializationsLines[0].Profession = BuildsManager.Data.Professions.Find(e => e.Id == BuildTemplate.Profession.ToString());
@@ -1581,10 +1592,14 @@ namespace Kenedia.Modules.BuildsManager
             SkillBar.Aquatic_Skills = BuildTemplate.UtilitySkills_Water;
 
             SkillBar.Profession = BuildsManager.Data.Professions.Find(e => e.Id == BuildTemplate.Profession.ToString());
+            canDraw = true;
+
+           if(SpecializationsLines[0].Profession != oldspec) OnTemplateChange();
         }
 
         public void UpdateTemplate()
         {
+            canDraw = false;
             BuildChatLink build = new BuildChatLink();
 
             build.Profession = (Gw2Sharp.Models.ProfessionType)Enum.Parse(typeof(Gw2Sharp.Models.ProfessionType), BuildTemplate.Profession.ToString());
@@ -1637,29 +1652,37 @@ namespace Kenedia.Modules.BuildsManager
             build.Parse(bytes);
 
             ParsedBuildTemplateCode = build.ToString();
+            canDraw = true;
         }
 
+        public void PaintAfterChildren(SpriteBatch spriteBatch)
+        {
+            SkillBar.PaintAfterChildren(spriteBatch);
+        }
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            newToolTip = null;
-
-            spriteBatch.DrawOnCtrl(Parent,
-                                   ContentService.Textures.Pixel,
-                                   LocalBounds,
-                                   bounds,
-                                   Color.Transparent,
-                                   0f,
-                                   Vector2.Zero
-                                   );
-
-            foreach (SpecializationLine specializationLine in SpecializationsLines)
+            if (canDraw)
             {
-                specializationLine.Paint(spriteBatch, bounds, RelativeMousePosition, Scale);
-            }
+                newToolTip = null;
 
-            SkillBar.Paint(spriteBatch, bounds, RelativeMousePosition, Scale);
-            BasicTooltipText = newToolTip;
-            ControlBounds = new Rectangle(SkillBar.Location.X, SkillBar.Location.Y, Math.Max(SpecializationsLines[0].ControlBounds.Width, SkillBar.ControlBounds.Width), SpecializationsLines[2].ControlBounds.Bottom - SkillBar.ControlBounds.Top);
+                spriteBatch.DrawOnCtrl(Parent,
+                                       ContentService.Textures.Pixel,
+                                       LocalBounds,
+                                       bounds,
+                                       Color.Transparent,
+                                       0f,
+                                       Vector2.Zero
+                                       );
+
+                foreach (SpecializationLine specializationLine in SpecializationsLines)
+                {
+                    specializationLine.Paint(spriteBatch, bounds, RelativeMousePosition, Scale);
+                }
+
+                SkillBar.Paint(spriteBatch, bounds, RelativeMousePosition, Scale);
+                BasicTooltipText = newToolTip;
+                ControlBounds = new Rectangle(SkillBar.Location.X, SkillBar.Location.Y, Math.Max(SpecializationsLines[0].ControlBounds.Width, SkillBar.ControlBounds.Width), SpecializationsLines[2].ControlBounds.Bottom - SkillBar.ControlBounds.Top);
+            }
         }
     }
 }

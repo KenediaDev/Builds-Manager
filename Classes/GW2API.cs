@@ -421,6 +421,11 @@ namespace Kenedia.Modules.BuildsManager
             public string Value;
             public string RawValue;
         }
+        public class intType
+        {
+            public int Value;
+            public string RawValue;
+        }
         public class Slot
         {
             public int Value;
@@ -451,6 +456,35 @@ namespace Kenedia.Modules.BuildsManager
             public string Value;
             public string RawValue;
         }
+        public class intFlag
+        {
+            public int Value;
+            public string RawValue;
+        }
+
+        public class Attribute
+        {
+            public int Value;
+            public string RawValue;
+        }
+
+        public class WeightClass
+        {
+            public int Value;
+            public string RawValue;
+        }
+
+        public class Stat
+        {
+            public Attribute Attribute;
+            public string Value;
+            public double Multiplier;
+        }
+
+        public class Stats : BaseObject
+        {
+            public List<Stat> Attributes;
+        }
 
         public class Details
         {
@@ -460,6 +494,16 @@ namespace Kenedia.Modules.BuildsManager
             public List<int> StatChoices;
             public double? AttributeAdjustment;
             public string Description;
+        }
+        public class intDetails
+        {
+            public intType Type;
+            public List<Flag> Flags;
+            public List<string> Bonuses;
+            public List<int> StatChoices;
+            public double? AttributeAdjustment;
+            public string Description;
+            public WeightClass WeightClass;
         }
 
         public class Icon
@@ -471,6 +515,11 @@ namespace Kenedia.Modules.BuildsManager
         public class ProfessionSkill
         {
             public int Id;
+        }
+        public class ProfessionWeapon
+        {
+            public int Specialization;
+            public List<intFlag> Flags;
         }
 
         public class Profession : BaseObject
@@ -488,12 +537,12 @@ namespace Kenedia.Modules.BuildsManager
         public class Item : BaseObject
         {
             public string Description;
-            public Details Details;
+            public intDetails Details;
             public Icon Icon;
             public List<Flag> Flags;
             public string ChatLink;
             public Rarity Rarity;
-            public Type Type;
+            public intType Type;
         }
 
         public class Skill : BaseObject
@@ -540,6 +589,70 @@ namespace Kenedia.Modules.BuildsManager
             public Icon ProfessionIconBig;
             public Icon ProfessionIcon;
             public List<Trait> Traits = new List<Trait>();
+        }
+    }
+
+    public class API
+    {
+        public enum itemSlot
+        {
+            Helmet = 6,
+            Shoulders  = 8,
+            Chest = 3,
+            Gloves = 5,
+            Leggings = 7,
+            Boots = 4,
+        }
+        public enum armorWeight
+        {
+            Heavy = 1,
+            Medium,
+            Light,
+        }
+        public enum weaponType
+        {
+            Axe = 1,
+            Dagger = 2,
+            Mace = 3,
+            Pistol = 4,
+            Scepter = 5,
+            Sword = 6,
+            Focus = 7,
+            Shield = 8,
+            Torch = 9,
+            Warhorn = 10,
+            Greatsword = 11,
+            Hammer = 12,
+            Longbow = 13,
+            Rifle = 14,
+            Shortbow = 15,
+            Staff = 16,
+            Harpoon = 17,
+            Speargun = 18,
+            Trident  = 19,
+        }
+
+        public class Item
+        {
+            string Name;
+            int Id;
+            string Url;
+        }
+
+        public class EquipmentItem : Item
+        {
+            itemSlot Slot;
+            double AttributeAdjustment;
+        }
+
+        public class ArmorItem: EquipmentItem
+        {
+            armorWeight ArmorWeight;
+
+        }
+        public class WeaponItem: EquipmentItem
+        {
+            weaponType WeaponType;
         }
     }
 }

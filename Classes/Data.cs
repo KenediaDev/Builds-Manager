@@ -22,6 +22,7 @@ namespace Kenedia.Modules.BuildsManager
         public List<GW2API.Trait> Traits = new List<GW2API.Trait>();
         public List<GW2API.Specialization> Specializations = new List<GW2API.Specialization>();
         public List<GW2API.Profession> Professions = new List<GW2API.Profession>();
+        public List<GW2API.Stats> Stats = new List<GW2API.Stats>();
 
         public iData()
         {
@@ -30,6 +31,9 @@ namespace Kenedia.Modules.BuildsManager
             var armory_path = BuildsManager.Paths.armory;
             var file_path = armory_path + @"\" + "armory [" + BuildsManager.getCultureString() + "].json";
             var SkillsByPalette = new List<KeyValuePair<int, int>>();
+
+            file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
+            if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<GW2API.Stats>>(System.IO.File.ReadAllText(file_path));           
 
             file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Sigils = JsonConvert.DeserializeObject<List<GW2API.Item>>(System.IO.File.ReadAllText(file_path));

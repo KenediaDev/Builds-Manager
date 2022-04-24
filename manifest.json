@@ -30,6 +30,10 @@
     "unlocks": {
       "optional": true,
       "details": "Needed to get your armory items."
+    },
+    "inventories": {
+      "optional": true,
+      "details": "Needed to get your armory items."
     }
   },
   "directories": [ "builds-manager"]

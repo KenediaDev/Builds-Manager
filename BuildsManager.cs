@@ -55,6 +55,7 @@ namespace Kenedia.Modules.BuildsManager
         public iMainWindow MainWindow;
         public LoadingSpinner loadingSpinner;
         public ProgressBar downloadBar;
+        public static List<int> ArmoryItems = new List<int>();
 
         public static List<WebDownload_Image> download_Images = new List<WebDownload_Image>();
         public static List<Load_Image> load_Images = new List<Load_Image>();
@@ -77,6 +78,61 @@ namespace Kenedia.Modules.BuildsManager
 
             Gw2ApiManager.SubtokenUpdated += Gw2ApiManager_SubtokenUpdated;
 
+            ArmoryItems.AddRange(new int[] {
+                  80248, //Perfected Envoy armor (light) Head
+                  80131, //Perfected Envoy armor (light) Shoulder
+                  80190, //Perfected Envoy armor (light) Chest
+                  80111, //Perfected Envoy armor (light) Hands
+                  80356, //Perfected Envoy armor (light) Legs
+                  80399, //Perfected Envoy armor (light) Feet
+
+                  80296, //Perfected Envoy armor (medium) Head
+                  80145, //Perfected Envoy armor (medium) Shoulder
+                  80578, //Perfected Envoy armor (medium) Chest
+                  80161, //Perfected Envoy armor (medium) Hands
+                  80252, //Perfected Envoy armor (medium) Legs
+                  80281, //Perfected Envoy armor (medium) Feet
+
+                  80384, //Perfected Envoy armor (heavy) Head
+                  80435, //Perfected Envoy armor (heavy) Shoulder
+                  80254, //Perfected Envoy armor (heavy) Chest
+                  80205, //Perfected Envoy armor (heavy) Hands
+                  80277, //Perfected Envoy armor (heavy) Legs
+                  80557, //Perfected Envoy armor (heavy) Feet
+
+                  91505, //Legendary Sigil
+                  91536, //Legendary Rune
+
+                  81908, //Legendary Accessory Aurora
+                  91048, //Legendary Accessory Vision
+                  91234, //Legendary Ring Coalescence
+                  93105, //Legendary Ring Conflux
+                  95380, //Legendary Amulet Prismatic Champion's Regalia
+
+                  74155, //Legendary Backpack Ad Infinitum
+
+                  30698, //The Bifrost
+                  30699, //Bolt
+                  30686, //The Dreamer
+                  30696, //The Flameseeker Prophecies
+                  30697, //Frenzy
+                  30684, //Frostfang
+                  30702, //Howler
+                  30687, //Incinerator
+                  30690, //The Juggernaut
+                  30685, //Kudzu
+                  30701, //Kraitkin
+                  30691, //Kamohoali'i Kotaki
+                  30688, //The Minstrel
+                  30692, //The Moot
+                  30694, //The Predator
+                  30693, //Quip
+                  30700, //Rodgort
+                  30703, //Sunrise
+                  30704, //Twilight
+                  30689, //Eternity
+                });
+
             ReloadKey.Value.Enabled = true;
             ReloadKey.Value.Activated += delegate
             {
@@ -94,13 +150,16 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         private async void Gw2ApiManager_SubtokenUpdated(object sender, ValueEventArgs<IEnumerable<TokenPermission>> e)
-        {
-
-            if (Gw2ApiManager.HasPermissions(new[] { TokenPermission.Account, TokenPermission.Characters }))
+        {            
+            if (Gw2ApiManager.HasPermissions(new[] { TokenPermission.Account, TokenPermission.Inventories, TokenPermission.Unlocks}))
             {
-                Logger.Debug("API Token update! Fetching new characters!");
-                var characters = await Gw2ApiManager.Gw2ApiClient.V2.Characters.AllAsync();
-
+                Logger.Debug("Fetching account infos!");
+                //var characters = await Gw2ApiManager.Gw2ApiClient.V2.Characters.AllAsync();
+                var armory = await Gw2ApiManager.Gw2ApiClient.V2.Account.LegendaryArmory.GetAsync();
+                foreach(AccountLegendaryArmory item in armory)
+                {
+               //     if(item.Count >= 1) ArmoryItems.Add(item.Id);
+                }
             }
         }
         public static bool HasProperty(object obj, string propertyName)
@@ -1020,17 +1079,18 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Logger.Debug("LoadQueued_LocalImages");
 
+                var loadList = new List<Load_Image>(load_Images);
+                load_Images = new List<Load_Image>();
+
                 GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
                 {
-                    foreach(Load_Image image in load_Images)
+                    foreach(Load_Image image in loadList)
                     {
                         Logger.Debug("Queued Image load for: " + image.Path);
                         image.Target.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(image.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                         image.OnLoadComplete();
                         image.Target.Controls.Clear();
                     }
-
-                    load_Images.Clear();
                 });
             }
         }
