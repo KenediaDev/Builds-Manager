@@ -11,7 +11,7 @@ namespace Kenedia.Modules.BuildsManager
     {
         public string BasePath;
 
-        public string images { get => BasePath + @"\images\"; }
+        public string builds { get => BasePath + @"\builds\"; }
         public string api { get => BasePath + @"\api\"; }
         public string traits { get => BasePath + @"\api\traits\"; }
         public string traits_icons { get => BasePath + @"\api\traits\icons\"; }

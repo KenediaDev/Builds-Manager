@@ -14,29 +14,6 @@ using Blish_HUD.Modules.Managers;
 
 namespace Kenedia.Modules.BuildsManager
 {
-    public class LocalTexture : Texture2D
-    {
-        public LocalTexture(GraphicsDevice graphicsDevice, int width, int height) : base(graphicsDevice, width, height)
-        {
-        }
-        public LocalTexture(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format) : base(graphicsDevice, width, height, mipmap, format)
-        {
-        }
-        public LocalTexture(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize) : base(graphicsDevice, width, height, mipmap, format, arraySize)
-        {
-        }
-        protected LocalTexture(GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared, int arraySize) : base(graphicsDevice, width, height, mipmap, format, type, shared, arraySize)
-        {
-
-        }
-
-        public static DirectoriesManager DirectoriesManager;
-
-        public API_ImageStates ImageState = API_ImageStates.Unkown;
-        public string Path;
-
-    }
-
     public enum API_ImageStates
     {
         Unkown,
@@ -98,168 +75,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public static Texture2D GetTextureFile(GW2API.BaseObject obj, string path, Object targetControl = null, IconTargets iconTarget = IconTargets.Icon)
         {
-            if (path != null && path != "")
-            {
-                path = path.Replace(@"/", @"\");
-                var objectExtension = Flags.GetOrCreateValue(obj);
-                subtExtension oExt = objectExtension.Icon;
-
-                switch (iconTarget)
-                {
-                    case IconTargets.Icon:
-                        oExt = objectExtension.Icon;
-                        break;
-
-                    case IconTargets.Background:
-                        oExt = objectExtension.Background;
-                        break;
-
-                    case IconTargets.ProfessionIcon:
-                        oExt = objectExtension.ProfessionIcon;
-                        break;
-
-                    case IconTargets.ProfessionIconBig:
-                        oExt = objectExtension.ProfessionIconBig;
-                        break;
-                }
-
-                switch (targetControl)
-                {
-                    case Control control:
-                        if (!oExt.Controls.Contains(targetControl)) oExt.Controls.Add(control);
-                        break;
-
-                    case Texture2D texture:
-                        if (!oExt.Controls.Contains(targetControl)) oExt.Textures.Add(texture);
-                        break;
-                }
-
-                if (oExt.FileName == null || oExt.FileName == "")
-                {
-                    switch (obj)
-                    {
-                        case GW2API.Item entry:
-                            oExt.Url = entry.Icon.Url;
-                            oExt.FileName = Regex.Match(entry.Icon.Url, "[0-9]*.png").ToString();
-                            break;
-
-                        case GW2API.Trait entry:
-                            oExt.Url = entry.Icon.Url;
-                            oExt.FileName = Regex.Match(entry.Icon.Url, "[0-9]*.png").ToString();
-                            break;
-
-                        case GW2API.Skill entry:
-                            oExt.Url = entry.Icon.Url;
-                            oExt.FileName = Regex.Match(entry.Icon.Url, "[0-9]*.png").ToString();
-                            break;
-
-                        case GW2API.Specialization entry:
-                            oExt.Url = iconTarget == IconTargets.Background ? entry.Background.Url : entry.Icon.Url;
-                            oExt.FileName = iconTarget == IconTargets.Background ? Regex.Match(entry.Background.Url, "[0-9]*.png").ToString() : Regex.Match(entry.Icon.Url, "[0-9]*.png").ToString();
-                            break;
-                    }
-
-                    oExt.Path = path + (path.EndsWith(@"\") ? "" : @"\") + oExt.FileName;
-                }
-
-                if (oExt.Path != null && oExt.Path != "")
-                {
-                    if (oExt.ImageState == API_ImageStates.Unkown)
-                    {
-                        if (System.IO.File.Exists(oExt.Path))
-                        {
-                            if (!BuildsManager.load_ImagePaths.Contains(oExt.Path))
-                            {
-                                // Add Image to load queue
-                                var img = new Load_Image()
-                                {
-                                    Target = oExt,
-                                    Path = oExt.Path,
-                                    OnLoadComplete = delegate
-                                    {
-                                        BuildsManager.Logger.Debug("Loaded Image from '{0}'.", oExt.Path);
-                                        oExt.ImageState = API_ImageStates.Loaded;
-                                        foreach (Image image in oExt.Controls)
-                                        {
-                                            if (image != null) image.Texture = oExt.Texture;
-                                        }
-
-                                        for (int i = 0; i < oExt.Textures.Count; i++)
-                                        {
-                                            oExt.Textures[i] = oExt.Texture;
-                                        }
-                                    },
-                                };
-
-                                BuildsManager.load_Images.Add(img);
-                                oExt.ImageState = API_ImageStates.Load_Queued;
-                            }
-                        }
-                        else
-                        {
-                            BuildsManager.download_Images.Add(new WebDownload_Image()
-                            {
-                                Url = oExt.Url,
-                                Path = oExt.Path,
-                                OnDownloadComplete = delegate
-                                {
-                                    BuildsManager.Logger.Debug("Download completed. Saved to '{0}'.", oExt.Path);
-                                    oExt.ImageState = API_ImageStates.Downloaded;
-
-                                    var img = new Load_Image()
-                                    {
-                                        Target = oExt,
-                                        Path = oExt.Path,
-                                        OnLoadComplete = delegate
-                                        {
-                                            BuildsManager.Logger.Debug("Loaded Image from '{0}'.", oExt.Path);
-                                            oExt.ImageState = API_ImageStates.Loaded;
-                                        },
-                                    };
-
-                                    BuildsManager.load_Images.Add(img);
-                                    oExt.ImageState = API_ImageStates.Load_Queued;
-                                },
-                            });
-
-                            oExt.ImageState = API_ImageStates.Download_Queued;
-                        }
-                    }
-
-                    switch (oExt.ImageState)
-                    {
-                        case API_ImageStates.Loaded:
-                            return oExt.Texture;
-
-                        case API_ImageStates.Load_Queued:
-                            return BuildsManager.DataManager._Icons[1];
-
-                        case API_ImageStates.Download_Queued:
-                            return BuildsManager.DataManager._Icons[1];
-
-                        case API_ImageStates.Downloaded:
-                            var img = new Load_Image()
-                            {
-                                Target = oExt,
-                                Path = oExt.Path,
-                                OnLoadComplete = delegate
-                                {
-                                    BuildsManager.Logger.Debug("Loaded Image from '{0}'.", oExt.Path);
-                                    oExt.ImageState = API_ImageStates.Loaded;
-                                },
-                            };
-
-                            BuildsManager.load_Images.Add(img);
-                            oExt.ImageState = API_ImageStates.Load_Queued;
-                            return BuildsManager.DataManager._Icons[1];
-
-                        default:
-                            return BuildsManager.DataManager._Icons[0];
-                    }
-                }
-            }
-
-            return BuildsManager.DataManager._Icons[0];
+            return BuildsManager.TextureManager._Icons[0];
         }
 
         //Item
@@ -273,7 +89,7 @@ namespace Kenedia.Modules.BuildsManager
         }
         public static Texture2D getIcon(this GW2API.Skill o, string path = null, Object targetControl = null)
         {
-            return GetTextureFile(o, path == null  && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
+            return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
         public static Texture2D getIcon(this GW2API.Specialization o, string path = null, Object targetControl = null)
         {
@@ -390,19 +206,19 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     if (Rarity.isSet) return __Rarity;
 
-                    if (Rarity != null) 
+                    if (Rarity != null)
                     {
                         switch (Rarity.Value)
                         {
-                            case 0: __Rarity = ItemRarity.Unknown; break; 
-                            case 1: __Rarity = ItemRarity.Junk; break; 
-                            case 2: __Rarity = ItemRarity.Basic; break; 
-                            case 3: __Rarity = ItemRarity.Fine; break; 
-                            case 4: __Rarity = ItemRarity.Masterwork; break; 
-                            case 5: __Rarity = ItemRarity.Rare; break; 
-                            case 6: __Rarity = ItemRarity.Exotic; break; 
-                            case 7: __Rarity = ItemRarity.Ascended; break; 
-                            case 8: __Rarity = ItemRarity.Legendary; break; 
+                            case 0: __Rarity = ItemRarity.Unknown; break;
+                            case 1: __Rarity = ItemRarity.Junk; break;
+                            case 2: __Rarity = ItemRarity.Basic; break;
+                            case 3: __Rarity = ItemRarity.Fine; break;
+                            case 4: __Rarity = ItemRarity.Masterwork; break;
+                            case 5: __Rarity = ItemRarity.Rare; break;
+                            case 6: __Rarity = ItemRarity.Exotic; break;
+                            case 7: __Rarity = ItemRarity.Ascended; break;
+                            case 8: __Rarity = ItemRarity.Legendary; break;
                         }
                     }
 
@@ -431,7 +247,7 @@ namespace Kenedia.Modules.BuildsManager
             public int Value;
             public string RawValue;
         }
-        
+
         public class Rarity
         {
             public string Value;
@@ -511,7 +327,7 @@ namespace Kenedia.Modules.BuildsManager
             public string Path;
             public string Url;
         }
-                
+
         public class ProfessionSkill
         {
             public int Id;
@@ -594,10 +410,32 @@ namespace Kenedia.Modules.BuildsManager
 
     public class API
     {
+        public static string UniformAttributeName(string statName)
+        {
+            switch (statName)
+            {
+                case "ConditionDamage":
+                    return "Condition Damage";
+
+                case "BoonDuration":
+                    return "Concentration";
+
+                case "ConditionDuration":
+                    return "Expertise";
+
+                case "Healing":
+                    return "Healing Power";
+
+                case "CritDamage":
+                    return "Ferocity";
+            }
+
+            return statName;
+        }
         public enum traitType
         {
             Minor = 1,
-            Major  = 2,
+            Major = 2,
         }
         public enum skillSlot
         {
@@ -613,23 +451,53 @@ namespace Kenedia.Modules.BuildsManager
             Profession_5 = 10,
             Heal = 11,
             Utility = 12,
-            Elite  = 13,
+            Elite = 13,
         }
-        public enum itemSlot
+        public enum armorSlot
         {
-            Helmet = 6,
-            Shoulders  = 8,
-            Chest = 3,
-            Gloves = 5,
-            Leggings = 7,
-            Boots = 4,
+            Helm,
+            Shoulders,
+            Coat,
+            Gloves,
+            Leggings,
+            Boots,
+        }
+        public enum weaponHand
+        {
+            Mainhand,
+            Offhand,
+            DualWielded,
+            Twohanded,
+            Aquatic,
+        }
+        public enum weaponSlot
+        {
+            Axe = weaponHand.DualWielded,
+            Dagger = weaponHand.DualWielded,
+            Mace = weaponHand.DualWielded,
+            Pistol = weaponHand.DualWielded,
+            Scepter = weaponHand.Mainhand,
+            Sword = weaponHand.DualWielded,
+            Focus = weaponHand.Offhand,
+            Shield = weaponHand.Offhand,
+            Torch = weaponHand.Offhand,
+            Warhorn = weaponHand.Offhand,
+            Greatsword = weaponHand.Twohanded,
+            Hammer = weaponHand.Twohanded,
+            Longbow = weaponHand.Twohanded,
+            Rifle = weaponHand.Twohanded,
+            Shortbow = weaponHand.Twohanded,
+            Staff = weaponHand.Twohanded,
+            Harpoon = weaponHand.Aquatic,
+            Speargun = weaponHand.Aquatic,
+            Trident = weaponHand.Aquatic,
         }
         public enum trinketType
         {
-            Back = 0,
-            Accessory = 1,
-            Amulet = 2,
-            Ring = 3,
+            Back,
+            Amulet,
+            Accessory,
+            Ring,
         }
         public enum armorWeight
         {
@@ -644,31 +512,38 @@ namespace Kenedia.Modules.BuildsManager
         }
         public enum weaponType
         {
-            Axe = 1,
-            Dagger = 2,
-            Mace = 3,
-            Pistol = 4,
-            Scepter = 5,
-            Sword = 6,
-            Focus = 7,
-            Shield = 8,
-            Torch = 9,
-            Warhorn = 10,
-            Greatsword = 11,
-            Hammer = 12,
-            Longbow = 13,
-            Rifle = 14,
-            Shortbow = 15,
-            Staff = 16,
-            Harpoon = 17,
-            Speargun = 18,
-            Trident  = 19,
+            Unkown = -1,
+            Axe,
+            Dagger,
+            Mace,
+            Pistol,
+            Scepter,
+            Sword,
+            Focus,
+            Shield,
+            Torch,
+            Warhorn,
+            Greatsword,
+            Hammer,
+            Longbow,
+            Rifle,
+            Shortbow,
+            Staff,
+            Harpoon,
+            Speargun,
+            Trident,
+
+            Spear = 16,
+            ShortBow = 14,
+            LongBow = 12,
         }
 
         public class Icon
         {
-          public  string Path;
+            public string Path;
             public string Url;
+            public Texture2D Texture;
+            public bool Loaded;
         }
         #region Items
         public class Item
@@ -680,28 +555,29 @@ namespace Kenedia.Modules.BuildsManager
         }
         public class EquipmentItem : Item
         {
-            public itemSlot Slot;
             public double AttributeAdjustment;
         }
-        public class ArmorItem: EquipmentItem
+        public class ArmorItem : EquipmentItem
         {
+            public armorSlot Slot;
             public armorWeight ArmorWeight;
 
         }
-        public class WeaponItem: EquipmentItem
+        public class WeaponItem : EquipmentItem
         {
             public weaponType WeaponType;
+            public weaponSlot Slot;
         }
-        public class TrinketItem: EquipmentItem
+        public class TrinketItem : EquipmentItem
         {
             public trinketType TrinketType;
         }
-        public class RuneItem: Item
+        public class RuneItem : Item
         {
             public upgradeType Type = upgradeType.Rune;
             public List<string> Bonuses;
         }
-        public class SigilItem: Item
+        public class SigilItem : Item
         {
             public upgradeType Type = upgradeType.Sigil;
             public string Description; //InfixUpgrade.Buff.Description
@@ -738,8 +614,8 @@ namespace Kenedia.Modules.BuildsManager
             public int Id;
             public Icon Icon;
             public Icon Background;
-            public Icon ProfessionIconBig;
             public Icon ProfessionIcon;
+            public Icon ProfessionIconBig;
             public string Profession;
             public bool Elite;
 
@@ -747,7 +623,11 @@ namespace Kenedia.Modules.BuildsManager
             public List<Trait> MinorTraits = new List<Trait>();
             public List<Trait> MajorTraits = new List<Trait>();
         }
-
+        public class ProfessionWeapon
+        {
+            public int Specialization;
+            public weaponType Weapon;
+        }
         public class Profession
         {
             public string Name;
@@ -755,7 +635,7 @@ namespace Kenedia.Modules.BuildsManager
             public Icon Icon;
             public Icon IconBig;
             public List<Specialization> Specializations = new List<Specialization>();
-            public List<weaponType> Weapons = new List<weaponType>();
+            public List<ProfessionWeapon> Weapons = new List<ProfessionWeapon>();
             public List<Skill> Skills = new List<Skill>();
         }
 

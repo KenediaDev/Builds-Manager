@@ -38,7 +38,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Parent = this,
                 Size = new Point(Size.X, Size.Y - 10),
-                Texture = BuildsManager.DataManager.getControlTexture(_Controls.GlidingFill_Gray),
+                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.GlidingFill_Gray),
             };
 
             _Bar = new ProgressContainer()
@@ -58,7 +58,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Parent = _Bar_Done,
                 Size = new Point(Size.X, Size.Y - 2),
-                Texture = BuildsManager.DataManager.getControlTexture(_Controls.GlidingFill),
+                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.GlidingFill),
             };
 
             _Label = new Label()

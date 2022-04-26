@@ -101,11 +101,33 @@
     {
         MainWindow,
         BlueishMainWindow,
+        Tooltip,
     }
 
     public enum _Emblems
     {
         SwordAndShield,
+    }
+    public enum _EquipSlotTextures
+    {
+        Helmet,
+        Shoulders,
+        Chest,
+        Gloves,
+        Leggings,
+        Boots,
+        Weapon1_MainHand = 6,
+        Weapon1_OffHand = 7,
+        AquaticWeapon1 = 9,
+        Weapon2_MainHand = 6,
+        Weapon2_OffHand = 7,
+        AquaticWeapon2 = 9,
+        Back,
+        Amulet,
+        Ring1,
+        Ring2,
+        Accessoire1,
+        Accessoire2,
     }
     public enum _EquipmentTextures
     {
@@ -133,10 +155,12 @@
     public enum _Stats
     {
         BoonDuration = 2,
+        Concentration = 2,
         ConditionDamage,
-        ConditionDuration,
         CritDamage,
+        Ferocity = 4,
         Healing,
+        HealingPower = 5,
         Power,
         Precision, 
         Toughness,
@@ -186,54 +210,6 @@
         Diviners = 1556,
         Dragons = 1681,
         Ritualists = 1686,
-    }
-    public enum _StatIcons
-    {
-        Berserkers,
-        Soldiers,
-        Valkyrie,
-        Captains,
-        Rampagers,
-        Knights,
-        Cavaliers,
-        Givers,
-        Shamans,
-        Carrion,
-        Rabid,
-        //Snowflake, //not assigned
-        Clerics = 12,
-        Magis,
-        Apothecarys,
-        Trailblazers,
-        Wanderers,
-        Minstrels,
-        Celestial,
-        //BerserkersAndValkyrie,
-        //DireAndRabids,
-        //RabidAndApothecarys,
-        Vipers = 22,
-        Sentinels,
-        Settlers,
-        Assassins,
-        Dire,
-        Zealots,
-        Nomads,
-        Sinister,
-        Vigilant,
-        Marauder,
-        Crusader,
-        Commanders,
-        Seraph,
-        Marshals,
-        Grieving,
-        //Skull, //not assigned
-        //Footprint, //not assigned
-        Harriers = 39,
-        Bringers,
-        Plaguedoctors,
-        Diviners,
-        Ritualists,
-        Dragons,
     }
     public enum _EquipmentSlots
     {

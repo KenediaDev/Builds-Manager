@@ -36,9 +36,9 @@ namespace Kenedia.Modules.BuildsManager
             HeightSizingMode = SizingMode.Fill;
             CanScroll = true;
 
-            Icon = BuildsManager.DataManager.getIcon(_Icons.Bug);
-            LeftBar = BuildsManager.DataManager.getControlTexture(_Controls.TabBorderLeft);
-            RightBar = BuildsManager.DataManager.getControlTexture(_Controls.TabBorderRight);
+            Icon = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+            LeftBar = BuildsManager.TextureManager.getControlTexture(_Controls.TabBorderLeft);
+            RightBar = BuildsManager.TextureManager.getControlTexture(_Controls.TabBorderRight);
 
             Size = parent.ContentBounds;
         }
@@ -61,8 +61,8 @@ namespace Kenedia.Modules.BuildsManager
 
     public class iMainWindow : StandardWindow
     {
-        public Build Build;
-        public Equipment Gear;
+        public Control_Build Build;
+        public Control_Equipment Gear;
         Texture2D _TabBarTexture;
         Texture2D _TabBar_Line;
 
@@ -71,7 +71,7 @@ namespace Kenedia.Modules.BuildsManager
         Rectangle _BuildSelection_Bounds;
         Point _ControlsPadding = new Point(10, 5);
 
-        iDataManager DataManager;
+        TextureManager TextureManager;
 
         public Label NameLabel;
 
@@ -94,17 +94,32 @@ namespace Kenedia.Modules.BuildsManager
         public List<iTab> iTabs = new List<iTab>();
 
         int TabBarHeight = 40;
-
-        public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, iDataManager dataManager, Container parent) : base (background, windowRegion, contentRegion)
+        private Template _Template;
+        public Template Template
         {
-            DataManager = dataManager;
+            get => _Template;
+            set
+            {
+                if (value != null)
+                {
+                    _Template = value;
+                    if (Gear != null) Gear.Template = value;
+                    if (Build != null) Build.Template = value;
+                }
+            }
+        }
+
+        public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, TextureManager textureManager, Container parent) : base(background, windowRegion, contentRegion)
+        {
+
+            TextureManager = textureManager;
             Parent = parent;
 
-            _TabBarTexture = BuildsManager.DataManager.getControlTexture(_Controls.TabBar_FadeIn);
-            _TabBar_Line = BuildsManager.DataManager.getControlTexture(_Controls.TabBar_Line);
+            _TabBarTexture = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
+            _TabBar_Line = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_Line);
 
             Title = "Builds Manager";
-            Emblem = DataManager.getEmblem(_Emblems.SwordAndShield);
+            Emblem = TextureManager.getEmblem(_Emblems.SwordAndShield);
             Subtitle = "Gear";
             SavesPosition = true;
             Id = $"BuildsManager";
@@ -118,26 +133,26 @@ namespace Kenedia.Modules.BuildsManager
 
             Build_Tab = new iTab(this)
             {
-                Icon = DataManager.getIcon(_Icons.Template),
+                Icon = TextureManager.getIcon(_Icons.Template),
                 Name = "Build",
                 Location = new Point(_BuildSelection_Bounds.Right, 65),
             };
             iTabs.Add(Build_Tab);
             active_Tab = Build_Tab;
+            Build_Tab.Resized += delegate { Build.Size = Build_Tab.Size.Add(new Point(0, -30)); };
 
-            Build = new Build()
+            Build = new Control_Build()
             {
                 Parent = Build_Tab,
-                BuildTemplate = new BuildTemplate("[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]"),
-                Location = new Point(0, 0),
+                Template = Template,
+                Location = new Point(0, 30),
+                Size = Build_Tab.Size.Add(new Point(0, -30)),
                 Scale = 0.93,
-                Visible = true,
-                Gear = Gear,
             };
 
             Gear_Tab = new iTab(this)
             {
-                Icon = DataManager.getIcon(_Icons.Helmet),
+                Icon = TextureManager.getIcon(_Icons.Helmet),
                 Location = new Point(_BuildSelection_Bounds.Right, 65),
                 Name = "Gear",
                 Visible = false,
@@ -145,13 +160,11 @@ namespace Kenedia.Modules.BuildsManager
             iTabs.Add(Gear_Tab);
             Gear_Tab.Resized += delegate { Gear.Size = Gear_Tab.Size; };
 
-            Gear = new Equipment(new GearTemplate())
+            Gear = new Control_Equipment(Gear_Tab)
             {
-                Parent = Gear_Tab,
+                Template = Template,
                 Scale = 1,
-                Visible = true,
                 Size = Gear_Tab.Size,
-                Build = Build,
             };
 
             var font = Content.DefaultFont18;
@@ -163,7 +176,6 @@ namespace Kenedia.Modules.BuildsManager
                 Font = font,
                 Height = font.LineHeight + (4 * 3),
             };
-            NameBox.Width = Build.ControlBounds.Width - 35 - (NameBox.Height * 2);
 
             NameLabel = new Label()
             {
@@ -188,7 +200,7 @@ namespace Kenedia.Modules.BuildsManager
 
             SaveName = new Image()
             {
-                Texture = BuildsManager.DataManager.getIcon(_Icons.Checkmark_Color),
+                Texture = BuildsManager.TextureManager.getIcon(_Icons.Checkmark_Color),
                 Parent = this,
                 Location = new Point(NameBox.LocalBounds.Right + (NameBox.Height * 1), 0),
                 Size = new Point(NameBox.Height, NameBox.Height),
@@ -216,18 +228,18 @@ namespace Kenedia.Modules.BuildsManager
             };
             SaveName.MouseEntered += delegate
             {
-                SaveName.Texture = BuildsManager.DataManager.getIcon(_Icons.Checkmark_Highlight);
+                SaveName.Texture = BuildsManager.TextureManager.getIcon(_Icons.Checkmark_Highlight);
 
             };
             SaveName.MouseLeft += delegate
             {
-                SaveName.Texture = BuildsManager.DataManager.getIcon(_Icons.Checkmark_Color);
+                SaveName.Texture = BuildsManager.TextureManager.getIcon(_Icons.Checkmark_Color);
 
             };
 
             CancelName = new Image()
             {
-                Texture = BuildsManager.DataManager.getIcon(_Icons.Stop_Color),
+                Texture = BuildsManager.TextureManager.getIcon(_Icons.Stop_Color),
                 Parent = this,
                 Location = new Point(NameBox.LocalBounds.Right, 0),
                 Size = new Point(NameBox.Height, NameBox.Height),
@@ -244,27 +256,32 @@ namespace Kenedia.Modules.BuildsManager
             };
             CancelName.MouseEntered += delegate
             {
-                CancelName.Texture = BuildsManager.DataManager.getIcon(_Icons.Stop_Highlight);
+                CancelName.Texture = BuildsManager.TextureManager.getIcon(_Icons.Stop_Highlight);
             };
             CancelName.MouseLeft += delegate
             {
-                CancelName.Texture = BuildsManager.DataManager.getIcon(_Icons.Stop_Color);
+                CancelName.Texture = BuildsManager.TextureManager.getIcon(_Icons.Stop_Color);
             };
 
             TemplateBox = new TextBox()
             {
                 Parent = Build_Tab,
-                Width = Build.ControlBounds.Width - 35 - 100,
+                Width = Build.LocalBounds.Width - 35 - 100,
                 Font = GameService.Content.DefaultFont12,
-                Location = new Point(Build.Location.X, Build.ControlBounds.Bottom + 10 ),
+                //Location = new Point(Build.Location.X, Build.ControlBounds.Bottom + 10 ),
             };
-            TemplateBox.Text = Build.BuildTemplateCode;
+            Build.Resized += delegate
+            {
+                TemplateBox.Width = Build.LocalBounds.Width - Copy_Button.Width;
+                Copy_Button.Location = new Point(TemplateBox.LocalBounds.Right, TemplateBox.LocalBounds.Top);
+            };
+            //TemplateBox.Text = Build.BuildTemplateCode;
 
             TemplateBox.TextChanged += delegate
             {
                 if (TemplateBox.Focused && TemplateBox.Text != null && TemplateBox.Text != "")
                 {
-                    Build.BuildTemplateCode = TemplateBox.Text;
+                    //Build.BuildTemplateCode = TemplateBox.Text;
                 }
             };
 
@@ -284,7 +301,6 @@ namespace Kenedia.Modules.BuildsManager
                 var player = GameService.Gw2Mumble.PlayerCharacter;
                 build.Profession = player != null ? player.Profession : Gw2Sharp.Models.ProfessionType.Guardian;
 
-                Build.BuildTemplateCode = build.ToString();
             };
 
             Copy_Button = new StandardButton()
@@ -293,15 +309,11 @@ namespace Kenedia.Modules.BuildsManager
                 Width = 100,
                 Location = new Point(TemplateBox.LocalBounds.Right, TemplateBox.LocalBounds.Top),
                 Text = "Copy",
+                Height = TemplateBox.Height,
             };
-            Copy_Button.Click += delegate 
+            Copy_Button.Click += delegate
             {
-                System.Windows.Forms.Clipboard.SetText(TemplateBox.Text);
-            };
-
-            Build.TemplateChanged += delegate
-            {
-                TemplateBox.Text = Build.ParsedBuildTemplateCode;
+                if (TemplateBox.Text != null && TemplateBox.Text != "") System.Windows.Forms.Clipboard.SetText(TemplateBox.Text);
             };
         }
 
@@ -315,7 +327,7 @@ namespace Kenedia.Modules.BuildsManager
                 tab.TabBounds = new Rectangle(i * width, _TabBar_Bounds.Top, width, _TabBar_Bounds.Height).Add(new Point(_TabBar_Bounds.Left, 0));
                 tab.Hovered = tab.TabBounds.Contains(RelativeMousePosition);
                 if (tab.Hovered) BasicTooltipText = tab?.Name;
-                
+
                 i++;
             }
         }
@@ -323,7 +335,7 @@ namespace Kenedia.Modules.BuildsManager
         {
             foreach (iTab tab in this.iTabs)
             {
-                if(tab.Hovered && tab != active_Tab)
+                if (tab.Hovered && tab != active_Tab)
                 {
                     active_Tab.Hide();
                     if (active_Tab.OnDeactivate != null) active_Tab.OnDeactivate();
@@ -332,7 +344,7 @@ namespace Kenedia.Modules.BuildsManager
                     active_Tab.Show();
                     if (active_Tab.OnActivate != null) active_Tab.OnActivate();
                 }
-            }            
+            }
 
             base.OnClick(e);
         }
@@ -430,44 +442,11 @@ namespace Kenedia.Modules.BuildsManager
                 i++;
             }
 
-
             base.PaintAfterChildren(spriteBatch, bounds);
-            if(active_Tab == Gear_Tab) Gear.PaintAfterChildren(spriteBatch);
-            if (active_Tab == Build_Tab) Build.PaintAfterChildren(spriteBatch);
-        }
-    }
+            //if(active_Tab == Gear_Tab) Gear.PaintAfterChildren(spriteBatch);
+            //if (active_Tab == Build_Tab) Build.PaintAfterChildren(spriteBatch);
 
-    public class iGearView : View
-    {
-        public FlowPanel ContentPanel;
-        public iMainWindow MainWindow;
-        public iGearView(iMainWindow mainWindow)
-        {
-            MainWindow = mainWindow;
-            
-        }
-
-        protected override void Build(Container buildPanel)
-        {
-            ContentPanel = new FlowPanel
-            {
-                Location = new Point(5, 5),
-                Size = buildPanel.ContentRegion.Size,
-                CanScroll = true,
-                Parent = buildPanel
-            };
 
         }
-    }
-    
-    public class iBuildVIew : View
-    {
-        public iMainWindow MainWindow;
-        public iBuildVIew(iMainWindow mainWindow)
-        {
-            MainWindow = mainWindow;
-
-        }
-
     }
 }

@@ -9,88 +9,122 @@ using Blish_HUD.Modules.Managers;
 using Gw2Sharp.WebApi.V2.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LegendaryItem = Kenedia.Modules.BuildsManager.GW2API.LegendaryItem;
+using Blish_HUD;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Kenedia.Modules.BuildsManager
 {
    public class iData
     {
-        public List<GW2API.Item> LegendaryItems = new List<GW2API.Item>();
-        public List<GW2API.Item> Runes = new List<GW2API.Item>();
-        public List<GW2API.Item> Sigils = new List<GW2API.Item>();
-        public List<GW2API.Skill> Skills = new List<GW2API.Skill>();
-        public List<GW2API.Trait> Traits = new List<GW2API.Trait>();
-        public List<GW2API.Specialization> Specializations = new List<GW2API.Specialization>();
-        public List<GW2API.Profession> Professions = new List<GW2API.Profession>();
-        public List<GW2API.Stats> Stats = new List<GW2API.Stats>();
+        public static ContentsManager ContentsManager;
+        public static DirectoriesManager DirectoriesManager;
 
-        public iData()
+        public List<API.Stat> Stats = new List<API.Stat>();
+        public List<API.Profession> Professions = new List<API.Profession>();
+        public List<API.RuneItem> Runes = new List<API.RuneItem>();
+        public List<API.SigilItem> Sigils = new List<API.SigilItem>();
+        public List<API.ArmorItem> Armors = new List<API.ArmorItem>();
+        public List<API.WeaponItem> Weapons = new List<API.WeaponItem>();
+        public List<API.TrinketItem> Trinkets = new List<API.TrinketItem>();
+
+        public iData(ContentsManager contentsManager = null, DirectoriesManager directoriesManager = null)
         {
+            if (contentsManager != null) ContentsManager = contentsManager;
+            if(directoriesManager != null) DirectoriesManager = directoriesManager;
+
+            string file_path;
             var culture = BuildsManager.getCultureString();
             var base_path = BuildsManager.Paths.BasePath+ @"\api\";
-            var armory_path = BuildsManager.Paths.armory;
-            var file_path = armory_path + @"\" + "armory [" + BuildsManager.getCultureString() + "].json";
-            var SkillsByPalette = new List<KeyValuePair<int, int>>();
 
             file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<GW2API.Stats>>(System.IO.File.ReadAllText(file_path));           
-
-            file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Sigils = JsonConvert.DeserializeObject<List<GW2API.Item>>(System.IO.File.ReadAllText(file_path));
-            foreach(GW2API.Item o in Sigils) { o.Icon.Path = BuildsManager.Paths.sigil_icons; };
-
-            file_path = BuildsManager.Paths.runes + @"runes [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Runes = JsonConvert.DeserializeObject<List<GW2API.Item>>(System.IO.File.ReadAllText(file_path));
-            foreach (GW2API.Item o in Runes) { o.Icon.Path = BuildsManager.Paths.rune_icons; };
-
-            file_path = BuildsManager.Paths.armory + @"armory [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) LegendaryItems = JsonConvert.DeserializeObject<List<GW2API.Item>>(System.IO.File.ReadAllText(file_path));
-            foreach (GW2API.Item o in LegendaryItems) { o.Icon.Path = BuildsManager.Paths.armory_icons; };
+            if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(System.IO.File.ReadAllText(file_path));
+            foreach (API.Stat stat in Stats) { stat.Icon.Texture = ContentsManager.GetTexture(stat.Icon.Path); foreach (API.StatAttribute attri in stat.Attributes) { attri.Icon.Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
             file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<GW2API.Profession>>(System.IO.File.ReadAllText(file_path));
-            foreach (GW2API.Profession o in Professions)
+            if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(System.IO.File.ReadAllText(file_path));
+
+            file_path = BuildsManager.Paths.runes + @"runes [" + culture + "].json";
+            if (System.IO.File.Exists(file_path)) Runes = JsonConvert.DeserializeObject<List<API.RuneItem>>(System.IO.File.ReadAllText(file_path));
+
+            file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
+            if (System.IO.File.Exists(file_path)) Sigils = JsonConvert.DeserializeObject<List<API.SigilItem>>(System.IO.File.ReadAllText(file_path));
+
+            file_path = BuildsManager.Paths.armory + @"armors [" + culture + "].json";
+            if (System.IO.File.Exists(file_path)) Armors = JsonConvert.DeserializeObject<List<API.ArmorItem>>(System.IO.File.ReadAllText(file_path));
+
+            file_path = BuildsManager.Paths.armory + @"weapons [" + culture + "].json";
+            if (System.IO.File.Exists(file_path)) Weapons = JsonConvert.DeserializeObject<List<API.WeaponItem>>(System.IO.File.ReadAllText(file_path));
+
+            file_path = BuildsManager.Paths.armory + @"trinkets [" + culture + "].json";
+            if (System.IO.File.Exists(file_path)) Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(System.IO.File.ReadAllText(file_path));
+
+            Trinkets = Trinkets.OrderBy(e => e.TrinketType).ToList();
+            Weapons = Weapons.OrderBy(e => (int) e.WeaponType).ToList();
+
+            Texture2D texture; 
+            GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
             {
-                o.Icon.Path = BuildsManager.Paths.profession_icons;
-                o.IconBig.Path = BuildsManager.Paths.profession_icons;
+                foreach(API.TrinketItem item in Trinkets) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach(API.WeaponItem item in Weapons) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach(API.ArmorItem item in Armors) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach(API.SigilItem item in Sigils) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach(API.RuneItem item in Runes) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
 
-                foreach (GW2API.Profession profession in Professions)
+                foreach (API.Profession profession in Professions)
                 {
-                    SkillsByPalette.AddRange(profession.SkillsByPalette);
-                }
-            };
+                    texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(profession.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    profession.Icon.Texture = texture;
 
-            file_path = BuildsManager.Paths.skills + @"skills [" + culture + "].json";
-            List<GW2API.Skill> temp_Skills = new List<GW2API.Skill>();
-            if (System.IO.File.Exists(file_path)) temp_Skills = JsonConvert.DeserializeObject<List<GW2API.Skill>>(System.IO.File.ReadAllText(file_path));
-            foreach (GW2API.Skill o in temp_Skills) {
-                o.Icon.Path = BuildsManager.Paths.skill_icons;
-                var ids = SkillsByPalette.Find(e => e.Value == o.Id); 
-                if (ids.Value > 0)
-                {
-                    BuildsManager.Logger.Debug("Adding skill '{0}' ({1}) with PaletteID: {2}", o.Name, o.Id, ids.Key);
-                    o.PaletteID = ids.Key;
-                    Skills.Add(o);
-                }
-            };
+                    texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(profession.IconBig.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    profession.IconBig.Texture = texture;
 
-            file_path = BuildsManager.Paths.traits + @"traits [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Traits = JsonConvert.DeserializeObject<List<GW2API.Trait>>(System.IO.File.ReadAllText(file_path));
-            foreach (GW2API.Trait o in Traits) { o.Icon.Path = BuildsManager.Paths.traits_icons; };
+                    foreach (API.Specialization specialization in profession.Specializations)
+                    {
+                        texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                        specialization.Icon.Texture = texture;
 
-            file_path = BuildsManager.Paths.specs + @"specializations [" + culture + "].json";
-            BuildsManager.Logger.Debug("Specs Path: {0}", file_path);
-            if (System.IO.File.Exists(file_path)) Specializations = JsonConvert.DeserializeObject<List<GW2API.Specialization>>(System.IO.File.ReadAllText(file_path));
-            foreach (GW2API.Specialization o in Specializations) 
-            { 
-                o.Icon.Path = BuildsManager.Paths.spec_icons; 
-                o.Background.Path = BuildsManager.Paths.spec_backgrounds; 
-                foreach(int id in o.MajorTraits)
-                {
-                    GW2API.Trait trait = Traits.Find(e => e.Id == id);
-                    o.Traits.Add(trait);
+                        texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.Background.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                        specialization.Background.Texture = texture.GetRegion(0, texture.Height - 133, texture.Width - (texture.Width - 643), texture.Height - (texture.Height - 133));
+
+                        if (specialization.ProfessionIcon != null)
+                        {
+                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.ProfessionIcon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                            specialization.ProfessionIcon.Texture = texture;
+                        }
+                        if (specialization.ProfessionIconBig != null)
+                        {
+                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.ProfessionIconBig.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                            specialization.ProfessionIconBig.Texture = texture;
+                        }
+                        if (specialization.WeaponTrait != null)
+                        {
+                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.WeaponTrait.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                            specialization.WeaponTrait.Icon.Texture = texture.GetRegion(3, 3, texture.Width - 6, texture.Height - 6);
+                        }
+
+
+                        foreach (API.Trait trait in specialization.MajorTraits)
+                        {
+                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(trait.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                            trait.Icon.Texture = texture.GetRegion(3, 3, texture.Width - 6, texture.Height - 6);
+                        }
+
+                        foreach (API.Trait trait in specialization.MinorTraits)
+                        {
+                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(trait.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                            trait.Icon.Texture = texture.GetRegion(3, 3, texture.Width - 6, texture.Height - 6);
+                        }
+                    }
+
+                    foreach (API.Skill skill in profession.Skills)
+                    {
+                        texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(skill.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                        skill.Icon.Texture = texture.GetRegion(12, 12, texture.Width - (12 * 2), texture.Height - (12 * 2));
+                    }
                 }
-            };
+
+                BuildsManager.DataLoaded = true;
+            });
         }
     }
 }
