@@ -249,7 +249,7 @@ namespace Kenedia.Modules.BuildsManager
 
         private async Task Fetch_APIData()
         {
-            if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || true)
+            if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || false)
             {
                 var downloadList = new List<APIDownload_Image>();
                 var culture = getCultureString();
@@ -669,6 +669,7 @@ namespace Kenedia.Modules.BuildsManager
                             temp.Weapons.Add(new API.ProfessionWeapon() {
                                 Weapon = weaponType,
                                 Specialization = weapon.Value.Specialization,
+                                Wielded = weapon.Value.Flags.Select(e => (API.weaponHand) Enum.Parse(typeof(API.weaponHand), e.RawValue)).ToList(),
                             });
                         }
 
@@ -763,7 +764,6 @@ namespace Kenedia.Modules.BuildsManager
             MainWindow.Template = new Template(Paths.builds + @"Condi Harbaebae.json");
             MainWindow.ToggleWindow();
 
-            Logger.Debug("Parsed Code: {0}", MainWindow.Template.Build.TemplateCode);
             //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEKRYqPTlwAAAAogEAAGoAAACvAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]");
             //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQEQGzEvPjZLF0sXehZ6FjYBNgFTF1MXcRJxEgAAAAAAAAAAAAAAAAAAAAA=]");
             //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEBhYVPT9wAKYAPQGoALMAagCpAOIBnADuAAAAAAAAAAAAAAAAAAAAAAA=]"); // All Filled

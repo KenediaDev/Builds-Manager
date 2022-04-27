@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace Kenedia.Modules.BuildsManager
@@ -24,7 +25,7 @@ namespace Kenedia.Modules.BuildsManager
     public class AquaticWeapon_TemplateItem_json : TemplateItem_json
     {
         public string _WeaponType = "Unkown";
-        public List<int?> _Sigils;
+        public List<int> _Sigils;
     }
 
     public class GearTemplate_json
@@ -36,8 +37,11 @@ namespace Kenedia.Modules.BuildsManager
     }
     public class Template_json
     {
+        public string Profession;
+        public int Specialization;
+        public string Name;
         public GearTemplate_json Gear;
-        public string BuildCode = "[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]";
+        public string BuildCode;
         public Template_json(string path)
         {
             if (File.Exists(path))
@@ -45,6 +49,7 @@ namespace Kenedia.Modules.BuildsManager
                 var template = JsonConvert.DeserializeObject<Template_json>(File.ReadAllText(path));
                 if (template != null)
                 {
+                    Name = template.Name;
                     Gear = template.Gear;
                     BuildCode = template.BuildCode;
                 }
@@ -75,7 +80,7 @@ namespace Kenedia.Modules.BuildsManager
     {
         public API.weaponType WeaponType = API.weaponType.Unkown;
         public List<API.SigilItem> Sigils;
-        public List<Rectangle> SigilsBounds = new List<Rectangle>() 
+        public List<Rectangle> SigilsBounds = new List<Rectangle>()
         {
             Rectangle.Empty,
             Rectangle.Empty,
@@ -93,7 +98,7 @@ namespace Kenedia.Modules.BuildsManager
 
     public class Template
     {
-        enum _TrinketSlots
+        public enum _TrinketSlots
         {
             Back,
             Amulet,
@@ -102,7 +107,7 @@ namespace Kenedia.Modules.BuildsManager
             Accessoire1,
             Accessoire2,
         }
-        enum _AmorSlots
+        public enum _AmorSlots
         {
             Helmet,
             Shoulders,
@@ -111,7 +116,7 @@ namespace Kenedia.Modules.BuildsManager
             Leggings,
             Boots,
         }
-        enum _WeaponSlots
+        public enum _WeaponSlots
         {
             Weapon1_MainHand,
             Weapon1_OffHand,
@@ -126,6 +131,11 @@ namespace Kenedia.Modules.BuildsManager
 
         public Template_json Template_json;
 
+        public string Name;
+        public API.Profession Profession;
+        public API.Specialization Specialization;
+
+        public string Path;
         public GearTemplate Gear = new GearTemplate();
         public BuildTemplate Build;
 
@@ -137,6 +147,11 @@ namespace Kenedia.Modules.BuildsManager
                 if (template != null)
                 {
                     Template_json = template;
+                    Name = template.Name;
+                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == template.Profession);
+                    Specialization = Profession.Specializations.Find(e => e.Id == template.Specialization);
+
+                    Path = path.Replace(Name + ".json", "");
 
                     foreach (Armor_TemplateItem_json jItem in Template_json.Gear.Armor)
                     {
@@ -160,7 +175,7 @@ namespace Kenedia.Modules.BuildsManager
                         Gear.Weapons[index].Stat = BuildsManager.Data.Stats.Find(e => e.Id == jItem._Stat);
                         Gear.Weapons[index].Sigil = BuildsManager.Data.Sigils.Find(e => e.Id == jItem._Sigil);
                         Gear.Weapons[index].Slot = (_EquipmentSlots)Enum.Parse(typeof(_EquipmentSlots), jItem._Slot);
-                        Gear.Weapons[index].WeaponType = (API.weaponType) Enum.Parse(typeof(API.weaponType), jItem._WeaponType);
+                        Gear.Weapons[index].WeaponType = (API.weaponType)Enum.Parse(typeof(API.weaponType), jItem._WeaponType);
                     }
                     foreach (AquaticWeapon_TemplateItem_json jItem in Template_json.Gear.AquaticWeapons)
                     {
@@ -180,6 +195,93 @@ namespace Kenedia.Modules.BuildsManager
                     Build = new BuildTemplate(Template_json.BuildCode);
                 }
             }
+        }
+
+        public void Reset()
+        {
+            Name = "My Build Template";
+            Template_json.Name = Name;
+            Specialization = null;
+
+            foreach (TemplateItem item in Gear.Trinkets)
+            {
+                item.Stat = null;
+            }
+
+            foreach (Armor_TemplateItem item in Gear.Armor)
+            {
+                item.Stat = null;
+                item.Rune = null;
+            }
+
+            foreach (Weapon_TemplateItem item in Gear.Weapons)
+            {
+                item.WeaponType = API.weaponType.Unkown;
+                item.Stat = null;
+                item.Sigil = null;
+            }
+
+            foreach (AquaticWeapon_TemplateItem item in Gear.AquaticWeapons)
+            {
+                item.WeaponType = API.weaponType.Unkown;
+                item.Stat = null;
+                item.Sigils = new List<API.SigilItem>() { null, null};
+            }
+        }
+
+        public void Save()
+        {
+            if (Path == null) return;
+            if (Template_json.Name != Name) File.Delete(Path + Template_json.Name + ".json");
+
+            Template_json.Name = Name;
+            Template_json.Profession = Profession != null ? Profession.Id : "Unkown";
+            Template_json.Specialization = Specialization != null ? Specialization.Id : 0;
+
+            Template_json.Gear = new GearTemplate_json();
+
+            foreach (TemplateItem item in Gear.Trinkets)
+            {
+                Template_json.Gear.Trinkets.Add(new TemplateItem_json()
+                {
+                    _Slot = item.Slot.ToString(),
+                    _Stat = item.Stat != null ? item.Stat.Id : 0,
+                });
+            }
+
+            foreach (Armor_TemplateItem item in Gear.Armor)
+            {
+                Template_json.Gear.Armor.Add(new Armor_TemplateItem_json()
+                {
+                    _Slot = item.Slot.ToString(),
+                    _Stat = item.Stat != null ? item.Stat.Id : 0,
+                    _Rune = item.Rune != null ? item.Rune.Id : 0,
+                });
+            }
+
+            foreach (Weapon_TemplateItem item in Gear.Weapons)
+            {
+                Template_json.Gear.Weapons.Add(new Weapon_TemplateItem_json()
+                {
+                    _WeaponType = item.WeaponType.ToString(),
+                    _Slot = item.Slot.ToString(),
+                    _Stat = item.Stat != null ? item.Stat.Id : 0,
+                    _Sigil = item.Sigil != null ? item.Sigil.Id : 0,
+                });
+            }
+
+            foreach (AquaticWeapon_TemplateItem item in Gear.AquaticWeapons)
+            {
+                Template_json.Gear.AquaticWeapons.Add(new AquaticWeapon_TemplateItem_json()
+                {
+                    _WeaponType = item.WeaponType.ToString(),
+                    _Slot = item.Slot.ToString(),
+                    _Stat = item.Stat != null ? item.Stat.Id : 0,
+                    _Sigils = item.Sigils.Select(e => e != null ? e.Id : 0).ToList(),
+                });
+            }
+
+            File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
         }
     }
 

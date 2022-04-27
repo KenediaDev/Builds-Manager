@@ -275,6 +275,9 @@
         TabBar_FadeIn,
         TabBar_Line,
         Selector,
+        AddButton,
+        ResetButton,
+        ResetButton_Hovered,
     }
     public enum _Icons
     {

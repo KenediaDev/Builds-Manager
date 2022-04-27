@@ -465,9 +465,9 @@ namespace Kenedia.Modules.BuildsManager
         public enum weaponHand
         {
             Mainhand,
-            Offhand,
+            TwoHand,
             DualWielded,
-            Twohanded,
+            Offhand,
             Aquatic,
         }
         public enum weaponSlot
@@ -482,12 +482,12 @@ namespace Kenedia.Modules.BuildsManager
             Shield = weaponHand.Offhand,
             Torch = weaponHand.Offhand,
             Warhorn = weaponHand.Offhand,
-            Greatsword = weaponHand.Twohanded,
-            Hammer = weaponHand.Twohanded,
-            Longbow = weaponHand.Twohanded,
-            Rifle = weaponHand.Twohanded,
-            Shortbow = weaponHand.Twohanded,
-            Staff = weaponHand.Twohanded,
+            Greatsword = weaponHand.TwoHand,
+            Hammer = weaponHand.TwoHand,
+            Longbow = weaponHand.TwoHand,
+            Rifle = weaponHand.TwoHand,
+            Shortbow = weaponHand.TwoHand,
+            Staff = weaponHand.TwoHand,
             Harpoon = weaponHand.Aquatic,
             Speargun = weaponHand.Aquatic,
             Trident = weaponHand.Aquatic,
@@ -627,6 +627,7 @@ namespace Kenedia.Modules.BuildsManager
         {
             public int Specialization;
             public weaponType Weapon;
+            public List<weaponHand> Wielded;
         }
         public class Profession
         {

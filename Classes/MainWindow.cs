@@ -75,10 +75,12 @@ namespace Kenedia.Modules.BuildsManager
 
         public Label NameLabel;
 
+        public Image ProfessionIcon;
         public Image EditName;
         public Image SaveName;
         public Image CancelName;
 
+        public Image ResetButton;
         public TextBox NameBox;
         public TextBox TemplateBox;
         public StandardButton Reset_Button;
@@ -103,6 +105,8 @@ namespace Kenedia.Modules.BuildsManager
                 if (value != null)
                 {
                     _Template = value;
+                    NameBox.Text = value.Name;
+                    NameLabel.Text = value.Name;
                     if (Gear != null) Gear.Template = value;
                     if (Build != null) Build.Template = value;
                 }
@@ -153,7 +157,7 @@ namespace Kenedia.Modules.BuildsManager
             Gear_Tab = new iTab(this)
             {
                 Icon = TextureManager.getIcon(_Icons.Helmet),
-                Location = new Point(_BuildSelection_Bounds.Right, 65),
+                Location = new Point(_BuildSelection_Bounds.Right, 45),
                 Name = "Gear",
                 Visible = false,
             };
@@ -166,15 +170,55 @@ namespace Kenedia.Modules.BuildsManager
                 Scale = 1,
                 Size = Gear_Tab.Size,
             };
+            Gear.Resized += delegate
+            {
+
+                NameBox.Width = Gear.Width - 130 - (NameBox.Height * 2);
+                SaveName.Location = new Point(NameBox.LocalBounds.Right + (NameBox.Height * 1), 0);
+                CancelName.Location = new Point(NameBox.LocalBounds.Right, 0);
+                ResetButton.Location = new Point(_BuildSelection_Bounds.Right + Gear.Width - ResetButton.Width, 0);
+            };
 
             var font = Content.DefaultFont18;
+
+            ProfessionIcon = new Image()
+            {
+                Texture = BuildsManager.TextureManager.getIcon(_Icons.Bug),
+                Location = new Point(_BuildSelection_Bounds.Right, 0),
+                Size = new Point(font.LineHeight + (4 * 3), font.LineHeight + (4 * 3)),
+                Parent = this,
+            };
+
+
             NameBox = new TextBox()
             {
                 Parent = this,
-                Location = new Point(_BuildSelection_Bounds.Right, 0),
+                Location = new Point(_BuildSelection_Bounds.Right + ProfessionIcon.Width + 5, 0),
                 Visible = false,
                 Font = font,
                 Height = font.LineHeight + (4 * 3),
+            };
+
+            ResetButton = new Image()
+            {
+                BasicTooltipText = "Reset",
+                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton),
+                Size = new Point(NameBox.Height , NameBox.Height),
+                Parent = this,
+            };
+            ResetButton.MouseEntered += delegate
+            {
+                ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton_Hovered);
+            };
+            ResetButton.MouseLeft += delegate
+            {
+                ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton);
+            };
+            ResetButton.Click += delegate
+            {
+                Template.Reset();
+                NameLabel.Text = Template.Name;
+                NameBox.Text = Template.Name;
             };
 
             NameLabel = new Label()
@@ -183,7 +227,7 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = this,
                 Width = NameBox.Width,
                 VerticalAlignment = VerticalAlignment.Middle,
-                Location = new Point(_BuildSelection_Bounds.Right, 0),
+                Location = new Point(_BuildSelection_Bounds.Right + ProfessionIcon.Width + 5, 0),
                 Height = font.LineHeight + (4 * 3),
                 //AutoSizeHeight = true,
                 Font = font,
@@ -209,6 +253,9 @@ namespace Kenedia.Modules.BuildsManager
             SaveName.Click += delegate
             {
                 NameLabel.Text = NameBox.Text;
+                Template.Name = NameBox.Text;
+                Template.Save();
+
                 NameBox.Text = "";
 
                 NameLabel.Show();
@@ -218,6 +265,9 @@ namespace Kenedia.Modules.BuildsManager
             };
             NameBox.EnterPressed += delegate
             {
+                Template.Name = NameBox.Text;
+                Template.Save();
+
                 NameLabel.Text = NameBox.Text;
                 NameBox.Text = "";
 
@@ -268,7 +318,7 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = Build_Tab,
                 Width = Build.LocalBounds.Width - 35 - 100,
                 Font = GameService.Content.DefaultFont12,
-                //Location = new Point(Build.Location.X, Build.ControlBounds.Bottom + 10 ),
+                Location = new Point(Build.LocalBounds.X, Build.LocalBounds.Bottom + 10 ),
             };
             Build.Resized += delegate
             {
@@ -351,6 +401,16 @@ namespace Kenedia.Modules.BuildsManager
 
         public override void UpdateContainer(GameTime gameTime)
         {
+            var texture = ProfessionIcon.Texture;
+            if(Template.Specialization != null)
+            {
+                ProfessionIcon.Texture = Template.Specialization.ProfessionIconBig.Texture;
+            }
+            else
+            {
+                ProfessionIcon.Texture = Template.Profession.IconBig.Texture;
+            }
+
             UpdateTabStates();
 
             base.UpdateContainer(gameTime);
