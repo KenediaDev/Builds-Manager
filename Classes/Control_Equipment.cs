@@ -15,6 +15,7 @@ using Blish_HUD.Input;
 using System.Text.RegularExpressions;
 using MonoGame.Extended.BitmapFonts;
 using Blish_HUD.Controls.Extern;
+using System.Threading;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -305,7 +306,6 @@ namespace Kenedia.Modules.BuildsManager
                             break;
                     }
 
-                    ScreenNotification.ShowNotification("Selection Clicked!", ScreenNotification.NotificationType.Warning, null, 1);
                     LastClick = DateTime.Now;
                     Clicked = true;
                     Hide();
@@ -682,7 +682,6 @@ namespace Kenedia.Modules.BuildsManager
         private void OnRightClick(object sender, MouseEventArgs mouse)
         {
             if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
-            ScreenNotification.ShowNotification("Right Click!", ScreenNotification.NotificationType.Error, null, 1);
             SelectionPopUp.Hide();
 
             if (Input.Keyboard.ActiveModifiers.HasFlag(ModifierKeys.Alt))
@@ -728,38 +727,94 @@ namespace Kenedia.Modules.BuildsManager
             }
             else
             {
+                var text = ""; 
                 foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
                 {
-                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
-                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Sigil != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigil.Name);
+                    if (item.Hovered && item.Stat != null)
+                    {
+                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        text = item.Stat.Name;
+                    }
+                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Sigil != null)
+                    {
+                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigil.Name);
+                        text = item.Sigil.Name;
+                    }
                 }
 
                 foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
                 {
-                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                    if (item.Hovered && item.Stat != null)
+                    {
+                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        text = item.Stat.Name;
+                    }
                     for (int i = 0; i < item.Sigils.Count; i++)
                     {
-                        if(item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition)) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigils[i].Name);
+                        if (item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition))
+                        {
+                            ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigils[i].Name);
+                            text = item.Sigils[i].Name;
+                        }
                     }
                 }
 
                 foreach (Armor_TemplateItem item in Template.Gear.Armor)
                 {
-                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
-                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Rune != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Rune.Name);
+                    if (item.Hovered && item.Stat != null)
+                    {
+                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        text = item.Stat.Name;
+                    }
+                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Rune != null)
+                    {
+                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Rune.Name);
+                        text = item.Rune.Name;
+                    }
                 }
 
                 foreach (TemplateItem item in Template.Gear.Trinkets)
                 {
-                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                    if (item.Hovered && item.Stat != null)
+                    {
+                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        text = item.Stat.Name;
+                    }
                 }
+
+                if(BuildsManager.ModuleInstance.PasteOnCopy.Value) Paste(text);
             }
+        }
+        public async void Paste(string text)
+        {
+            byte[] prevClipboardContent = await ClipboardUtil.WindowsClipboardService.GetAsUnicodeBytesAsync();
+            await ClipboardUtil.WindowsClipboardService.SetTextAsync(text)
+                               .ContinueWith(clipboardResult => {
+                                   if (clipboardResult.IsFaulted)
+                                       BuildsManager.Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {text}!", text);
+                                   else
+                                       Task.Run(() => {
+
+                                           Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.LCONTROL, true);
+                                           Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
+                                           Thread.Sleep(50);
+                                           Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
+                                           Thread.Sleep(50);
+                                           Blish_HUD.Controls.Intern.Keyboard.Release(VirtualKeyShort.LCONTROL, true);
+                                       }).ContinueWith(result => {
+                                           if (result.IsFaulted)
+                                           {
+                                               BuildsManager.Logger.Warn(result.Exception, "Failed to paste {text}", text);
+                                           }
+                                           else if (prevClipboardContent != null)
+                                               ClipboardUtil.WindowsClipboardService.SetUnicodeBytesAsync(prevClipboardContent);
+                                       });
+                               });
         }
 
         private void OnClick(object sender, MouseEventArgs m)
         {
             if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
-            ScreenNotification.ShowNotification("Click!", ScreenNotification.NotificationType.Error, null, 1);
             SelectionPopUp.Hide();
 
             foreach (TemplateItem item in Template.Gear.Trinkets)

@@ -44,14 +44,19 @@ namespace Kenedia.Modules.BuildsManager
         [DllImport("user32")]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
         public const uint WM_COMMAND = 0x0111;
+        public const uint WM_PASTE = 0x0302;
+        [DllImport("user32")]
+        public static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
+
 
         public static TextureManager TextureManager;
         public static iPaths Paths;
         public static iData Data; public iTicks Ticks = new iTicks();
         public static List<int> ArmoryItems = new List<int>();
 
-        private SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
-        private SettingEntry<int> GameVersion;
+        public SettingEntry<bool> PasteOnCopy;
+        public SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
+        public SettingEntry<int> GameVersion;
 
         public iMainWindow MainWindow;
         public LoadingSpinner loadingSpinner;
@@ -82,6 +87,11 @@ namespace Kenedia.Modules.BuildsManager
                                                       new Blish_HUD.Input.KeyBinding(Keys.LeftControl),
                                                       () => "Reload Button",
                                                       () => "");
+
+            PasteOnCopy = settings.DefineSetting(nameof(PasteOnCopy),
+                                                      true,
+                                                      () => "Paste Stat/Upgrade Name",
+                                                      () => "Paste Stat/Upgrade Name after copying it.");
 
             GameVersion = settings.DefineSetting(nameof(GameVersion), 0);
         }
