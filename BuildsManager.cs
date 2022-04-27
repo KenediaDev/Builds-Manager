@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Point = Microsoft.Xna.Framework.Point;
@@ -39,6 +40,10 @@ namespace Kenedia.Modules.BuildsManager
         {
             ModuleInstance = this;
         }
+
+        [DllImport("user32")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        public const uint WM_COMMAND = 0x0111;
 
         public static TextureManager TextureManager;
         public static iPaths Paths;
@@ -394,6 +399,7 @@ namespace Kenedia.Modules.BuildsManager
                                     Id = (int)attribute.Attribute.Value,
                                     Name = API.UniformAttributeName(attribute.Attribute.RawValue),
                                     Multiplier = attribute.Multiplier,
+                                    Value = attribute.Value,
                                     Icon = new API.Icon() { Path = @"textures\stats\" + (int)attribute.Attribute.Value + ".png" },
                                 });
                             }

@@ -645,6 +645,7 @@ namespace Kenedia.Modules.BuildsManager
             public int Id;
             public string Name;
             public double Multiplier;
+            public int Value;
             public Icon Icon;
         }
         public class Stat

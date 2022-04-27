@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Input;
 using Blish_HUD.Input;
 using System.Text.RegularExpressions;
 using MonoGame.Extended.BitmapFonts;
+using Blish_HUD.Controls.Extern;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -21,6 +22,7 @@ namespace Kenedia.Modules.BuildsManager
     {
         private Texture2D Background;
         private Texture2D Icon;
+        public object CurrentObject;
         public string Header;
         public List<string> Content;
         public CustomTooltip(Container parent)
@@ -179,6 +181,8 @@ namespace Kenedia.Modules.BuildsManager
         private BitmapFont HeaderFont;
         private Scrollbar Scrollbar;
         public CustomTooltip CustomTooltip;
+        public bool Clicked = false;
+        public DateTime LastClick = DateTime.Now;
 
         public SelectionPopUp(Container parent)
         {            
@@ -201,27 +205,26 @@ namespace Kenedia.Modules.BuildsManager
             Font = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
             HeaderFont = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
 
-            Click += OnClick;
+            Input.Mouse.LeftMouseButtonPressed += delegate { OnChanged(); };
 
             Moved += delegate
             {
                 FilterBox.Location = Location.Add(new Point(3, 4));
             };
-
             Resized += delegate
             {
                 FilterBox.Width = Width - 6;
             };
-
             Hidden += delegate
             {
                 FilterBox.Hide();
+                Clicked = false;
             };
-
             Shown += delegate
             {
                 FilterBox.Show();
                 FilterBox.Focused = true;
+                Clicked = false;
             };
             Disposed += delegate
             {
@@ -229,9 +232,10 @@ namespace Kenedia.Modules.BuildsManager
             };
         }
 
-        private void OnClick(object sender, MouseEventArgs mouse)
+        public EventHandler Changed;
+        private void OnChanged()
         {
-            if (List == null || List.Count == 0) return;
+            if (List == null || List.Count == 0 || !Visible) return;
 
             foreach (SelectionEntry entry in List)
             {
@@ -282,7 +286,7 @@ namespace Kenedia.Modules.BuildsManager
                                     break;
 
                                 case _EquipmentSlots.Weapon2_MainHand:
-                                    if((int) selectedWeapon.Slot == (int) API.weaponHand.TwoHand && Template.Gear.Weapons[(int) Template._WeaponSlots.Weapon2_OffHand].WeaponType != API.weaponType.Unkown)
+                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType != API.weaponType.Unkown)
                                     {
                                         Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType = API.weaponType.Unkown;
                                     }
@@ -301,10 +305,17 @@ namespace Kenedia.Modules.BuildsManager
                             break;
                     }
 
+                    ScreenNotification.ShowNotification("Selection Clicked!", ScreenNotification.NotificationType.Warning, null, 1);
+                    LastClick = DateTime.Now;
+                    Clicked = true;
                     Hide();
+                    break;
                 }
             }
+
+            this.Changed?.Invoke(this, EventArgs.Empty);
         }
+
         class filterTag
         {
             public string text;
@@ -422,6 +433,7 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
+            Clicked = false;
             UpdateLayout();
 
             spriteBatch.DrawOnCtrl(this,
@@ -520,6 +532,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     _Template = value;
                     UpdateTemplate();
+                    UpdateLayout();
                 }
             }
         }
@@ -537,6 +550,8 @@ namespace Kenedia.Modules.BuildsManager
         private List<SelectionPopUp.SelectionEntry> Runes_Selection = new List<SelectionPopUp.SelectionEntry>();
         private List<SelectionPopUp.SelectionEntry> Weapons_Selection = new List<SelectionPopUp.SelectionEntry>();
 
+        private List<string> Instructions = new List<string>();
+
         private string _Profession;
         public CustomTooltip CustomTooltip;
         public SelectionPopUp SelectionPopUp;
@@ -546,34 +561,6 @@ namespace Kenedia.Modules.BuildsManager
             Parent = parent;
             // BackgroundColor = Color.Aqua;
             _RuneTexture = BuildsManager.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
-
-
-            List<int> intList = new List<int>() { 1, 2, 3 };
-            List<string> stringList = new List<string>() { "A", "B", "C" };
-            List<Texture2D> textureList = new List<Texture2D>() { _RuneTexture, _RuneTexture, _RuneTexture };
-            var list = textureList;
-            for (int i = 0; i < list.Count; i++)
-            {
-                var entry = list[i];
-                BuildsManager.Logger.Debug("It's a {0}", entry.GetType().Name);
-
-                switch (entry.GetType().Name)
-                {
-                    case "String":
-                        BuildsManager.Logger.Debug("It's a {0}", "string");
-                        break;
-
-                    case "Int32":
-                        BuildsManager.Logger.Debug("It's a {0}", "int");
-                        break;
-
-                    case "Texture2D":
-                        BuildsManager.Logger.Debug("It's a {0}", "Texture2D");
-                        break;
-                }
-            }
-
-
 
             Trinkets = new List<API.TrinketItem>();
             foreach (API.TrinketItem item in BuildsManager.Data.Trinkets)
@@ -612,6 +599,11 @@ namespace Kenedia.Modules.BuildsManager
                 CustomTooltip = CustomTooltip,
                 Template = Template,
             };
+            SelectionPopUp.Changed += delegate
+            {
+                OnChanged();
+            };
+
             Disposed += delegate
             {
                 CustomTooltip.Dispose();
@@ -662,6 +654,18 @@ namespace Kenedia.Modules.BuildsManager
                     ContentTextures = item.Attributes.Select(e => e.Icon.Texture).ToList(),
                 });
             }
+
+            Instructions = new List<string>()
+            {
+                "Left Click to select Stat/Upgrade",
+                "Alt + Right Click to select Weapon",
+                "Right Click to copy Stat/Upgrade Name",
+            };
+            
+            Shown += delegate
+            {
+                UpdateLayout();
+            };
         }
 
         public EventHandler Changed;
@@ -672,42 +676,90 @@ namespace Kenedia.Modules.BuildsManager
 
         private void OnGlobalClick(object sender, MouseEventArgs m)
         {
-            if (!MouseOver) SelectionPopUp.Hide();
+            if (!MouseOver && !SelectionPopUp.MouseOver) SelectionPopUp.Hide();
         }
 
         private void OnRightClick(object sender, MouseEventArgs mouse)
         {
+            if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
+            ScreenNotification.ShowNotification("Right Click!", ScreenNotification.NotificationType.Error, null, 1);
             SelectionPopUp.Hide();
 
-            foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+            if (Input.Keyboard.ActiveModifiers.HasFlag(ModifierKeys.Alt))
             {
-                if (item.Hovered)
+                foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Weapons;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Weapons_Selection;
-                    SelectionPopUp.Slot = item.Slot;
+                    if (item.Hovered)
+                    {
+                        bool canSelect = true;
+                        if(item.Slot == _EquipmentSlots.Weapon1_OffHand)
+                        {
+                            canSelect = Template.Gear.Weapons[(int) Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int) Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int) API.weaponHand.TwoHand;
+                        }
+                        if(item.Slot == _EquipmentSlots.Weapon2_OffHand)
+                        {
+                            canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                        }
+
+                        if (canSelect)
+                        {
+                            SelectionPopUp.Show();
+                            SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
+                            SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Weapons;
+                            SelectionPopUp.SelectionTarget = item;
+                            SelectionPopUp.List = Weapons_Selection;
+                            SelectionPopUp.Slot = item.Slot;
+                        }
+                    }
+                }
+
+                foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+                {
+                    if (item.Hovered)
+                    {
+                        SelectionPopUp.Show();
+                        SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
+                        SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticWeapons;
+                        SelectionPopUp.SelectionTarget = item;
+                        SelectionPopUp.List = Weapons_Selection;
+                        SelectionPopUp.Slot = item.Slot;
+                    }
                 }
             }
-
-            foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+            else
             {
-                if (item.Hovered)
+                foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticWeapons;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Weapons_Selection;
-                    SelectionPopUp.Slot = item.Slot;
+                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Sigil != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigil.Name);
+                }
+
+                foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+                {
+                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                    for (int i = 0; i < item.Sigils.Count; i++)
+                    {
+                        if(item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition)) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigils[i].Name);
+                    }
+                }
+
+                foreach (Armor_TemplateItem item in Template.Gear.Armor)
+                {
+                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Rune != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Rune.Name);
+                }
+
+                foreach (TemplateItem item in Template.Gear.Trinkets)
+                {
+                    if (item.Hovered && item.Stat != null) ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
                 }
             }
         }
 
         private void OnClick(object sender, MouseEventArgs m)
         {
+            if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
+            ScreenNotification.ShowNotification("Click!", ScreenNotification.NotificationType.Error, null, 1);
             SelectionPopUp.Hide();
 
             foreach (TemplateItem item in Template.Gear.Trinkets)
@@ -747,11 +799,24 @@ namespace Kenedia.Modules.BuildsManager
             {
                 if (item.Hovered)
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Stats_Selection;
+                    bool canSelect = true;
+                    if (item.Slot == _EquipmentSlots.Weapon1_OffHand)
+                    {
+                        canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                    }
+                    if (item.Slot == _EquipmentSlots.Weapon2_OffHand)
+                    {
+                        canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                    }
+
+                    if (canSelect)
+                    {
+                        SelectionPopUp.Show();
+                        SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
+                        SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
+                        SelectionPopUp.SelectionTarget = item;
+                        SelectionPopUp.List = Stats_Selection;
+                    }
                 }
 
                 if (item.UpgradeBounds.Contains(RelativeMousePosition))
@@ -866,18 +931,6 @@ namespace Kenedia.Modules.BuildsManager
                 item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
                 item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
                 item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
-                item.Hovered = item.Bounds.Contains(mPos);
-                if (item.Hovered && item.Stat != null && (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver))
-                {
-                    CustomTooltip.Visible = true;
-                    CustomTooltip.Header = item.Stat.Name;
-                    CustomTooltip.Content = new List<string>();
-                    foreach (API.StatAttribute attribute in item.Stat.Attributes)
-                    {
-                        CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment) + " " + attribute.Name);
-                    }
-                };
-
                 i++;
             }
 
@@ -888,28 +941,6 @@ namespace Kenedia.Modules.BuildsManager
                 item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
                 item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
                 item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
-                item.Hovered = item.Bounds.Contains(mPos);
-
-                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
-                {
-                    if (item.UpgradeBounds.Contains(mPos) && item.Rune != null)
-                    {
-                        CustomTooltip.Visible = true;
-                        CustomTooltip.Header = item.Rune.Name;
-                        CustomTooltip.Content = item.Rune.Bonuses;
-                    }
-                    else if (item.Hovered && item.Stat != null)
-                    {
-                        CustomTooltip.Visible = true;
-                        CustomTooltip.Header = item.Stat.Name;
-                        CustomTooltip.Content = new List<string>();
-                        foreach (API.StatAttribute attribute in item.Stat.Attributes)
-                        {
-                            CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment) + " " + attribute.Name);
-                        }
-                    }
-                }
-
                 i++;
             }
 
@@ -919,29 +950,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
                 item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-
                 item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
-                item.Hovered = item.Bounds.Contains(mPos);
-
-                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
-                {
-                    if (item.UpgradeBounds.Contains(mPos) && item.Sigil != null)
-                    {
-                        CustomTooltip.Visible = true;
-                        CustomTooltip.Header = item.Sigil.Name;
-                        CustomTooltip.Content = new List<string>() { item.Sigil.Description };
-                    }
-                    else if (item.Hovered && item.Stat != null)
-                    {
-                        CustomTooltip.Visible = true;
-                        CustomTooltip.Header = item.Stat.Name;
-                        CustomTooltip.Content = new List<string>();
-                        foreach (API.StatAttribute attribute in item.Stat.Attributes)
-                        {
-                            CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment) + " " + attribute.Name);
-                        }
-                    }
-                }
 
                 if (i == 1) i++;
                 i++;
@@ -957,35 +966,188 @@ namespace Kenedia.Modules.BuildsManager
                 for (int j = 0; j < 2; j++)
                 {
                     item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
+                }
+
+                item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                
+                if (i == 0) i = i + 2;
+                i++;
+            }
+        }
+
+        private void UpdateStates()
+        {
+            Point mPos = RelativeMousePosition;
+            int i;
+            int offset = 1;
+            int size = 48;
+            int statSize = (int)(size / 1.5);
+
+            if (CustomTooltip.Visible) CustomTooltip.Visible = false;
+
+            i = 0;
+            foreach (TemplateItem item in Template.Gear.Trinkets)
+            {
+                item.Hovered = item.Bounds.Contains(mPos);
+                if (item.Hovered && item.Stat != null && (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver))
+                {
+                    CustomTooltip.Visible = true;
+
+                    if (CustomTooltip.CurrentObject != item)
+                    {
+                        CustomTooltip.CurrentObject = item;
+                        CustomTooltip.Header = item.Stat.Name;
+                        CustomTooltip.Content = new List<string>();
+                        foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                        {
+                            CustomTooltip.Content.Add("+ " + (attribute.Value + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment)) + " " + attribute.Name);
+                        }
+                    }
+                };
+
+                i++;
+            }
+
+            i = 0;
+            offset += 90;
+            foreach (Armor_TemplateItem item in Template.Gear.Armor)
+            {
+                item.Hovered = item.Bounds.Contains(mPos);
+
+                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                {
+                    if (item.UpgradeBounds.Contains(mPos) && item.Rune != null)
+                    {
+                        CustomTooltip.Visible = true;
+                        if (CustomTooltip.CurrentObject != item.Rune)
+                        {
+                            CustomTooltip.CurrentObject = item.Rune;
+                            CustomTooltip.Header = item.Rune.Name;
+                            CustomTooltip.Content = item.Rune.Bonuses;
+                        }
+                    }
+                    else if (item.Hovered && item.Stat != null)
+                    {
+                        CustomTooltip.Visible = true;
+                        if (CustomTooltip.CurrentObject != item)
+                        {
+                            CustomTooltip.CurrentObject = item;
+                            CustomTooltip.Header = item.Stat.Name;
+                            CustomTooltip.Content = new List<string>();
+                            foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                            {
+                                CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Armors[i].AttributeAdjustment) + " " + attribute.Name);
+                            }
+                        }
+                    }
+                }
+
+                i++;
+            }
+
+            i = 0;
+            offset += 150;
+            foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+            {
+                item.Hovered = item.Bounds.Contains(mPos);
+
+                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                {
+                    if (item.UpgradeBounds.Contains(mPos) && item.Sigil != null)
+                    {
+                        CustomTooltip.Visible = true;
+
+                        if (CustomTooltip.CurrentObject != item.Sigil)
+                        {
+                            CustomTooltip.CurrentObject = item.Sigil;
+                            CustomTooltip.Header = item.Sigil.Name;
+                            CustomTooltip.Content = new List<string>() { item.Sigil.Description };
+                        }
+                    }
+                    else if (item.Hovered && item.Stat != null)
+                    {
+                        CustomTooltip.Visible = true;
+
+                        if (CustomTooltip.CurrentObject != item)
+                        {
+                            CustomTooltip.CurrentObject = item;
+                            CustomTooltip.Header = item.Stat.Name;
+                            CustomTooltip.Content = new List<string>();
+
+                            bool twoHanded = false;
+                            if (item.Slot == _EquipmentSlots.Weapon1_MainHand || item.Slot == _EquipmentSlots.Weapon1_OffHand)
+                            {
+                                twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
+                            }
+                            if (item.Slot == _EquipmentSlots.Weapon2_MainHand || item.Slot == _EquipmentSlots.Weapon2_OffHand)
+                            {
+                                twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
+                            }
+
+                            var weapon = twoHanded ? Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword) : Weapons.Find(e => e.WeaponType == API.weaponType.Axe);
+                            if (weapon != null)
+                            {
+                                foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                {
+                                    CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (i == 1) i++;
+                i++;
+            }
+
+            i = 0;
+            offset += 150;
+            foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
 
                     if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
                     {
                         if (item.SigilsBounds[j].Contains(mPos) && item.Sigils.Count > j && item.Sigils[j] != null)
                         {
                             CustomTooltip.Visible = true;
-                            CustomTooltip.Header = item.Sigils[j].Name;
-                            CustomTooltip.Content = new List<string>() { item.Sigils[j].Description };
+
+                            if (CustomTooltip.CurrentObject != item.Sigils[j])
+                            {
+                                CustomTooltip.CurrentObject = item;
+                                CustomTooltip.Header = item.Sigils[j].Name;
+                                CustomTooltip.Content = new List<string>() { item.Sigils[j].Description };
+                            }
                         }
                     }
                 }
 
-                item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
                 item.Hovered = item.Bounds.Contains(mPos);
-
                 if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
                 {
                     if (item.Hovered && item.Stat != null)
                     {
                         CustomTooltip.Visible = true;
-                        CustomTooltip.Header = item.Stat.Name;
-                        CustomTooltip.Content = new List<string>();
-                        foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                        if (CustomTooltip.CurrentObject != item)
                         {
-                            CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment) + " " + attribute.Name);
+                            CustomTooltip.CurrentObject = item;
+                            CustomTooltip.Header = item.Stat.Name;
+                            CustomTooltip.Content = new List<string>();
+
+                            var weapon = Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword);
+                            if (weapon != null)
+                            {
+                                foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                {
+                                    CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                }
+                            }
                         }
                     }
                 }
-
+                
                 if (i == 0) i = i + 2;
                 i++;
             }
@@ -996,7 +1158,7 @@ namespace Kenedia.Modules.BuildsManager
             if (_Template == null) return;
             if (_Profession != Template.Build.Profession.Id) ProfessionChanged();
 
-            UpdateLayout();
+            UpdateStates();
             int i;
             Color itemColor = new Color(75, 75, 75, 255);
             Color frameColor = new Color(125, 125, 125, 255);
@@ -1189,6 +1351,46 @@ namespace Kenedia.Modules.BuildsManager
                                             default);
                 }
 
+                i++;
+            }
+
+
+            var cnt = new ContentService();
+            var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
+
+            var lastTrinket = Template.Gear.Trinkets[Template.Gear.Trinkets.Count-1];
+            var texture = BuildsManager.TextureManager.getEmblem(_Emblems.QuestionMark);
+            var mTexture = BuildsManager.TextureManager.getIcon(_Icons.Mouse);
+
+            spriteBatch.DrawOnCtrl(this,
+                                    texture,
+                                    new Rectangle(lastTrinket.Bounds.Left, LocalBounds.Bottom - (font.LineHeight * 3), (font.LineHeight * 3), (font.LineHeight * 3)),
+                                    texture.Bounds,
+                                    Color.White,
+                                    0f,
+                                    default
+                                    );
+
+            i = 0;
+            foreach (string s in Instructions)
+            {
+                spriteBatch.DrawOnCtrl(this,
+                                        mTexture,
+                                        new Rectangle(lastTrinket.Bounds.Left + (font.LineHeight * 3), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), font.LineHeight, font.LineHeight),
+                                        mTexture.Bounds,
+                                        Color.White,
+                                        0f,
+                                        default
+                                        );
+
+                spriteBatch.DrawStringOnCtrl(this,
+                                        s,
+                                        font,
+                                        new Rectangle(lastTrinket.Bounds.Left +5 + (font.LineHeight * 4), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), 100, font.LineHeight),
+                                        Color.White,
+                                        false,
+                                        HorizontalAlignment.Left
+                                        );
                 i++;
             }
         }

@@ -205,7 +205,8 @@ namespace Kenedia.Modules.BuildsManager
                 Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton),
                 Size = new Point(NameBox.Height , NameBox.Height),
                 Parent = this,
-            };
+                Location = new Point(Width - 5 - NameBox.Height, 0),
+        };
             ResetButton.MouseEntered += delegate
             {
                 ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton_Hovered);
