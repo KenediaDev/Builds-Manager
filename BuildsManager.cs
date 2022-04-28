@@ -775,9 +775,11 @@ namespace Kenedia.Modules.BuildsManager
                 new Rectangle(30, 30, Width, Height + 30),
                 new Rectangle(30, 5, Width - 5, Height - 30),
                 TextureManager,
-                GameService.Graphics.SpriteScreen);
+                GameService.Graphics.SpriteScreen,
+                new Template(Paths.builds + @"Condi Harbaebae.json")
+                );
 
-            MainWindow.Template = new Template(Paths.builds + @"Condi Harbaebae.json");
+            //MainWindow.Template = new Template(Paths.builds + @"Condi Harbaebae.json");
             MainWindow.ToggleWindow();
 
             //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEKRYqPTlwAAAAogEAAGoAAACvAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]");

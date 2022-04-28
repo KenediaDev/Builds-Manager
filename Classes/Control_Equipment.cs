@@ -144,7 +144,7 @@ namespace Kenedia.Modules.BuildsManager
     public class SelectionPopUp : Control
     {
         public class SelectionEntry
-        {
+        {            
             public object Object;
             public Texture2D Texture;
             public string Header;
@@ -186,13 +186,13 @@ namespace Kenedia.Modules.BuildsManager
         public DateTime LastClick = DateTime.Now;
 
         public SelectionPopUp(Container parent)
-        {            
+        {         
             Parent = parent;
             Visible = false;
             ZIndex = 997;
             Size = new Point(300, 500);
             Background = BuildsManager.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
-            //BackgroundColor = Color.Honeydew;
+            //BackgroundColor = Color.Red;
             FilterBox = new TextBox()
             {
                 Parent = Parent,
@@ -556,9 +556,11 @@ namespace Kenedia.Modules.BuildsManager
         public CustomTooltip CustomTooltip;
         public SelectionPopUp SelectionPopUp;
 
-        public Control_Equipment(Container parent)
+        public Control_Equipment(Container parent, Template template)
         {
             Parent = parent;
+            _Template = template;
+
             // BackgroundColor = Color.Aqua;
             _RuneTexture = BuildsManager.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
 
@@ -666,6 +668,8 @@ namespace Kenedia.Modules.BuildsManager
             {
                 UpdateLayout();
             };
+
+            UpdateLayout();
         }
 
         public EventHandler Changed;

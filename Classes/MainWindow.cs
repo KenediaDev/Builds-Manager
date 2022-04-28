@@ -113,11 +113,12 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
 
-        public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, TextureManager textureManager, Container parent) : base(background, windowRegion, contentRegion)
+        public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, TextureManager textureManager, Container parent, Template template) : base(background, windowRegion, contentRegion)
         {
 
             TextureManager = textureManager;
             Parent = parent;
+            _Template = template;
 
             _TabBarTexture = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
             _TabBar_Line = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_Line);
@@ -129,11 +130,10 @@ namespace Kenedia.Modules.BuildsManager
             Id = $"BuildsManager";
             ContentRegion = ContentRegion.Add(new Point(0, 50));
 
-            _BuildSelection_Bounds = new Rectangle(ContentBounds.X, 0 + TitleBarBounds.Height, 300, 40);
+            _BuildSelection_Bounds = new Rectangle(ContentBounds.X, 0 + TitleBarBounds.Height, 150, 40);
 
             _TabBar_Bounds = new Rectangle(_BuildSelection_Bounds.Right, 0 + TitleBarBounds.Height, ContentRegion.Width - _BuildSelection_Bounds.Right, 40);
             _TabBar_LineBounds = new Rectangle(_BuildSelection_Bounds.Right, 0 + TitleBarBounds.Height + _TabBar_Bounds.Height - 5, ContentRegion.Width - _BuildSelection_Bounds.Right, 10);
-
 
             Build_Tab = new iTab(this)
             {
@@ -145,10 +145,9 @@ namespace Kenedia.Modules.BuildsManager
             active_Tab = Build_Tab;
             Build_Tab.Resized += delegate { Build.Size = Build_Tab.Size.Add(new Point(0, -30)); };
 
-            Build = new Control_Build()
+            Build = new Control_Build(Build_Tab, Template)
             {
                 Parent = Build_Tab,
-                Template = Template,
                 Location = new Point(0, 30),
                 Size = Build_Tab.Size.Add(new Point(0, -30)),
                 Scale = 0.93,
@@ -164,11 +163,11 @@ namespace Kenedia.Modules.BuildsManager
             iTabs.Add(Gear_Tab);
             Gear_Tab.Resized += delegate { Gear.Size = Gear_Tab.Size; };
 
-            Gear = new Control_Equipment(Gear_Tab)
+            Gear = new Control_Equipment(Gear_Tab, Template)
             {
-                Template = Template,
-                Scale = 1,
+                Parent = Gear_Tab,
                 Size = Gear_Tab.Size,
+                Scale = 1,
             };
             Gear.Resized += delegate
             {
