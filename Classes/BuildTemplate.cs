@@ -1,4 +1,5 @@
-﻿using Gw2Sharp.ChatLinks;
+﻿using Blish_HUD.Controls;
+using Gw2Sharp.ChatLinks;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -193,6 +194,8 @@ namespace Kenedia.Modules.BuildsManager
                     }
 
                     Build = new BuildTemplate(Template_json.BuildCode);
+
+                    Build.Changed += OnChanged;
                 }
             }
         }
@@ -283,12 +286,31 @@ namespace Kenedia.Modules.BuildsManager
 
             File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
         }
+
+        public EventHandler Changed;
+        private void OnChanged(object sender, EventArgs e)
+        {
+            ScreenNotification.ShowNotification("TEMPLATE ADJUSTED!", ScreenNotification.NotificationType.Error);
+            this.Changed?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public class SpecLine
     {
-        public API.Specialization Specialization;
+        public int Index;
+        private API.Specialization _Specialization;
+        public API.Specialization Specialization
+        {
+            get => _Specialization;
+            set
+            {
+                _Specialization = value;
+                Traits = new List<API.Trait>();
+                this.Changed?.Invoke(this, EventArgs.Empty);
+            }
+        }
         public List<API.Trait> Traits = new List<API.Trait>();
+        public EventHandler Changed;
     }
 
     public class BuildTemplate
@@ -310,9 +332,9 @@ namespace Kenedia.Modules.BuildsManager
 
         public List<SpecLine> SpecLines = new List<SpecLine>
         {
-            new SpecLine(),
-            new SpecLine(),
-            new SpecLine()
+            new SpecLine(){ Index = 0},
+            new SpecLine(){ Index = 1},
+            new SpecLine(){ Index = 2}
         };
         public List<API.Skill> Skills_Terrestial = new List<API.Skill>
         {
@@ -403,7 +425,6 @@ namespace Kenedia.Modules.BuildsManager
                 Profession = BuildsManager.Data.Professions.Find(e => e.Id == build.Profession.ToString());
                 if (Profession != null)
                 {
-                    BuildsManager.Logger.Debug("Template has Profession: {0}", Profession.Name);
                     if (build.Specialization1Id != 0)
                     {
                         SpecLines[0].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization1Id);
@@ -503,8 +524,19 @@ namespace Kenedia.Modules.BuildsManager
                         if (skill != null) Skills_Aquatic[skillindex] = skill;
                         skillindex++;
                     }
+
+                    foreach(SpecLine specLine in SpecLines)
+                    {
+                        specLine.Changed += OnChanged;
+                    }
                 }
             }
+        }
+
+        public EventHandler Changed;
+        private void OnChanged(object sender, EventArgs e)
+        {
+            this.Changed?.Invoke(this, EventArgs.Empty);
         }
     }
 }

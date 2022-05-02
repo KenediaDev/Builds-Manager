@@ -109,6 +109,12 @@ namespace Kenedia.Modules.BuildsManager
                     NameLabel.Text = value.Name;
                     if (Gear != null) Gear.Template = value;
                     if (Build != null) Build.Template = value;
+
+                    _Template.Changed += delegate
+                    {
+                        BuildsManager.Logger.Debug("Parsed Build Code: " + Template.Build.ParseBuildCode());
+                        TemplateBox.Text = Template.Build.ParseBuildCode();
+                    };
                 }
             }
         }
@@ -119,6 +125,12 @@ namespace Kenedia.Modules.BuildsManager
             TextureManager = textureManager;
             Parent = parent;
             _Template = template;
+
+            _Template.Changed += delegate
+            {
+                BuildsManager.Logger.Debug("Parsed Build Code: " + Template.Build.ParseBuildCode());
+                TemplateBox.Text = Template.Build.ParseBuildCode();
+            };
 
             _TabBarTexture = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
             _TabBar_Line = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_Line);

@@ -23,9 +23,39 @@ namespace Kenedia.Modules.BuildsManager
     {
         private Texture2D Background;
         private Texture2D Icon;
-        public object CurrentObject;
-        public string Header;
-        public List<string> Content;
+        private int _Height;
+        private object _CurrentObject;
+        public object CurrentObject 
+        {
+            get => _CurrentObject;
+            set {
+                _CurrentObject = value;
+                _Height = -1;
+            }
+        }
+        private string _Header;
+        public string Header
+        {
+            get => _Header;
+            set
+            {
+                _Header = value;
+                _Height = -1;
+            }
+        }
+
+        public Color HeaderColor = Color.Orange;
+        public Color ContentColor = Color.Honeydew;
+        private List<string> _Content;
+        public List<string> Content
+        {
+            get => _Content;
+            set
+            {
+                _Content = value;
+                _Height = -1;
+            }
+        }
         public CustomTooltip(Container parent)
         {
             Parent = GameService.Graphics.SpriteScreen;
@@ -56,7 +86,15 @@ namespace Kenedia.Modules.BuildsManager
             List<string> newStrings = new List<string>();
             foreach (string s in Content)
             {
-                var ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
+                var ss = s;
+
+                if (s.Contains("<c=@reminder>"))
+                {
+                    if(CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
+                    ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
+                }
+
+                ss = Regex.Replace(ss, "<c=@abilitytype>", "");
                 ss = Regex.Replace(ss, "</c>", "");
                 ss = Regex.Replace(ss, "<br>", "");
                 newStrings.Add(ss);
@@ -71,14 +109,15 @@ namespace Kenedia.Modules.BuildsManager
 
             var firstWidth = font.MeasureString(Content[0]).Width;
 
-            Height = height + (Content.Count == 1 ? firstWidth > (width - 20) ? font.LineHeight : 20 : Content.Count == 6 ? 20 : 20);
+            if(_Height == -1) _Height = height + (Content.Count == 1 ? firstWidth > (width - 20) ? font.LineHeight : 20 : Content.Count == 6 ? 20 : 20);
+            Height = _Height;
             Width = width;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             if (Header == null || Content == null) return;
-            UpdateLayout();
+            if (_Height == -1) UpdateLayout();
 
             var cnt = new ContentService();
             var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
@@ -124,7 +163,7 @@ namespace Kenedia.Modules.BuildsManager
                                    Header,
                                    headerFont,
                                    new Rectangle(10, 10, 0, (int)rect.Height),
-                                   Color.Orange,
+                                   HeaderColor,
                                    false,
                                    HorizontalAlignment.Left
                                    );
@@ -133,7 +172,7 @@ namespace Kenedia.Modules.BuildsManager
                                    string.Join(Environment.NewLine, Content),
                                    font,
                                    new Rectangle(10, (int)rect.Height + 25, Width - 10, Height),
-                                   Color.Honeydew,
+                                   ContentColor,
                                    true,
                                    HorizontalAlignment.Left,
                                    VerticalAlignment.Top
