@@ -293,6 +293,10 @@ namespace Kenedia.Modules.BuildsManager
             ScreenNotification.ShowNotification("TEMPLATE ADJUSTED!", ScreenNotification.NotificationType.Error);
             this.Changed?.Invoke(this, EventArgs.Empty);
         }
+        public void SetChanged()
+        {
+            OnChanged(null, EventArgs.Empty);
+        }
     }
 
     public class SpecLine
@@ -311,6 +315,7 @@ namespace Kenedia.Modules.BuildsManager
         }
         public List<API.Trait> Traits = new List<API.Trait>();
         public EventHandler Changed;
+        public Specialization_Control Control;
     }
 
     public class BuildTemplate

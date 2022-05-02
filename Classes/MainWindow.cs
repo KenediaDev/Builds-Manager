@@ -112,7 +112,6 @@ namespace Kenedia.Modules.BuildsManager
 
                     _Template.Changed += delegate
                     {
-                        BuildsManager.Logger.Debug("Parsed Build Code: " + Template.Build.ParseBuildCode());
                         TemplateBox.Text = Template.Build.ParseBuildCode();
                     };
                 }
@@ -128,7 +127,6 @@ namespace Kenedia.Modules.BuildsManager
 
             _Template.Changed += delegate
             {
-                BuildsManager.Logger.Debug("Parsed Build Code: " + Template.Build.ParseBuildCode());
                 TemplateBox.Text = Template.Build.ParseBuildCode();
             };
 
@@ -377,6 +375,8 @@ namespace Kenedia.Modules.BuildsManager
             {
                 if (TemplateBox.Text != null && TemplateBox.Text != "") System.Windows.Forms.Clipboard.SetText(TemplateBox.Text);
             };
+
+            TemplateBox.Text = Template.Build.ParseBuildCode();
         }
 
         private void UpdateTabStates()
