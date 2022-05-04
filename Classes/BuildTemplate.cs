@@ -1,4 +1,5 @@
-﻿using Blish_HUD.Controls;
+﻿using Blish_HUD;
+using Blish_HUD.Controls;
 using Gw2Sharp.ChatLinks;
 using Newtonsoft.Json;
 using System;
@@ -26,15 +27,41 @@ namespace Kenedia.Modules.BuildsManager
     public class AquaticWeapon_TemplateItem_json : TemplateItem_json
     {
         public string _WeaponType = "Unkown";
-        public List<int> _Sigils;
+        public List<int> _Sigils = new List<int>();
     }
 
     public class GearTemplate_json
     {
-        public List<TemplateItem_json> Trinkets = new List<TemplateItem_json>();
-        public List<Armor_TemplateItem_json> Armor = new List<Armor_TemplateItem_json>();
-        public List<Weapon_TemplateItem_json> Weapons = new List<Weapon_TemplateItem_json>();
-        public List<AquaticWeapon_TemplateItem_json> AquaticWeapons = new List<AquaticWeapon_TemplateItem_json>();
+        public List<TemplateItem_json> Trinkets = new List<TemplateItem_json>()
+        {
+            new TemplateItem_json(){ _Slot = "Back"},
+            new TemplateItem_json(){ _Slot = "Amulet"},
+            new TemplateItem_json(){ _Slot = "Ring1"},
+            new TemplateItem_json(){ _Slot = "Ring2"},
+            new TemplateItem_json(){ _Slot = "Accessoire1"},
+            new TemplateItem_json(){ _Slot = "Accessoire2"},
+        };
+        public List<Armor_TemplateItem_json> Armor = new List<Armor_TemplateItem_json>()
+        {
+            new Armor_TemplateItem_json(){ _Slot = "Helmet"},
+            new Armor_TemplateItem_json(){ _Slot = "Shoulders"},
+            new Armor_TemplateItem_json(){ _Slot = "Chest"},
+            new Armor_TemplateItem_json(){ _Slot = "Gloves"},
+            new Armor_TemplateItem_json(){ _Slot = "Leggings"},
+            new Armor_TemplateItem_json(){ _Slot = "Boots"},
+        };
+        public List<Weapon_TemplateItem_json> Weapons = new List<Weapon_TemplateItem_json>()
+        {
+            new Weapon_TemplateItem_json(){_Slot = "Weapon1_MainHand"},
+            new Weapon_TemplateItem_json(){_Slot = "Weapon1_OffHand"},
+            new Weapon_TemplateItem_json(){_Slot = "Weapon2_MainHand"},
+            new Weapon_TemplateItem_json(){_Slot = "Weapon2_OffHand"},
+        };
+        public List<AquaticWeapon_TemplateItem_json> AquaticWeapons = new List<AquaticWeapon_TemplateItem_json>() 
+        {
+            new AquaticWeapon_TemplateItem_json() {_Slot = "AquaticWeapon1"},
+            new AquaticWeapon_TemplateItem_json() {_Slot = "AquaticWeapon2"},
+        };
     }
     public class Template_json
     {
@@ -43,9 +70,9 @@ namespace Kenedia.Modules.BuildsManager
         public string Name;
         public GearTemplate_json Gear;
         public string BuildCode;
-        public Template_json(string path)
+        public Template_json(string path = default)
         {
-            if (File.Exists(path))
+            if (path != default && File.Exists(path))
             {
                 var template = JsonConvert.DeserializeObject<Template_json>(File.ReadAllText(path));
                 if (template != null)
@@ -55,12 +82,17 @@ namespace Kenedia.Modules.BuildsManager
                     BuildCode = template.BuildCode;
                 }
             }
+            else
+            {
+                Gear = new GearTemplate_json();
+                BuildCode = "[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]";
+            }
         }
     }
 
     public class TemplateItem : TemplateItem_json
     {
-        public _EquipmentSlots Slot;
+        public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public API.Stat Stat;
 
         public Rectangle Bounds;
@@ -80,7 +112,7 @@ namespace Kenedia.Modules.BuildsManager
     public class AquaticWeapon_TemplateItem : TemplateItem
     {
         public API.weaponType WeaponType = API.weaponType.Unkown;
-        public List<API.SigilItem> Sigils;
+        public List<API.SigilItem> Sigils = new List<API.SigilItem>();
         public List<Rectangle> SigilsBounds = new List<Rectangle>()
         {
             Rectangle.Empty,
@@ -90,12 +122,36 @@ namespace Kenedia.Modules.BuildsManager
 
     public class GearTemplate
     {
-        public List<TemplateItem> Trinkets = new List<TemplateItem>(new TemplateItem[6]);
-        public List<Armor_TemplateItem> Armor = new List<Armor_TemplateItem>(new Armor_TemplateItem[6]);
-        public List<Weapon_TemplateItem> Weapons = new List<Weapon_TemplateItem>(new Weapon_TemplateItem[4]);
-        public List<AquaticWeapon_TemplateItem> AquaticWeapons = new List<AquaticWeapon_TemplateItem>(new AquaticWeapon_TemplateItem[2]);
+        public List<TemplateItem> Trinkets = new List<TemplateItem>()
+        {
+            new TemplateItem(){ _Slot = "Back"},
+            new TemplateItem(){ _Slot = "Amulet"},
+            new TemplateItem(){ _Slot = "Ring1"},
+            new TemplateItem(){ _Slot = "Ring2"},
+            new TemplateItem(){ _Slot = "Accessoire1"},
+            new TemplateItem(){ _Slot = "Accessoire2"},
+        };
+        public List<Armor_TemplateItem> Armor = new List<Armor_TemplateItem>()
+        {
+            new Armor_TemplateItem(){ _Slot = "Helmet"},
+            new Armor_TemplateItem(){ _Slot = "Shoulders"},
+            new Armor_TemplateItem(){ _Slot = "Chest"},
+            new Armor_TemplateItem(){ _Slot = "Gloves"},
+            new Armor_TemplateItem(){ _Slot = "Leggings"},
+            new Armor_TemplateItem(){ _Slot = "Boots"},
+        };
+        public List<Weapon_TemplateItem> Weapons = new List<Weapon_TemplateItem>() {
+        new Weapon_TemplateItem(){ Slot = _EquipmentSlots.Weapon1_MainHand},
+        new Weapon_TemplateItem(){ Slot = _EquipmentSlots.Weapon1_OffHand},
+        new Weapon_TemplateItem(){ Slot = _EquipmentSlots.Weapon2_MainHand},
+        new Weapon_TemplateItem(){ Slot = _EquipmentSlots.Weapon2_OffHand},
+        };
+        public List<AquaticWeapon_TemplateItem> AquaticWeapons = new List<AquaticWeapon_TemplateItem>()
+        {
+            new AquaticWeapon_TemplateItem(){ Slot = _EquipmentSlots.AquaticWeapon1},
+            new AquaticWeapon_TemplateItem(){ Slot = _EquipmentSlots.AquaticWeapon2},
+        };
     }
-
 
     public class Template
     {
@@ -140,9 +196,9 @@ namespace Kenedia.Modules.BuildsManager
         public GearTemplate Gear = new GearTemplate();
         public BuildTemplate Build;
 
-        public Template(string path)
+        public Template(string path = default)
         {
-            if (File.Exists(path))
+            if (path != default && File.Exists(path))
             {
                 var template = JsonConvert.DeserializeObject<Template_json>(File.ReadAllText(path));
                 if (template != null)
@@ -150,7 +206,7 @@ namespace Kenedia.Modules.BuildsManager
                     Template_json = template;
                     Name = template.Name;
                     Profession = BuildsManager.Data.Professions.Find(e => e.Id == template.Profession);
-                    Specialization = Profession.Specializations.Find(e => e.Id == template.Specialization);
+                    Specialization = Profession != null ? Profession.Specializations.Find(e => e.Id == template.Specialization) : null;
 
                     Path = path.Replace(Name + ".json", "");
 
@@ -187,9 +243,12 @@ namespace Kenedia.Modules.BuildsManager
                         Gear.AquaticWeapons[index].WeaponType = (API.weaponType)Enum.Parse(typeof(API.weaponType), jItem._WeaponType);
                         Gear.AquaticWeapons[index].Sigils = new List<API.SigilItem>();
 
-                        foreach (int id in jItem._Sigils)
+                        if (jItem._Sigils != null)
                         {
-                            Gear.AquaticWeapons[index].Sigils.Add(BuildsManager.Data.Sigils.Find(e => e.Id == id));
+                            foreach (int id in jItem._Sigils)
+                            {
+                                Gear.AquaticWeapons[index].Sigils.Add(BuildsManager.Data.Sigils.Find(e => e.Id == id));
+                            }
                         }
                     }
 
@@ -198,12 +257,32 @@ namespace Kenedia.Modules.BuildsManager
                     Build.Changed += OnChanged;
                 }
             }
+            else
+            {
+                Gear = new GearTemplate();
+                Build = new BuildTemplate();
+                Name = "New Build Template";
+                Template_json = new Template_json();
+
+                var player = GameService.Gw2Mumble.PlayerCharacter;
+
+                if (player != null)
+                {
+                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
+                    Path = BuildsManager.Paths.builds;
+                }
+
+                SetChanged();
+            }
         }
 
         public void Reset()
         {
             Name = "My Build Template";
-            Template_json.Name = Name;
+            Template_json = new Template_json()
+            {
+                Name = Name
+            };
             Specialization = null;
 
             foreach (TemplateItem item in Gear.Trinkets)
@@ -228,8 +307,20 @@ namespace Kenedia.Modules.BuildsManager
             {
                 item.WeaponType = API.weaponType.Unkown;
                 item.Stat = null;
-                item.Sigils = new List<API.SigilItem>() { null, null};
+                item.Sigils = new List<API.SigilItem>() { null, null };
             }
+
+            Build = new BuildTemplate();
+
+            var player = GameService.Gw2Mumble.PlayerCharacter;
+
+            if (player != null)
+            {
+                Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
+                Path = BuildsManager.Paths.builds;
+            }
+
+            SetChanged();
         }
 
         public void Save()
@@ -243,46 +334,37 @@ namespace Kenedia.Modules.BuildsManager
 
             Template_json.Gear = new GearTemplate_json();
 
-            foreach (TemplateItem item in Gear.Trinkets)
+            for (int i = 0; i < Gear.Trinkets.Count; i++)
             {
-                Template_json.Gear.Trinkets.Add(new TemplateItem_json()
-                {
-                    _Slot = item.Slot.ToString(),
-                    _Stat = item.Stat != null ? item.Stat.Id : 0,
-                });
+                var item = Gear.Trinkets[i];
+                Template_json.Gear.Trinkets[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
             }
 
-            foreach (Armor_TemplateItem item in Gear.Armor)
+            for (int i = 0; i < Gear.Armor.Count; i++)
             {
-                Template_json.Gear.Armor.Add(new Armor_TemplateItem_json()
-                {
-                    _Slot = item.Slot.ToString(),
-                    _Stat = item.Stat != null ? item.Stat.Id : 0,
-                    _Rune = item.Rune != null ? item.Rune.Id : 0,
-                });
+                var item = Gear.Armor[i];
+                Template_json.Gear.Armor[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                Template_json.Gear.Armor[i]._Rune = item.Rune != null ? item.Rune.Id : 0;
             }
 
-            foreach (Weapon_TemplateItem item in Gear.Weapons)
+            for (int i = 0; i < Gear.Weapons.Count; i++)
             {
-                Template_json.Gear.Weapons.Add(new Weapon_TemplateItem_json()
-                {
-                    _WeaponType = item.WeaponType.ToString(),
-                    _Slot = item.Slot.ToString(),
-                    _Stat = item.Stat != null ? item.Stat.Id : 0,
-                    _Sigil = item.Sigil != null ? item.Sigil.Id : 0,
-                });
+                var item = Gear.Weapons[i];
+                Template_json.Gear.Weapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                Template_json.Gear.Weapons[i]._Sigil = item.Sigil != null ? item.Sigil.Id : 0;
+                Template_json.Gear.Weapons[i]._WeaponType = item.WeaponType.ToString();
             }
 
-            foreach (AquaticWeapon_TemplateItem item in Gear.AquaticWeapons)
+            for (int i = 0; i < Gear.AquaticWeapons.Count; i++)
             {
-                Template_json.Gear.AquaticWeapons.Add(new AquaticWeapon_TemplateItem_json()
-                {
-                    _WeaponType = item.WeaponType.ToString(),
-                    _Slot = item.Slot.ToString(),
-                    _Stat = item.Stat != null ? item.Stat.Id : 0,
-                    _Sigils = item.Sigils.Select(e => e != null ? e.Id : 0).ToList(),
-                });
+                var item = Gear.AquaticWeapons[i];
+
+                Template_json.Gear.AquaticWeapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                Template_json.Gear.AquaticWeapons[i]._Sigils = item.Sigils != null ? item.Sigils.Select(e => e != null ? e.Id : 0).ToList() : new List<int>();
+                Template_json.Gear.AquaticWeapons[i]._WeaponType = item.WeaponType.ToString();
             }
+
+            Template_json.BuildCode = Build.ParseBuildCode();
 
             File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
         }
@@ -290,8 +372,8 @@ namespace Kenedia.Modules.BuildsManager
         public EventHandler Changed;
         private void OnChanged(object sender, EventArgs e)
         {
-            ScreenNotification.ShowNotification("TEMPLATE ADJUSTED!", ScreenNotification.NotificationType.Error);
             this.Changed?.Invoke(this, EventArgs.Empty);
+            Save();
         }
         public void SetChanged()
         {
@@ -418,122 +500,134 @@ namespace Kenedia.Modules.BuildsManager
             return code;
         }
 
-        public BuildTemplate(string code)
+        public BuildTemplate(string code = default)
         {
-            BuildChatLink build = new BuildChatLink();
-            IGw2ChatLink chatlink = null;
-            if (BuildChatLink.TryParse(code, out chatlink))
+            if (code != default)
             {
-                TemplateCode = code;
-                build.Parse(chatlink.ToArray());
-
-                Profession = BuildsManager.Data.Professions.Find(e => e.Id == build.Profession.ToString());
-                if (Profession != null)
+                BuildChatLink build = new BuildChatLink();
+                IGw2ChatLink chatlink = null;
+                if (BuildChatLink.TryParse(code, out chatlink))
                 {
-                    if (build.Specialization1Id != 0)
+                    TemplateCode = code;
+                    build.Parse(chatlink.ToArray());
+
+                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == build.Profession.ToString());
+                    if (Profession != null)
                     {
-                        SpecLines[0].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization1Id);
-
-                        if (SpecLines[0].Specialization != null)
+                        if (build.Specialization1Id != 0)
                         {
-                            SpecLines[0].Traits = new List<API.Trait>();
+                            SpecLines[0].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization1Id);
 
-                            var spec = SpecLines[0].Specialization;
-                            var traits = new List<byte>(new byte[] { build.Specialization1Trait1Index, build.Specialization1Trait2Index, build.Specialization1Trait3Index });
-                            var selectedTraits = SpecLines[0].Traits;
-                            int traitIndex = 0;
-
-                            foreach (byte bit in traits)
+                            if (SpecLines[0].Specialization != null)
                             {
-                                if (bit > 0)
+                                SpecLines[0].Traits = new List<API.Trait>();
+
+                                var spec = SpecLines[0].Specialization;
+                                var traits = new List<byte>(new byte[] { build.Specialization1Trait1Index, build.Specialization1Trait2Index, build.Specialization1Trait3Index });
+                                var selectedTraits = SpecLines[0].Traits;
+                                int traitIndex = 0;
+
+                                foreach (byte bit in traits)
                                 {
-                                    selectedTraits.Add(spec.MajorTraits[(traitIndex * 3) + bit - 1]);
+                                    if (bit > 0)
+                                    {
+                                        selectedTraits.Add(spec.MajorTraits[(traitIndex * 3) + bit - 1]);
+                                    }
+                                    traitIndex++;
                                 }
-                                traitIndex++;
                             }
                         }
-                    }
-                    if (build.Specialization2Id != 0)
-                    {
-                        SpecLines[1].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization2Id);
-
-                        if (SpecLines[1].Specialization != null)
+                        if (build.Specialization2Id != 0)
                         {
-                            SpecLines[1].Traits = new List<API.Trait>();
+                            SpecLines[1].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization2Id);
 
-                            var spec = SpecLines[1].Specialization;
-                            var traits = new List<byte>(new byte[] { build.Specialization2Trait1Index, build.Specialization2Trait2Index, build.Specialization2Trait3Index });
-                            var selectedTraits = SpecLines[1].Traits;
-                            int traitIndex = 0;
-
-                            foreach (byte bit in traits)
+                            if (SpecLines[1].Specialization != null)
                             {
-                                if (bit > 0)
+                                SpecLines[1].Traits = new List<API.Trait>();
+
+                                var spec = SpecLines[1].Specialization;
+                                var traits = new List<byte>(new byte[] { build.Specialization2Trait1Index, build.Specialization2Trait2Index, build.Specialization2Trait3Index });
+                                var selectedTraits = SpecLines[1].Traits;
+                                int traitIndex = 0;
+
+                                foreach (byte bit in traits)
                                 {
-                                    selectedTraits.Add(spec.MajorTraits[(traitIndex * 3) + bit - 1]);
+                                    if (bit > 0)
+                                    {
+                                        selectedTraits.Add(spec.MajorTraits[(traitIndex * 3) + bit - 1]);
+                                    }
+                                    traitIndex++;
                                 }
-                                traitIndex++;
                             }
                         }
-                    }
-                    if (build.Specialization3Id != 0)
-                    {
-                        SpecLines[2].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization3Id);
-
-                        if (SpecLines[2].Specialization != null)
+                        if (build.Specialization3Id != 0)
                         {
-                            SpecLines[2].Traits = new List<API.Trait>();
+                            SpecLines[2].Specialization = Profession.Specializations.Find(e => e.Id == (int)build.Specialization3Id);
 
-                            var spec = SpecLines[2].Specialization;
-                            var traits = new List<byte>(new byte[] { build.Specialization3Trait1Index, build.Specialization3Trait2Index, build.Specialization3Trait3Index });
-                            var selectedTraits = SpecLines[2].Traits;
-                            int traitIndex = 0;
-
-                            foreach (byte bit in traits)
+                            if (SpecLines[2].Specialization != null)
                             {
-                                if (bit > 0)
+                                SpecLines[2].Traits = new List<API.Trait>();
+
+                                var spec = SpecLines[2].Specialization;
+                                var traits = new List<byte>(new byte[] { build.Specialization3Trait1Index, build.Specialization3Trait2Index, build.Specialization3Trait3Index });
+                                var selectedTraits = SpecLines[2].Traits;
+                                int traitIndex = 0;
+
+                                foreach (byte bit in traits)
                                 {
-                                    selectedTraits.Add(spec.MajorTraits[(traitIndex * 3) + bit - 1]);
+                                    if (bit > 0)
+                                    {
+                                        selectedTraits.Add(spec.MajorTraits[(traitIndex * 3) + bit - 1]);
+                                    }
+                                    traitIndex++;
                                 }
-                                traitIndex++;
                             }
                         }
-                    }
 
-                    List<ushort> Terrestrial_PaletteIds = new List<ushort>{
+                        List<ushort> Terrestrial_PaletteIds = new List<ushort>{
                         build.TerrestrialHealingSkillPaletteId,
                         build.TerrestrialUtility1SkillPaletteId,
                         build.TerrestrialUtility2SkillPaletteId,
                         build.TerrestrialUtility3SkillPaletteId,
                         build.TerrestrialEliteSkillPaletteId,
                     };
-                    int skillindex = 0;
-                    foreach (ushort pid in Terrestrial_PaletteIds)
-                    {
-                        API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
-                        if (skill != null) Skills_Terrestial[skillindex] = skill;
-                        skillindex++;
-                    }
+                        int skillindex = 0;
+                        foreach (ushort pid in Terrestrial_PaletteIds)
+                        {
+                            API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
+                            if (skill != null) Skills_Terrestial[skillindex] = skill;
+                            skillindex++;
+                        }
 
-                    List<ushort> Aqua_PaletteIds = new List<ushort>{
+                        List<ushort> Aqua_PaletteIds = new List<ushort>{
                         build.AquaticHealingSkillPaletteId,
                         build.AquaticUtility1SkillPaletteId,
                         build.AquaticUtility2SkillPaletteId,
                         build.AquaticUtility3SkillPaletteId,
                         build.AquaticEliteSkillPaletteId,
                     };
-                    skillindex = 0;
-                    foreach (ushort pid in Aqua_PaletteIds)
-                    {
-                        API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
-                        if (skill != null) Skills_Aquatic[skillindex] = skill;
-                        skillindex++;
-                    }
+                        skillindex = 0;
+                        foreach (ushort pid in Aqua_PaletteIds)
+                        {
+                            API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
+                            if (skill != null) Skills_Aquatic[skillindex] = skill;
+                            skillindex++;
+                        }
 
-                    foreach(SpecLine specLine in SpecLines)
-                    {
-                        specLine.Changed += OnChanged;
+                        foreach (SpecLine specLine in SpecLines)
+                        {
+                            specLine.Changed += OnChanged;
+                        }
                     }
+                }
+            }
+            else
+            {
+                var player = GameService.Gw2Mumble.PlayerCharacter;
+
+                if (player != null)
+                {
+                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
                 }
             }
         }

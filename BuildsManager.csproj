@@ -68,6 +68,7 @@
     <Compile Include="Classes\Control_Build.cs" />
     <Compile Include="Classes\BuildTemplate.cs" />
     <Compile Include="Classes\ClassExtensions.cs" />
+    <Compile Include="Classes\Control_TemplateSelection.cs" />
     <Compile Include="Classes\Data.cs" />
     <Compile Include="Classes\Control_Equipment.cs" />
     <Compile Include="Classes\GW2API.cs" />

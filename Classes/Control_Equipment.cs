@@ -25,10 +25,11 @@ namespace Kenedia.Modules.BuildsManager
         private Texture2D Icon;
         private int _Height;
         private object _CurrentObject;
-        public object CurrentObject 
+        public object CurrentObject
         {
             get => _CurrentObject;
-            set {
+            set
+            {
                 _CurrentObject = value;
                 _Height = -1;
             }
@@ -90,7 +91,7 @@ namespace Kenedia.Modules.BuildsManager
 
                 if (s.Contains("<c=@reminder>"))
                 {
-                    if(CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
+                    if (CurrentObject != null && CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
                     ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
                 }
 
@@ -109,7 +110,7 @@ namespace Kenedia.Modules.BuildsManager
 
             var firstWidth = font.MeasureString(Content[0]).Width;
 
-            if(_Height == -1) _Height = height + (Content.Count == 1 ? firstWidth > (width - 20) ? font.LineHeight : 20 : Content.Count == 6 ? 20 : 20);
+            if (_Height == -1) _Height = height + (Content.Count == 1 ? firstWidth > (width - 20) ? font.LineHeight : 20 : Content.Count == 6 ? 20 : 20);
             Height = _Height;
             Width = width;
         }
@@ -183,7 +184,7 @@ namespace Kenedia.Modules.BuildsManager
     public class SelectionPopUp : Control
     {
         public class SelectionEntry
-        {            
+        {
             public object Object;
             public Texture2D Texture;
             public string Header;
@@ -213,7 +214,7 @@ namespace Kenedia.Modules.BuildsManager
         public List<SelectionEntry> FilteredList = new List<SelectionEntry>();
         public object SelectionTarget;
         public Template Template;
-        public _EquipmentSlots Slot;
+        public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public int UpgradeIndex = 0;
 
         private ContentService ContentService;
@@ -225,7 +226,7 @@ namespace Kenedia.Modules.BuildsManager
         public DateTime LastClick = DateTime.Now;
 
         public SelectionPopUp(Container parent)
-        {         
+        {
             Parent = parent;
             Visible = false;
             ZIndex = 997;
@@ -277,7 +278,7 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (List == null || List.Count == 0 || !Visible) return;
 
-            foreach (SelectionEntry entry in List)
+            foreach (SelectionEntry entry in FilteredList)
             {
                 if (entry.Hovered)
                 {
@@ -368,13 +369,14 @@ namespace Kenedia.Modules.BuildsManager
             int size = 42;
 
             FilteredList = new List<SelectionEntry>();
-            if((SelectionType == selectionType.Weapons || SelectionType == selectionType.AquaticWeapons) && Template != null && Template.Build != null && Template.Build.Profession != null)
+            if ((SelectionType == selectionType.Weapons || SelectionType == selectionType.AquaticWeapons) && Template != null && Template.Build != null && Template.Build.Profession != null)
             {
+
                 List<string> weapons = new List<string>();
 
                 foreach (API.ProfessionWeapon weapon in Template.Build.Profession.Weapons)
                 {
-                    if (weapon.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization.Id == weapon.Specialization) != null)
+                    if (weapon.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == weapon.Specialization) != null)
                     {
                         switch (Slot)
                         {
@@ -432,7 +434,7 @@ namespace Kenedia.Modules.BuildsManager
                         }
                     }
 
-                    if(!FilteredList.Contains(entry) && (Tags.Count == Tags.Where(e => e.match == true).ToList().Count)) FilteredList.Add(entry);
+                    if (!FilteredList.Contains(entry) && (Tags.Count == Tags.Where(e => e.match == true).ToList().Count)) FilteredList.Add(entry);
                 }
             }
             else
@@ -467,7 +469,7 @@ namespace Kenedia.Modules.BuildsManager
                 i++;
             }
 
-            Height = FilterBox.Height + 5 + Math.Min(10, Math.Max(FilteredList.Count, 1))* (size + 5);
+            Height = FilterBox.Height + 5 + Math.Min(10, Math.Max(FilteredList.Count, 1)) * (size + 5);
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
@@ -485,7 +487,7 @@ namespace Kenedia.Modules.BuildsManager
 
             spriteBatch.DrawOnCtrl(this,
                                     Background,
-                                    bounds.Add(-2,0,0,0),
+                                    bounds.Add(-2, 0, 0, 0),
                                     bounds,
                                     Color.White,
                                     0f,
@@ -497,13 +499,13 @@ namespace Kenedia.Modules.BuildsManager
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
             //Bottom
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom -2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom -1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
             //Left
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
-            
+
             //Right
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
@@ -651,7 +653,7 @@ namespace Kenedia.Modules.BuildsManager
                 SelectionPopUp.Dispose();
             };
 
-            foreach(API.RuneItem item in BuildsManager.Data.Runes)
+            foreach (API.RuneItem item in BuildsManager.Data.Runes)
             {
                 Runes_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -662,7 +664,7 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            foreach(API.SigilItem item in BuildsManager.Data.Sigils)
+            foreach (API.SigilItem item in BuildsManager.Data.Sigils)
             {
                 Sigils_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -673,18 +675,18 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            foreach(API.WeaponItem item in Weapons)
+            foreach (API.WeaponItem item in Weapons)
             {
                 Weapons_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
                     Texture = item.Icon.Texture,
                     Header = item.WeaponType.ToString(),
-                    Content = new List<string>() { ""},
+                    Content = new List<string>() { "" },
                 });
             }
 
-            foreach(API.Stat item in BuildsManager.Data.Stats)
+            foreach (API.Stat item in BuildsManager.Data.Stats)
             {
                 Stats_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -702,12 +704,13 @@ namespace Kenedia.Modules.BuildsManager
                 "Alt + Right Click to select Weapon",
                 "Right Click to copy Stat/Upgrade Name",
             };
-            
+
             Shown += delegate
             {
                 UpdateLayout();
             };
 
+            ProfessionChanged();
             UpdateLayout();
         }
 
@@ -734,11 +737,11 @@ namespace Kenedia.Modules.BuildsManager
                     if (item.Hovered)
                     {
                         bool canSelect = true;
-                        if(item.Slot == _EquipmentSlots.Weapon1_OffHand)
+                        if (item.Slot == _EquipmentSlots.Weapon1_OffHand)
                         {
-                            canSelect = Template.Gear.Weapons[(int) Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int) Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int) API.weaponHand.TwoHand;
+                            canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
                         }
-                        if(item.Slot == _EquipmentSlots.Weapon2_OffHand)
+                        if (item.Slot == _EquipmentSlots.Weapon2_OffHand)
                         {
                             canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
                         }
@@ -770,7 +773,7 @@ namespace Kenedia.Modules.BuildsManager
             }
             else
             {
-                var text = ""; 
+                var text = "";
                 foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
                 {
                     if (item.Hovered && item.Stat != null)
@@ -792,12 +795,15 @@ namespace Kenedia.Modules.BuildsManager
                         ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
                         text = item.Stat.Name;
                     }
-                    for (int i = 0; i < item.Sigils.Count; i++)
+                    if (item.Sigils != null)
                     {
-                        if (item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition))
+                        for (int i = 0; i < item.Sigils.Count; i++)
                         {
-                            ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigils[i].Name);
-                            text = item.Sigils[i].Name;
+                            if (item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition))
+                            {
+                                ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigils[i].Name);
+                                text = item.Sigils[i].Name;
+                            }
                         }
                     }
                 }
@@ -825,18 +831,20 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                if(BuildsManager.ModuleInstance.PasteOnCopy.Value) Paste(text);
+                if (BuildsManager.ModuleInstance.PasteOnCopy.Value) Paste(text);
             }
         }
         public async void Paste(string text)
         {
             byte[] prevClipboardContent = await ClipboardUtil.WindowsClipboardService.GetAsUnicodeBytesAsync();
             await ClipboardUtil.WindowsClipboardService.SetTextAsync(text)
-                               .ContinueWith(clipboardResult => {
+                               .ContinueWith(clipboardResult =>
+                               {
                                    if (clipboardResult.IsFaulted)
                                        BuildsManager.Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {text}!", text);
                                    else
-                                       Task.Run(() => {
+                                       Task.Run(() =>
+                                       {
 
                                            Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                                            Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
@@ -844,7 +852,8 @@ namespace Kenedia.Modules.BuildsManager
                                            Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_V, true);
                                            Thread.Sleep(50);
                                            Blish_HUD.Controls.Intern.Keyboard.Release(VirtualKeyShort.LCONTROL, true);
-                                       }).ContinueWith(result => {
+                                       }).ContinueWith(result =>
+                                       {
                                            if (result.IsFaulted)
                                            {
                                                BuildsManager.Logger.Warn(result.Exception, "Failed to paste {text}", text);
@@ -968,11 +977,16 @@ namespace Kenedia.Modules.BuildsManager
 
         private void ProfessionChanged()
         {
-            _Profession = Template.Build.Profession.Id;
-            var profession = Template.Build.Profession;
+            var id = "Unkown";
+
+            if (Template.Build.Profession != null)
+            {
+                _Profession = Template.Build.Profession.Id;
+                id = Template.Build.Profession.Id;
+            }
             var armorWeight = API.armorWeight.Heavy;
 
-            switch (profession.Id)
+            switch (id)
             {
                 case "Elementalist":
                 case "Necromancer":
@@ -986,9 +1000,7 @@ namespace Kenedia.Modules.BuildsManager
                     armorWeight = API.armorWeight.Medium;
                     break;
 
-                case "Warrior":
-                case "Guardian":
-                case "Revenant":
+                default:
                     armorWeight = API.armorWeight.Heavy;
                     break;
             }
@@ -1026,9 +1038,12 @@ namespace Kenedia.Modules.BuildsManager
             i = 0;
             foreach (TemplateItem item in Template.Gear.Trinkets)
             {
-                item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-                item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                if (item != null)
+                {
+                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                }
                 i++;
             }
 
@@ -1036,9 +1051,12 @@ namespace Kenedia.Modules.BuildsManager
             offset += 90;
             foreach (Armor_TemplateItem item in Template.Gear.Armor)
             {
-                item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-                item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                if (item != null)
+                {
+                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                }
                 i++;
             }
 
@@ -1046,10 +1064,12 @@ namespace Kenedia.Modules.BuildsManager
             offset += 150;
             foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
             {
-                item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-                item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
-
+                if (item != null)
+                {
+                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                }
                 if (i == 1) i++;
                 i++;
             }
@@ -1058,16 +1078,19 @@ namespace Kenedia.Modules.BuildsManager
             offset += 150;
             foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
             {
-                item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-
-                for (int j = 0; j < 2; j++)
+                if (item != null)
                 {
-                    item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
+                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
+
+                    for (int j = 0; j < 2; j++)
+                    {
+                        item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
+                    }
+
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
                 }
 
-                item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
-                
                 if (i == 0) i = i + 2;
                 i++;
             }
@@ -1086,22 +1109,25 @@ namespace Kenedia.Modules.BuildsManager
             i = 0;
             foreach (TemplateItem item in Template.Gear.Trinkets)
             {
-                item.Hovered = item.Bounds.Contains(mPos);
-                if (item.Hovered && item.Stat != null && (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver))
+                if (item != null)
                 {
-                    CustomTooltip.Visible = true;
-
-                    if (CustomTooltip.CurrentObject != item)
+                    item.Hovered = item.Bounds.Contains(mPos);
+                    if (item.Hovered && item.Stat != null && (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver))
                     {
-                        CustomTooltip.CurrentObject = item;
-                        CustomTooltip.Header = item.Stat.Name;
-                        CustomTooltip.Content = new List<string>();
-                        foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                        CustomTooltip.Visible = true;
+
+                        if (CustomTooltip.CurrentObject != item)
                         {
-                            CustomTooltip.Content.Add("+ " + (attribute.Value + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment)) + " " + attribute.Name);
+                            CustomTooltip.CurrentObject = item;
+                            CustomTooltip.Header = item.Stat.Name;
+                            CustomTooltip.Content = new List<string>();
+                            foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                            {
+                                CustomTooltip.Content.Add("+ " + (attribute.Value + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment)) + " " + attribute.Name);
+                            }
                         }
-                    }
-                };
+                    };
+                }
 
                 i++;
             }
@@ -1110,31 +1136,34 @@ namespace Kenedia.Modules.BuildsManager
             offset += 90;
             foreach (Armor_TemplateItem item in Template.Gear.Armor)
             {
-                item.Hovered = item.Bounds.Contains(mPos);
-
-                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                if (item != null)
                 {
-                    if (item.UpgradeBounds.Contains(mPos) && item.Rune != null)
+                    item.Hovered = item.Bounds.Contains(mPos);
+
+                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
                     {
-                        CustomTooltip.Visible = true;
-                        if (CustomTooltip.CurrentObject != item.Rune)
+                        if (item.UpgradeBounds.Contains(mPos) && item.Rune != null)
                         {
-                            CustomTooltip.CurrentObject = item.Rune;
-                            CustomTooltip.Header = item.Rune.Name;
-                            CustomTooltip.Content = item.Rune.Bonuses;
-                        }
-                    }
-                    else if (item.Hovered && item.Stat != null)
-                    {
-                        CustomTooltip.Visible = true;
-                        if (CustomTooltip.CurrentObject != item)
-                        {
-                            CustomTooltip.CurrentObject = item;
-                            CustomTooltip.Header = item.Stat.Name;
-                            CustomTooltip.Content = new List<string>();
-                            foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                            CustomTooltip.Visible = true;
+                            if (CustomTooltip.CurrentObject != item.Rune)
                             {
-                                CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Armors[i].AttributeAdjustment) + " " + attribute.Name);
+                                CustomTooltip.CurrentObject = item.Rune;
+                                CustomTooltip.Header = item.Rune.Name;
+                                CustomTooltip.Content = item.Rune.Bonuses;
+                            }
+                        }
+                        else if (item.Hovered && item.Stat != null)
+                        {
+                            CustomTooltip.Visible = true;
+                            if (CustomTooltip.CurrentObject != item)
+                            {
+                                CustomTooltip.CurrentObject = item;
+                                CustomTooltip.Header = item.Stat.Name;
+                                CustomTooltip.Content = new List<string>();
+                                foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                {
+                                    CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Armors[i].AttributeAdjustment) + " " + attribute.Name);
+                                }
                             }
                         }
                     }
@@ -1147,47 +1176,50 @@ namespace Kenedia.Modules.BuildsManager
             offset += 150;
             foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
             {
-                item.Hovered = item.Bounds.Contains(mPos);
-
-                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                if (item != null)
                 {
-                    if (item.UpgradeBounds.Contains(mPos) && item.Sigil != null)
-                    {
-                        CustomTooltip.Visible = true;
+                    item.Hovered = item.Bounds.Contains(mPos);
 
-                        if (CustomTooltip.CurrentObject != item.Sigil)
+                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                    {
+                        if (item.UpgradeBounds.Contains(mPos) && item.Sigil != null)
                         {
-                            CustomTooltip.CurrentObject = item.Sigil;
-                            CustomTooltip.Header = item.Sigil.Name;
-                            CustomTooltip.Content = new List<string>() { item.Sigil.Description };
+                            CustomTooltip.Visible = true;
+
+                            if (CustomTooltip.CurrentObject != item.Sigil)
+                            {
+                                CustomTooltip.CurrentObject = item.Sigil;
+                                CustomTooltip.Header = item.Sigil.Name;
+                                CustomTooltip.Content = new List<string>() { item.Sigil.Description };
+                            }
                         }
-                    }
-                    else if (item.Hovered && item.Stat != null)
-                    {
-                        CustomTooltip.Visible = true;
-
-                        if (CustomTooltip.CurrentObject != item)
+                        else if (item.Hovered && item.Stat != null)
                         {
-                            CustomTooltip.CurrentObject = item;
-                            CustomTooltip.Header = item.Stat.Name;
-                            CustomTooltip.Content = new List<string>();
+                            CustomTooltip.Visible = true;
 
-                            bool twoHanded = false;
-                            if (item.Slot == _EquipmentSlots.Weapon1_MainHand || item.Slot == _EquipmentSlots.Weapon1_OffHand)
+                            if (CustomTooltip.CurrentObject != item)
                             {
-                                twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
-                            }
-                            if (item.Slot == _EquipmentSlots.Weapon2_MainHand || item.Slot == _EquipmentSlots.Weapon2_OffHand)
-                            {
-                                twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
-                            }
+                                CustomTooltip.CurrentObject = item;
+                                CustomTooltip.Header = item.Stat.Name;
+                                CustomTooltip.Content = new List<string>();
 
-                            var weapon = twoHanded ? Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword) : Weapons.Find(e => e.WeaponType == API.weaponType.Axe);
-                            if (weapon != null)
-                            {
-                                foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                bool twoHanded = false;
+                                if (item.Slot == _EquipmentSlots.Weapon1_MainHand || item.Slot == _EquipmentSlots.Weapon1_OffHand)
                                 {
-                                    CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                    twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
+                                }
+                                if (item.Slot == _EquipmentSlots.Weapon2_MainHand || item.Slot == _EquipmentSlots.Weapon2_OffHand)
+                                {
+                                    twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
+                                }
+
+                                var weapon = twoHanded ? Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword) : Weapons.Find(e => e.WeaponType == API.weaponType.Axe);
+                                if (weapon != null)
+                                {
+                                    foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                    {
+                                        CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                    }
                                 }
                             }
                         }
@@ -1202,50 +1234,53 @@ namespace Kenedia.Modules.BuildsManager
             offset += 150;
             foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
             {
-                for (int j = 0; j < 2; j++)
+                if (item != null)
                 {
-                    item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
-
-                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                    for (int j = 0; j < 2; j++)
                     {
-                        if (item.SigilsBounds[j].Contains(mPos) && item.Sigils.Count > j && item.Sigils[j] != null)
-                        {
-                            CustomTooltip.Visible = true;
+                        item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
 
-                            if (CustomTooltip.CurrentObject != item.Sigils[j])
+                        if ((!SelectionPopUp.Visible || !SelectionPopUp.MouseOver) && item.Sigils != null)
+                        {
+                            if (item.SigilsBounds[j].Contains(mPos) && item.Sigils.Count > j && item.Sigils[j] != null)
                             {
-                                CustomTooltip.CurrentObject = item;
-                                CustomTooltip.Header = item.Sigils[j].Name;
-                                CustomTooltip.Content = new List<string>() { item.Sigils[j].Description };
+                                CustomTooltip.Visible = true;
+
+                                if (CustomTooltip.CurrentObject != item.Sigils[j])
+                                {
+                                    CustomTooltip.CurrentObject = item;
+                                    CustomTooltip.Header = item.Sigils[j].Name;
+                                    CustomTooltip.Content = new List<string>() { item.Sigils[j].Description };
+                                }
                             }
                         }
                     }
-                }
 
-                item.Hovered = item.Bounds.Contains(mPos);
-                if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
-                {
-                    if (item.Hovered && item.Stat != null)
+                    item.Hovered = item.Bounds.Contains(mPos);
+                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
                     {
-                        CustomTooltip.Visible = true;
-                        if (CustomTooltip.CurrentObject != item)
+                        if (item.Hovered && item.Stat != null)
                         {
-                            CustomTooltip.CurrentObject = item;
-                            CustomTooltip.Header = item.Stat.Name;
-                            CustomTooltip.Content = new List<string>();
-
-                            var weapon = Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword);
-                            if (weapon != null)
+                            CustomTooltip.Visible = true;
+                            if (CustomTooltip.CurrentObject != item)
                             {
-                                foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                CustomTooltip.CurrentObject = item;
+                                CustomTooltip.Header = item.Stat.Name;
+                                CustomTooltip.Content = new List<string>();
+
+                                var weapon = Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword);
+                                if (weapon != null)
                                 {
-                                    CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                    foreach (API.StatAttribute attribute in item.Stat.Attributes)
+                                    {
+                                        CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                
+
                 if (i == 0) i = i + 2;
                 i++;
             }
@@ -1254,7 +1289,7 @@ namespace Kenedia.Modules.BuildsManager
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             if (_Template == null) return;
-            if (_Profession != Template.Build.Profession.Id) ProfessionChanged();
+            if (Template.Build.Profession != null && _Profession != Template.Build.Profession.Id) ProfessionChanged();
 
             UpdateStates();
             int i;
@@ -1264,8 +1299,10 @@ namespace Kenedia.Modules.BuildsManager
             i = 0;
             foreach (Armor_TemplateItem item in Template.Gear.Armor)
             {
+                if (item != null)
+                {
 
-                spriteBatch.DrawOnCtrl(this,
+                    spriteBatch.DrawOnCtrl(this,
                                         ContentService.Textures.Pixel,
                                         item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
                                         Rectangle.Empty,
@@ -1273,43 +1310,43 @@ namespace Kenedia.Modules.BuildsManager
                                         0f,
                                         default);
 
-                spriteBatch.DrawOnCtrl(this,
-                                        Armors[i].Icon.Texture,
-                                        item.Bounds,
-                                        Armors[i].Icon.Texture.Bounds,
-                                        itemColor,
-                                        0f,
-                                        default);
-
-
-                if (item.Stat != null)
-                {
                     spriteBatch.DrawOnCtrl(this,
-                                            item.Stat.Icon.Texture,
-                                            item.StatBounds,
-                                            item.Stat.Icon.Texture.Bounds,
+                                            Armors.Count > i ? Armors[i].Icon.Texture : BuildsManager.TextureManager._Icons[0],
+                                            item.Bounds,
+                                            Armors.Count > i ? Armors[i].Icon.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
+                                            itemColor,
+                                            0f,
+                                            default);
+
+
+                    if (item.Stat != null)
+                    {
+                        spriteBatch.DrawOnCtrl(this,
+                                                item.Stat.Icon.Texture,
+                                                item.StatBounds,
+                                                item.Stat.Icon.Texture.Bounds,
+                                                Color.White,
+                                                0f,
+                                                default);
+                    }
+
+
+                    spriteBatch.DrawOnCtrl(this,
+                                            ContentService.Textures.Pixel,
+                                            item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
+                                            Rectangle.Empty,
+                                            item.Rune == null ? Color.Transparent : frameColor,
+                                            0f,
+                                            default);
+
+                    spriteBatch.DrawOnCtrl(this,
+                                            item.Rune == null ? _RuneTexture : item.Rune.Icon.Texture,
+                                            item.UpgradeBounds,
+                                            item.Rune == null ? _RuneTexture.Bounds : item.Rune.Icon.Texture.Bounds,
                                             Color.White,
                                             0f,
                                             default);
                 }
-
-
-                spriteBatch.DrawOnCtrl(this,
-                                        ContentService.Textures.Pixel,
-                                        item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                        Rectangle.Empty,
-                                        item.Rune == null ? Color.Transparent : frameColor,
-                                        0f,
-                                        default);
-
-                spriteBatch.DrawOnCtrl(this,
-                                        item.Rune == null ? _RuneTexture : item.Rune.Icon.Texture,
-                                        item.UpgradeBounds,
-                                        item.Rune == null ? _RuneTexture.Bounds : item.Rune.Icon.Texture.Bounds,
-                                        Color.White,
-                                        0f,
-                                        default);
-
 
                 i++;
             }
@@ -1317,7 +1354,9 @@ namespace Kenedia.Modules.BuildsManager
             i = 0;
             foreach (TemplateItem item in Template.Gear.Trinkets)
             {
-                spriteBatch.DrawOnCtrl(this,
+                if (item != null)
+                {
+                    spriteBatch.DrawOnCtrl(this,
                                         ContentService.Textures.Pixel,
                                         item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
                                         Rectangle.Empty,
@@ -1325,23 +1364,24 @@ namespace Kenedia.Modules.BuildsManager
                                         0f,
                                         default);
 
-                spriteBatch.DrawOnCtrl(this,
-                                        Trinkets[i].Icon.Texture,
-                                        item.Bounds,
-                                        Trinkets[i].Icon.Texture.Bounds,
-                                        itemColor,
-                                        0f,
-                                        default);
-
-                if (item.Stat != null)
-                {
                     spriteBatch.DrawOnCtrl(this,
-                                            item.Stat.Icon.Texture,
-                                            item.StatBounds,
-                                            item.Stat.Icon.Texture.Bounds,
-                                            Color.White,
+                                            Trinkets.Count > i ? Trinkets[i].Icon.Texture : BuildsManager.TextureManager._Icons[0],
+                                            item.Bounds,
+                                            Trinkets.Count > i ? Trinkets[i].Icon.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
+                                            itemColor,
                                             0f,
                                             default);
+
+                    if (item.Stat != null)
+                    {
+                        spriteBatch.DrawOnCtrl(this,
+                                                item.Stat.Icon.Texture,
+                                                item.StatBounds,
+                                                item.Stat.Icon.Texture.Bounds,
+                                                Color.White,
+                                                0f,
+                                                default);
+                    }
                 }
 
                 i++;
@@ -1350,7 +1390,9 @@ namespace Kenedia.Modules.BuildsManager
             i = 0;
             foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
             {
-                spriteBatch.DrawOnCtrl(this,
+                if (item != null)
+                {
+                    spriteBatch.DrawOnCtrl(this,
                                         ContentService.Textures.Pixel,
                                         item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
                                         Rectangle.Empty,
@@ -1358,42 +1400,42 @@ namespace Kenedia.Modules.BuildsManager
                                         0f,
                                         default);
 
-                spriteBatch.DrawOnCtrl(this,
-                                        item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture : WeaponSlots[i],
-                                        item.Bounds,
-                                        item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture.Bounds : WeaponSlots[i].Bounds,
-                                        item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
-                                        0f,
-                                        default);
-
-
-                if (item.Stat != null)
-                {
                     spriteBatch.DrawOnCtrl(this,
-                                            item.Stat.Icon.Texture,
-                                            item.StatBounds,
-                                            item.Stat.Icon.Texture.Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture : WeaponSlots[i],
+                                            item.Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture.Bounds : WeaponSlots[i].Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
+                                            0f,
+                                            default);
+
+
+                    if (item.Stat != null)
+                    {
+                        spriteBatch.DrawOnCtrl(this,
+                                                item.Stat.Icon.Texture,
+                                                item.StatBounds,
+                                                item.Stat.Icon.Texture.Bounds,
+                                                Color.White,
+                                                0f,
+                                                default);
+                    }
+
+                    spriteBatch.DrawOnCtrl(this,
+                                            ContentService.Textures.Pixel,
+                                            item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
+                                            Rectangle.Empty,
+                                            item.Sigil == null ? Color.Transparent : frameColor,
+                                            0f,
+                                            default);
+
+                    spriteBatch.DrawOnCtrl(this,
+                                            item.Sigil == null ? _RuneTexture : item.Sigil.Icon.Texture,
+                                            item.UpgradeBounds,
+                                            item.Sigil == null ? _RuneTexture.Bounds : item.Sigil.Icon.Texture.Bounds,
                                             Color.White,
                                             0f,
                                             default);
                 }
-
-                spriteBatch.DrawOnCtrl(this,
-                                        ContentService.Textures.Pixel,
-                                        item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                        Rectangle.Empty,
-                                        item.Sigil == null ? Color.Transparent : frameColor,
-                                        0f,
-                                        default);
-
-                spriteBatch.DrawOnCtrl(this,
-                                        item.Sigil == null ? _RuneTexture : item.Sigil.Icon.Texture,
-                                        item.UpgradeBounds,
-                                        item.Sigil == null ? _RuneTexture.Bounds : item.Sigil.Icon.Texture.Bounds,
-                                        Color.White,
-                                        0f,
-                                        default);
-
 
                 i++;
             }
@@ -1401,7 +1443,9 @@ namespace Kenedia.Modules.BuildsManager
             i = 0;
             foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
             {
-                spriteBatch.DrawOnCtrl(this,
+                if (item != null)
+                {
+                    spriteBatch.DrawOnCtrl(this,
                                         ContentService.Textures.Pixel,
                                         item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
                                         Rectangle.Empty,
@@ -1409,44 +1453,45 @@ namespace Kenedia.Modules.BuildsManager
                                         0f,
                                         default);
 
-                spriteBatch.DrawOnCtrl(this,
-                                        item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture : AquaticWeaponSlots[i],
-                                        item.Bounds,
-                                        item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture.Bounds : AquaticWeaponSlots[i].Bounds,
-                                        item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
-                                        0f,
-                                        default);
-
-                if (item.Stat != null)
-                {
                     spriteBatch.DrawOnCtrl(this,
-                                            item.Stat.Icon.Texture,
-                                            item.StatBounds,
-                                            item.Stat.Icon.Texture.Bounds,
-                                            Color.White,
-                                            0f,
-                                            default);
-                }
-
-                for (int j = 0; j < 2; j++)
-                {
-                    var sigil = item.Sigils.Count > j ? item.Sigils[j] : null;
-
-                    spriteBatch.DrawOnCtrl(this,
-                                            ContentService.Textures.Pixel,
-                                            item.SigilsBounds[j].Add(new Rectangle(-1, -1, 2, 2)),
-                                            Rectangle.Empty,
-                                            sigil == null ? Color.Transparent : frameColor,
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture : AquaticWeaponSlots[i],
+                                            item.Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture.Bounds : AquaticWeaponSlots[i].Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
                                             0f,
                                             default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            sigil == null ? _RuneTexture : sigil.Icon.Texture,
-                                            item.SigilsBounds[j],
-                                            sigil == null ? _RuneTexture.Bounds : sigil.Icon.Texture.Bounds,
-                                            Color.White,
-                                            0f,
-                                            default);
+                    if (item.Stat != null)
+                    {
+                        spriteBatch.DrawOnCtrl(this,
+                                                item.Stat.Icon.Texture,
+                                                item.StatBounds,
+                                                item.Stat.Icon.Texture.Bounds,
+                                                Color.White,
+                                                0f,
+                                                default);
+                    }
+
+                    for (int j = 0; j < 2; j++)
+                    {
+                            var sigil = item.Sigils != null && item.Sigils.Count > j ? item.Sigils[j] : null;
+
+                            spriteBatch.DrawOnCtrl(this,
+                                                    ContentService.Textures.Pixel,
+                                                    item.SigilsBounds[j].Add(new Rectangle(-1, -1, 2, 2)),
+                                                    Rectangle.Empty,
+                                                    sigil == null ? Color.Transparent : frameColor,
+                                                    0f,
+                                                    default);
+
+                            spriteBatch.DrawOnCtrl(this,
+                                                    sigil == null ? _RuneTexture : sigil.Icon.Texture,
+                                                    item.SigilsBounds[j],
+                                                    sigil == null ? _RuneTexture.Bounds : sigil.Icon.Texture.Bounds,
+                                                    Color.White,
+                                                    0f,
+                                                    default);
+                    }
                 }
 
                 i++;
@@ -1456,40 +1501,42 @@ namespace Kenedia.Modules.BuildsManager
             var cnt = new ContentService();
             var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
 
-            var lastTrinket = Template.Gear.Trinkets[Template.Gear.Trinkets.Count-1];
+            var lastTrinket = Template.Gear.Trinkets[Template.Gear.Trinkets.Count - 1];
             var texture = BuildsManager.TextureManager.getEmblem(_Emblems.QuestionMark);
             var mTexture = BuildsManager.TextureManager.getIcon(_Icons.Mouse);
-
-            spriteBatch.DrawOnCtrl(this,
-                                    texture,
-                                    new Rectangle(lastTrinket.Bounds.Left, LocalBounds.Bottom - (font.LineHeight * 3), (font.LineHeight * 3), (font.LineHeight * 3)),
-                                    texture.Bounds,
-                                    Color.White,
-                                    0f,
-                                    default
-                                    );
-
-            i = 0;
-            foreach (string s in Instructions)
+            if (lastTrinket != null)
             {
                 spriteBatch.DrawOnCtrl(this,
-                                        mTexture,
-                                        new Rectangle(lastTrinket.Bounds.Left + (font.LineHeight * 3), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), font.LineHeight, font.LineHeight),
-                                        mTexture.Bounds,
+                                        texture,
+                                        new Rectangle(lastTrinket.Bounds.Left, LocalBounds.Bottom - (font.LineHeight * 3), (font.LineHeight * 3), (font.LineHeight * 3)),
+                                        texture.Bounds,
                                         Color.White,
                                         0f,
                                         default
                                         );
 
-                spriteBatch.DrawStringOnCtrl(this,
-                                        s,
-                                        font,
-                                        new Rectangle(lastTrinket.Bounds.Left +5 + (font.LineHeight * 4), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), 100, font.LineHeight),
-                                        Color.White,
-                                        false,
-                                        HorizontalAlignment.Left
-                                        );
-                i++;
+                i = 0;
+                foreach (string s in Instructions)
+                {
+                    spriteBatch.DrawOnCtrl(this,
+                                            mTexture,
+                                            new Rectangle(lastTrinket.Bounds.Left + (font.LineHeight * 3), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), font.LineHeight, font.LineHeight),
+                                            mTexture.Bounds,
+                                            Color.White,
+                                            0f,
+                                            default
+                                            );
+
+                    spriteBatch.DrawStringOnCtrl(this,
+                                            s,
+                                            font,
+                                            new Rectangle(lastTrinket.Bounds.Left + 5 + (font.LineHeight * 4), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), 100, font.LineHeight),
+                                            Color.White,
+                                            false,
+                                            HorizontalAlignment.Left
+                                            );
+                    i++;
+                }
             }
         }
     }

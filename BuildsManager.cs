@@ -93,7 +93,8 @@ namespace Kenedia.Modules.BuildsManager
                                                       () => "Paste Stat/Upgrade Name",
                                                       () => "Paste Stat/Upgrade Name after copying it.");
 
-            GameVersion = settings.DefineSetting(nameof(GameVersion), 0);
+            var internal_settings = settings.AddSubCollection("Internal Settings", false);
+            GameVersion = internal_settings.DefineSetting(nameof(GameVersion), 0);
         }
 
         protected override void Initialize()
@@ -286,41 +287,61 @@ namespace Kenedia.Modules.BuildsManager
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Sigils"));
 
                 var runes = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(_runes);
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Runes"));
 
                 var armory_items = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(ArmoryItems);
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Armory"));
 
                 var professions = await Gw2ApiManager.Gw2ApiClient.V2.Professions.AllAsync();
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Professions"));
 
                 var specs = await Gw2ApiManager.Gw2ApiClient.V2.Specializations.AllAsync();
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Specs"));
 
                 var traits = await Gw2ApiManager.Gw2ApiClient.V2.Traits.AllAsync();
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Traits"));
 
-                var skills = await Gw2ApiManager.Gw2ApiClient.V2.Skills.AllAsync();
+                List<int> Skill_Ids = new List<int>();
+
+                foreach (Profession profession in professions)
+                {
+                    Logger.Debug(string.Format("Checking {0} Skills", profession.Name));
+                    foreach (ProfessionSkill skill in profession.Skills)
+                    {
+                        if(!Skill_Ids.Contains(skill.Id)) Skill_Ids.Add(skill.Id);
+                    }
+                }
+                Logger.Debug(string.Format("Fetching a total of {0} Skills", Skill_Ids.Count));
+
+                var skills = await Gw2ApiManager.Gw2ApiClient.V2.Skills.ManyAsync(Skill_Ids);
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Skills"));
 
                 var stats = await Gw2ApiManager.Gw2ApiClient.V2.Itemstats.AllAsync();
                 completed++;
                 downloadBar.Progress = completed / 9;
                 downloadBar.Text = string.Format("{0} / 9", completed);
+                Logger.Debug(string.Format("Fetched {0}", "Itemstats"));
 
                 List<API.RuneItem> Runes = new List<API.RuneItem>();
                 foreach (ItemUpgradeComponent rune in runes)
@@ -617,7 +638,17 @@ namespace Kenedia.Modules.BuildsManager
                             ChatLink = skill.ChatLink,
                             Description = skill.Description,
                             Specialization = skill.Specialization != null ? (int)skill.Specialization : 0,
+                            Flags = skill.Flags.ToList().Select(e => e.RawValue).ToList(),
+                            Categories = new List<string>(),
                         };
+
+                        if (skill.Categories != null)
+                        {
+                            foreach (string category in skill.Categories)
+                            {
+                                temp.Categories.Add(category);
+                            }
+                        }
 
                         Enum.TryParse(skill.Slot.RawValue, out temp.Slot);
                         Skills.Add(temp);
@@ -776,7 +807,8 @@ namespace Kenedia.Modules.BuildsManager
                 new Rectangle(30, 5, Width - 5, Height - 30),
                 TextureManager,
                 GameService.Graphics.SpriteScreen,
-                new Template(Paths.builds + @"Condi Harbaebae.json")
+                //new Template(Paths.builds + @"Condi Harbaebae.json")
+                new Template()
                 );
 
             //MainWindow.Template = new Template(Paths.builds + @"Condi Harbaebae.json");

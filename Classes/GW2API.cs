@@ -594,6 +594,8 @@ namespace Kenedia.Modules.BuildsManager
             public string ChatLink;
             public string Description;
             public skillSlot Slot;
+            public List<string> Flags;
+            public List<string> Categories;
         }
 
         public class Trait
