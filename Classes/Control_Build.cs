@@ -24,7 +24,7 @@ namespace Kenedia.Modules.BuildsManager
     public class Trait_Control : Control
     {
         private double _Scale = 1;
-
+        private int _LineThickness = 5;
         public double Scale
         {
             get => _Scale;
@@ -35,31 +35,24 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
         private const int _TraitSize = 38;
+        private Texture2D _Line;
         private Template _Template;
         public Template Template
         {
-            get => _Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                    _Template.Changed += delegate
-                    {
-
-                    };
-                }
-            }
+            get => BuildsManager.ModuleInstance.Selected_Template;
         }
 
         public int Index;
+
+        public int TraitIndex;
+        public int SpecIndex;
+        public API.traitType TraitType;
 
         private CustomTooltip CustomTooltip;
         private Specialization_Control Specialization_Control;
         public Trait_Control(Container parent, Point p, API.Trait trait, CustomTooltip customTooltip, Specialization_Control specialization_Control, Template template)
         {
             Parent = parent;
-            Template = template;
             CustomTooltip = customTooltip;
             Specialization_Control = specialization_Control;
             DefaultPoint = p;
@@ -67,6 +60,9 @@ namespace Kenedia.Modules.BuildsManager
             DefaultBounds = new Rectangle(0, 0, _TraitSize, _TraitSize);
             _Trait = trait;
             Size = new Point(_TraitSize, _TraitSize);
+            _Line = BuildsManager.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+
+            ClipsBounds = false;
 
             Click += delegate
             {
@@ -115,10 +111,10 @@ namespace Kenedia.Modules.BuildsManager
         private API.Trait _Trait;
         public API.Trait Trait
         {
-            get => _Trait;
+            get => TraitType != null ? TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex] : null;
             set
             {
-                _Trait = value;
+
             }
         }
 
@@ -127,7 +123,9 @@ namespace Kenedia.Modules.BuildsManager
         {
             get
             {
-                return Template != null && Trait != null && (Trait.Type == API.traitType.Minor || Template.Build.SpecLines[Specialization_Control.Index].Traits.Contains(Trait));
+                var trait = TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
+
+                return Template != null && trait != null && (trait.Type == API.traitType.Minor || Template.Build.SpecLines[SpecIndex].Traits.Contains(trait));
             }
         }
 
@@ -141,7 +139,14 @@ namespace Kenedia.Modules.BuildsManager
         public ConnectorLine PostLine = new ConnectorLine();
         public EventHandler Changed;
 
-        private void UpdateLayout()
+        private List<Point>_MinorTraits = new List<Point>()
+        {
+            new Point(215, (133 - 38) / 2),
+            new Point(360, (133 - 38) / 2),
+            new Point(505, (133 - 38) / 2),
+        };
+
+private void UpdateLayout()
         {
             Bounds = DefaultBounds.Scale(Scale);
             Location = DefaultPoint.Scale(Scale);
@@ -149,15 +154,25 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (Trait == null || Bounds == null) return;
+            if (Template == null || Bounds == null) return;                        
+            var trait = TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
 
-            spriteBatch.DrawOnCtrl(this,
-                                    Trait.Icon.Texture,
-                                    Bounds,
-                                    Trait.Icon.Texture.Bounds,
-                                    Selected ? Color.White : (MouseOver ? Color.LightGray : Color.Gray),
-                                    0f,
-                                    default);
+            if (trait != null)
+            {
+                spriteBatch.DrawOnCtrl(this,
+                                        trait.Icon.Texture,
+                                        Bounds,
+                                        trait.Icon.Texture.Bounds,
+                                        Selected ? Color.White : (MouseOver ? Color.LightGray : Color.Gray),
+                                        0f,
+                                        default);
+
+            }
+        }
+        public void SetTemplate()
+        {
+            var template = BuildsManager.ModuleInstance.Selected_Template;
+
         }
     }
     public class SpecializationSelector_Control : Control
@@ -180,15 +195,7 @@ namespace Kenedia.Modules.BuildsManager
         }
         public Template Template
         {
-            get => _Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                    //Template.Changed 
-                }
-            }
+            get => BuildsManager.ModuleInstance.Selected_Template;
         }
 
         protected override void OnClick(MouseEventArgs e)
@@ -283,6 +290,12 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
         }
+
+        public void SetTemplate()
+        {
+            var template = BuildsManager.ModuleInstance.Selected_Template;
+
+        }
     }
     public class Specialization_Control : Control
     {
@@ -327,56 +340,13 @@ namespace Kenedia.Modules.BuildsManager
         private Template _Template;
         public Template Template
         {
-            get => _Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                }
-            }
+            get => BuildsManager.ModuleInstance.Selected_Template;
         }
         public int Index;
         private API.Specialization _Specialization;
         public API.Specialization Specialization
         {
-            get => _Specialization;
-            set
-            {
-                if (_Specialization != value)
-                {
-                    _Specialization = value;
-
-                    if (_Specialization != null)
-                    {
-                        for (int i = 0; i < _MajorTraits.Count; i++)
-                        {
-                            _MajorTraits[i].Trait = Specialization.MajorTraits[i];
-                            _MajorTraits[i].PreLine = new ConnectorLine();
-                            _MajorTraits[i].PostLine = new ConnectorLine();
-                        }
-
-                        for (int i = 0; i < _MinorTraits.Count; i++)
-                        {
-                            _MinorTraits[i].Trait = Specialization.MinorTraits[i];
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < _MajorTraits.Count; i++)
-                        {
-                            _MajorTraits[i].Trait = null;
-                        }
-
-                        for (int i = 0; i < _MinorTraits.Count; i++)
-                        {
-                            _MinorTraits[i].Trait = null;
-                        }
-                    }
-
-                    if (_Created) UpdateLayout();
-                }
-            }
+            get => Template != null ? Template.Build.SpecLines[Index].Specialization : null;
         }
         public EventHandler Changed;
 
@@ -409,7 +379,6 @@ namespace Kenedia.Modules.BuildsManager
             _Template = template;
             CustomTooltip = customTooltip;
             Index = index;
-            Specialization = template.Build.SpecLines[Index].Specialization;
             Size = new Point(_Width, _Height);
             DefaultLocation = p;
             Location = p;
@@ -418,7 +387,7 @@ namespace Kenedia.Modules.BuildsManager
 
             _Template.Changed += delegate
             {
-                Specialization = _Template.Build.SpecLines[Index].Specialization;
+
             };
 
             _SpecSideSelector_Hovered = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
@@ -432,21 +401,21 @@ namespace Kenedia.Modules.BuildsManager
 
             _MinorTraits = new List<Trait_Control>()
                 {
-                    new Trait_Control(Parent, new Point(215, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[0] : null, CustomTooltip, this, Template){ZIndex = ZIndex + 1},
-                    new Trait_Control(Parent, new Point(360, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[1]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1},
-                    new Trait_Control(Parent, new Point(505, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[2]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1},
+                    new Trait_Control(Parent, new Point(215, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[0] : null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(Parent, new Point(360, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[1]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(Parent, new Point(505, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[2]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Minor},
                 };
             _MajorTraits = new List<Trait_Control>()
                 {
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[0]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1},
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[1]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[2]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[3]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[4]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[5]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[6]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[7]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[8]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1},
+                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[0]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Major },
+                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[1]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[2]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1 , TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[3]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 3, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[4]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 4, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[5]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 5, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[6]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 6, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[7]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 7, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[8]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 8, SpecIndex = Index, TraitType = API.traitType.Major},
                 };
 
             var TemplateSpecLine = Template.Build.SpecLines.Find(e => e.Specialization == Specialization);
@@ -471,7 +440,6 @@ namespace Kenedia.Modules.BuildsManager
                 Specialization_Control = this,
                 Parent = Parent,
                 Visible = false,
-                Template = Template,
                 ZIndex = ZIndex + 2,
                 Elite = Elite,
             };
@@ -493,69 +461,11 @@ namespace Kenedia.Modules.BuildsManager
                 Selector.Location = LocalBounds.Location.Add(new Point(SelectorBounds.Width, 0));
                 Selector.Size = LocalBounds.Size.Add(new Point(-SelectorBounds.Width, 0));
 
-                Selector.Template = Template;
                 Selector.Elite = Elite;
                 Selector.Specialization = Specialization;
             }
         }
 
-        public void UpdateLayoutOG()
-        {
-            AbsoluteBounds = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2)).Add(Location).Scale(Scale);
-
-            ContentBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Add(Location).Scale(_Scale);
-            SelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, 15, _Height).Add(Location).Scale(_Scale);
-
-            HighlightBounds = new Rectangle(_Width - _HighlightLeft, (_Height - _SpecHighlightFrame.Height) / 2, _SpecHighlightFrame.Width, _SpecHighlightFrame.Height).Add(Location).Scale(_Scale);
-            SpecSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Add(Location).Scale(_Scale);
-
-            FirstLine.Bounds = new Rectangle(HighlightBounds.Right - 5.Scale(_Scale), HighlightBounds.Center.Y, 225 - HighlightBounds.Right, _LineThickness.Scale(_Scale));
-            WeaponTraitBounds = new Rectangle(HighlightBounds.Right - _TraitSize - 6, (_Height + HighlightBounds.Height - 165), _TraitSize, _TraitSize).Add(Location).Scale(_Scale);
-
-            foreach (Trait_Control trait in _MajorTraits)
-            {
-                if (trait.Selected)
-                {
-                    var minor = _MinorTraits[trait.Trait.Tier - 1];
-                    float rotation = 0f;
-                    switch (trait.Trait.Order)
-                    {
-                        case 0:
-                            rotation = -(float)(Math.PI / 5.65);
-                            break;
-
-                        case 1:
-                            rotation = 0f;
-                            break;
-
-                        case 2:
-                            rotation = (float)(Math.PI / 5.65);
-                            break;
-                    }
-
-                    trait.PreLine.Rotation = rotation;
-                    trait.PostLine.Rotation = -rotation;
-
-                    var minor_Pos = minor.Bounds.Center.Add(new Point(-minor.Location.X, -minor.Location.Y));
-                    var majorPos = trait.Bounds.Center.Add(new Point(-trait.Location.X, -trait.Location.Y));
-
-
-                    trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor_Pos.Distance2D(majorPos), _LineThickness.Scale(_Scale));
-
-                    if (trait.Selected && trait.Trait.Tier != 3)
-                    {
-                        minor = _MinorTraits[trait.Trait.Tier];
-                        minor_Pos = minor.Bounds.Center.Add(new Point(-minor.Location.X, -minor.Location.Y));
-                        trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, majorPos.Distance2D(minor_Pos), _LineThickness.Scale(_Scale));
-                    }
-                }
-                else
-                {
-                    trait.PreLine = new ConnectorLine();
-                    trait.PostLine = new ConnectorLine();
-                }
-            }
-        }
         public void UpdateLayout()
         {
             AbsoluteBounds = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2)).Scale(Scale).Add(Location);
@@ -573,6 +483,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 if (trait.Selected)
                 {
+
                     var minor = _MinorTraits[trait.Trait.Tier - 1];
                     float rotation = 0f;
                     switch (trait.Trait.Order)
@@ -593,17 +504,14 @@ namespace Kenedia.Modules.BuildsManager
                     trait.PreLine.Rotation = rotation;
                     trait.PostLine.Rotation = -rotation;
 
-                    var minor_Pos = minor.Bounds.Center.Add(new Point(-minor.Location.X, -minor.Location.Y));
-                    var majorPos = trait.Bounds.Center.Add(new Point(-trait.Location.X, -trait.Location.Y));
-
-
-                    trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor_Pos.Distance2D(majorPos), _LineThickness.Scale(_Scale));
+                    var minor_Pos = minor.LocalBounds.Center;
+                    var majorPos = trait.LocalBounds.Center;
+                    trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor.AbsoluteBounds.Center.Distance2D(trait.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
 
                     if (trait.Selected && trait.Trait.Tier != 3)
                     {
                         minor = _MinorTraits[trait.Trait.Tier];
-                        minor_Pos = minor.Bounds.Center.Add(new Point(-minor.Location.X, -minor.Location.Y));
-                        trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, majorPos.Distance2D(minor_Pos), _LineThickness.Scale(_Scale));
+                        trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, trait.AbsoluteBounds.Center.Distance2D(minor.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
                     }
                 }
                 else
@@ -670,6 +578,7 @@ namespace Kenedia.Modules.BuildsManager
 
                     if (trait.PreLine.Bounds != null)
                     {
+                        //ScreenNotification.ShowNotification(trait.Trait.Name, ScreenNotification.NotificationType.Error);
                         spriteBatch.DrawOnCtrl(Parent,
                                                _Line,
                                                trait.PreLine.Bounds,
@@ -682,6 +591,7 @@ namespace Kenedia.Modules.BuildsManager
 
                     if (trait.PostLine.Bounds != null)
                     {
+                        //ScreenNotification.ShowNotification("PostLine", ScreenNotification.NotificationType.Error);
                         spriteBatch.DrawOnCtrl(Parent,
                                                _Line,
                                                trait.PostLine.Bounds,
@@ -762,7 +672,16 @@ namespace Kenedia.Modules.BuildsManager
         public void PaintAfterChilds(SpriteBatch spriteBatch, Rectangle bounds)
         {
         }
+
+        public void SetTemplate()
+        {
+            var template = BuildsManager.ModuleInstance.Selected_Template;
+
+            BuildsManager.Logger.Debug("Set Spec No. {0}", Index);
+
+        }
     }
+
     public enum SkillSlots
     {
         Heal,
@@ -776,18 +695,7 @@ namespace Kenedia.Modules.BuildsManager
         private Template _Template;
         public Template Template
         {
-            get => _Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                    _Template.Changed += delegate
-                    {
-
-                    };
-                }
-            }
+            get => BuildsManager.ModuleInstance.Selected_Template;
         }
 
         private API.Skill _Skill;
@@ -869,7 +777,7 @@ namespace Kenedia.Modules.BuildsManager
                                     (Skill != null && Skill.Icon != null && Skill.Icon.Texture != null) ? Skill.Icon.Texture : _SkillPlaceHolder,
                                     skillRect,
                                     (Skill != null && Skill.Icon != null && Skill.Icon.Texture != null) ? Skill.Icon.Texture.Bounds : _SkillPlaceHolder.Bounds,
-                                    Color.White,
+                                    (Skill != null && Skill.Icon != null && Skill.Icon.Texture != null) ? Color.White : new Color(0,0,0,155),
                                     0f,
                                     default);
 
@@ -893,6 +801,11 @@ namespace Kenedia.Modules.BuildsManager
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Right - 2, skillRect.Top, 2, skillRect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Right - 1, skillRect.Top, 1, skillRect.Height), Rectangle.Empty, color * 0.6f);
             }
+        }
+
+        public void SetTemplate()
+        {
+
         }
     }
 
@@ -1030,7 +943,7 @@ namespace Kenedia.Modules.BuildsManager
                                     ContentService.Textures.Pixel,
                                     bounds,
                                     bounds,
-                                    new Color(0, 0, 0, 240),
+                                    new Color(0, 0, 0, 230),
                                     0f,
                                     default);
 
@@ -1131,6 +1044,11 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
         }
+
+        public void SetTemplate()
+        {
+
+        }
     }
 
     public class SkillBar_Control : Control
@@ -1139,7 +1057,7 @@ namespace Kenedia.Modules.BuildsManager
         private Template _Template;
         public Template Template
         {
-            get => _Template;
+            get => BuildsManager.ModuleInstance.Selected_Template;
             set
             {
                 if (value != null)
@@ -1155,8 +1073,18 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
 
-        private void ApplyBuild()
+        public void ApplyBuild()
         {
+            foreach(Skill_Control skill in _Skills_Aquatic)
+            {
+                skill.Dispose();
+            }
+
+            foreach(Skill_Control skill in _Skills_Terrestial)
+            {
+                skill.Dispose();
+            }
+
                 _Skills_Aquatic = new List<Skill_Control>();
                 foreach (API.Skill skill in Template.Build.Skills_Aquatic)
                 {
@@ -1368,6 +1296,8 @@ namespace Kenedia.Modules.BuildsManager
                         SkillSelector.Visible = false;
                     }
                 };
+
+                BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
             }
 
             var p = _Width - (_Skills_Aquatic.Count * (_SkillSize + 1));
@@ -1436,6 +1366,12 @@ namespace Kenedia.Modules.BuildsManager
             SkillSelector.SkillChanged += OnSkillChanged;
             Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
         }
+
+        private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
+        {
+            SetTemplate();
+        }
+
         private void OnSkillChanged(object sender, SkillChangedEvent e)
         {
             if (e.Skill_Control.Aquatic)
@@ -1495,6 +1431,30 @@ namespace Kenedia.Modules.BuildsManager
                                     0f,
                                     default);
         }
+        protected override void DisposeControl()
+        {
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
+            base.DisposeControl();
+        }
+        public void SetTemplate()
+        {
+            var template = BuildsManager.ModuleInstance.Selected_Template;
+            var i = 0;
+
+            i = 0;
+            foreach(Skill_Control sCtrl in _Skills_Aquatic)
+            {
+                sCtrl.Skill = Template.Build.Skills_Aquatic[i];
+                i++;
+            }
+
+            i = 0;
+            foreach(Skill_Control sCtrl in _Skills_Terrestial)
+            {
+                sCtrl.Skill = Template.Build.Skills_Terrestial[i];
+                i++;
+            }
+        }
     }
 
     public class Control_Build : Control
@@ -1502,22 +1462,7 @@ namespace Kenedia.Modules.BuildsManager
         private Template _Template;
         public Template Template
         {
-            get => _Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                    Template.Changed += delegate
-                    {
-                        UpdateTemplate();
-                        UpdateLayout();
-                    };
-
-                    UpdateTemplate();
-                    UpdateLayout();
-                }
-            }
+            get => BuildsManager.ModuleInstance.Selected_Template;
         }
 
         private Texture2D _Background;
@@ -1586,6 +1531,8 @@ namespace Kenedia.Modules.BuildsManager
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
+            BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+
             //BackgroundColor = Color.Honeydew;
             Click += OnClick;
 
@@ -1627,6 +1574,18 @@ namespace Kenedia.Modules.BuildsManager
             UpdateTemplate();
         }
 
+        private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
+        {
+            BuildsManager.ModuleInstance.Selected_Template.Changed += delegate
+            {
+                UpdateTemplate();
+            };
+        }
+        protected override void DisposeControl()
+        {
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
+            base.DisposeControl();
+        }
         public EventHandler Changed;
         private void OnChanged()
         {
@@ -1644,7 +1603,6 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Template.Build.SpecLines[i].Control = Specializations[i];
 
-                Specializations[i].Specialization = Template.Build.SpecLines[i].Specialization;
                 SkillBar.Template = Template;
                 //SkillBar.SetTemplate();
             }
@@ -1656,11 +1614,16 @@ namespace Kenedia.Modules.BuildsManager
 
         }
 
-
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             if (_Template == null) return;
             UpdateLayout();
+        }
+
+        public void SetTemplate()
+        {
+            var template = BuildsManager.ModuleInstance.Selected_Template;
+
         }
     }
 }

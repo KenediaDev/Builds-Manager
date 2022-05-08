@@ -68,19 +68,20 @@
     <Compile Include="Classes\Control_Build.cs" />
     <Compile Include="Classes\BuildTemplate.cs" />
     <Compile Include="Classes\ClassExtensions.cs" />
+    <Compile Include="Classes\Control_IconButton.cs" />
     <Compile Include="Classes\Control_TemplateSelection.cs" />
     <Compile Include="Classes\Data.cs" />
     <Compile Include="Classes\Control_Equipment.cs" />
     <Compile Include="Classes\GW2API.cs" />
     <Compile Include="Classes\ItemImage.cs" />
     <Compile Include="Classes\LocalTexture.cs" />
-    <Compile Include="Classes\MainWindow.cs" />
     <Compile Include="Classes\Paths.cs" />
     <Compile Include="Classes\ProgressBar.cs" />
     <Compile Include="Classes\Ticks.cs" />
     <Compile Include="Classes\TextureManager.cs" />
     <Compile Include="Classes\Enum.cs" />
     <Compile Include="Classes\TraitLine.cs" />
+    <Compile Include="Classes\Window_MainWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AsyncClipboardService, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">

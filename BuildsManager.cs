@@ -58,7 +58,31 @@ namespace Kenedia.Modules.BuildsManager
         public SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
         public SettingEntry<int> GameVersion;
 
-        public iMainWindow MainWindow;
+        public List<Template> Templates = new List<Template>();
+        private Template _Selected_Template;
+        public Template Selected_Template 
+        {
+            get => _Selected_Template;
+            set
+            {
+                _Selected_Template = value;
+                OnSelected_Template_Changed();
+            }
+        }
+        public event EventHandler Selected_Template_Changed;
+        public void OnSelected_Template_Changed()
+        {
+            this.Selected_Template_Changed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler Template_Deleted;
+        public void OnTemplate_Deleted()
+        {
+            LoadTemplates();
+            this.Template_Deleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public Window_MainWindow MainWindow;
         public LoadingSpinner loadingSpinner;
         public ProgressBar downloadBar;
         private CornerIcon cornerIcon;
@@ -156,20 +180,28 @@ namespace Kenedia.Modules.BuildsManager
                   30689, //Eternity
                 });
 
-            ReloadKey.Value.Enabled = true;
-            ReloadKey.Value.Activated += delegate
-            {
-                ScreenNotification.ShowNotification("Rebuilding UI!", ScreenNotification.NotificationType.Error);
-                MainWindow.Dispose();
-                CreateUI();
-                MainWindow.Show();
-            };
-
             DataLoaded = false;
         }
 
         protected override async Task LoadAsync()
         {
+        }
+        public void LoadTemplates()
+        {
+            var currentTemplate = _Selected_Template?.Name;
+
+            Templates = new List<Template>();
+            var files = Directory.GetFiles(BuildsManager.Paths.builds, "*.json", SearchOption.AllDirectories).ToList();
+
+            files.Sort((a, b) => a.CompareTo(b));
+
+            foreach (string path in files)
+            {
+                var template = new Template(path);
+                Templates.Add(template);
+
+                if (template.Name == currentTemplate) _Selected_Template = template;
+            }
         }
 
         protected override void OnModuleLoaded(EventArgs e)
@@ -797,30 +829,27 @@ namespace Kenedia.Modules.BuildsManager
 
         private void CreateUI()
         {
+            LoadTemplates();
+            Selected_Template = new Template();
+
             var Height = 670;
             var Width = 915;
 
-
-            MainWindow = new iMainWindow(
+            MainWindow = new Window_MainWindow(
                 TextureManager.getBackground(_Backgrounds.MainWindow),
                 new Rectangle(30, 30, Width, Height + 30),
-                new Rectangle(30, 5, Width - 5, Height - 30),
-                TextureManager,
-                GameService.Graphics.SpriteScreen,
-                //new Template(Paths.builds + @"Condi Harbaebae.json")
-                new Template()
-                );
+                new Rectangle(30, 15, Width - 3, Height + 25)
+                )
+            {
+                Parent = GameService.Graphics.SpriteScreen,
+                Title = "Builds Manager",
+                Emblem = TextureManager._Emblems[(int)_Emblems.SwordAndShield],
+                Subtitle = "❤",
+                SavesPosition = true,
+                Id = $"BuildsManager New",
+            };
 
-            //MainWindow.Template = new Template(Paths.builds + @"Condi Harbaebae.json");
-            MainWindow.ToggleWindow();
-
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEKRYqPTlwAAAAogEAAGoAAACvAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]");
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQEQGzEvPjZLF0sXehZ6FjYBNgFTF1MXcRJxEgAAAAAAAAAAAAAAAAAAAAA=]");
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIEBhYVPT9wAKYAPQGoALMAagCpAOIBnADuAAAAAAAAAAAAAAAAAAAAAAA=]"); // All Filled
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIkAAAAEgAAAAAAqQAAAAAAAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAA=]"); // Partly Empty
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIzAAAACwAAAAAAAAAAAD0BAAAAAAAAAADuAAAAAAAAAAAAAAAAAAAAAAA=]"); // Minimum Empty
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]"); //Empty
-            //MainWindow.Build.BuildTemplate = new BuildTemplate("[&DQMGOyYvOSsqDwAAhgAAACYBAABXFgAA8BUAAAAAAAAAAAAAAAAAAAAAAAA=]");
+            //MainWindow.ToggleWindow();
         }
     }
 }

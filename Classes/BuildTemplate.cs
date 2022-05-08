@@ -112,7 +112,11 @@ namespace Kenedia.Modules.BuildsManager
     public class AquaticWeapon_TemplateItem : TemplateItem
     {
         public API.weaponType WeaponType = API.weaponType.Unkown;
-        public List<API.SigilItem> Sigils = new List<API.SigilItem>();
+        public List<API.SigilItem> Sigils = new List<API.SigilItem>() 
+        {
+            new API.SigilItem(),
+            new API.SigilItem(),
+        };
         public List<Rectangle> SigilsBounds = new List<Rectangle>()
         {
             Rectangle.Empty,
@@ -250,6 +254,11 @@ namespace Kenedia.Modules.BuildsManager
                                 Gear.AquaticWeapons[index].Sigils.Add(BuildsManager.Data.Sigils.Find(e => e.Id == id));
                             }
                         }
+
+                        for (int i = Gear.AquaticWeapons[index].Sigils.Count; i < 2; i++)
+                        {
+                            Gear.AquaticWeapons[index].Sigils.Add(new API.SigilItem());
+                        }
                     }
 
                     Build = new BuildTemplate(Template_json.BuildCode);
@@ -261,7 +270,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Gear = new GearTemplate();
                 Build = new BuildTemplate();
-                Name = "New Build Template";
+                Name = "[No Name Set]";
                 Template_json = new Template_json();
 
                 var player = GameService.Gw2Mumble.PlayerCharacter;
@@ -278,7 +287,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public void Reset()
         {
-            Name = "My Build Template";
+            Name = "[No Name Set]";
             Template_json = new Template_json()
             {
                 Name = Name
@@ -307,7 +316,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 item.WeaponType = API.weaponType.Unkown;
                 item.Stat = null;
-                item.Sigils = new List<API.SigilItem>() { null, null };
+                item.Sigils = new List<API.SigilItem>() { new API.SigilItem(), new API.SigilItem() };
             }
 
             Build = new BuildTemplate();
@@ -323,9 +332,18 @@ namespace Kenedia.Modules.BuildsManager
             SetChanged();
         }
 
+        public void Delete()
+        {
+            if (Path == null) return;
+            if (Name == "[No Name Set]") return;
+            File.Delete(Path + Name + ".json");
+            BuildsManager.ModuleInstance.OnTemplate_Deleted();
+        }
+
         public void Save()
         {
             if (Path == null) return;
+            if (Name == "[No Name Set]") return;
             if (Template_json.Name != Name) File.Delete(Path + Template_json.Name + ".json");
 
             Template_json.Name = Name;
@@ -366,7 +384,10 @@ namespace Kenedia.Modules.BuildsManager
 
             Template_json.BuildCode = Build.ParseBuildCode();
 
+            var existsAlready = File.Exists(Path + Name + ".json");
+
             File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
+            if (!existsAlready) BuildsManager.ModuleInstance.OnTemplate_Deleted();
         }
 
         public EventHandler Changed;
@@ -635,6 +656,7 @@ namespace Kenedia.Modules.BuildsManager
         public EventHandler Changed;
         private void OnChanged(object sender, EventArgs e)
         {
+            BuildsManager.Logger.Debug("Template Changed: ");
             this.Changed?.Invoke(this, EventArgs.Empty);
         }
     }

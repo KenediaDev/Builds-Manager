@@ -280,6 +280,14 @@
         AddButton,
         ResetButton,
         ResetButton_Hovered,
+        Template_Border,
+        Delete,
+        Delete_Hovered,
+        Clear,
+        Add,
+        Add_Hovered,
+        Copy,
+        Copy_Hovered,
     }
     public enum _Icons
     {

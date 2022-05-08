@@ -195,6 +195,7 @@ namespace Kenedia.Modules.BuildsManager
             public Rectangle TextBounds;
             public List<Rectangle> ContentBounds;
             public Rectangle Bounds;
+            public Rectangle AbsolutBounds;
             public bool Hovered;
         }
         public enum selectionType
@@ -205,6 +206,7 @@ namespace Kenedia.Modules.BuildsManager
             Weapons,
             AquaticSigils,
             AquaticWeapons,
+            Profession,
         }
 
         private Texture2D Background;
@@ -212,7 +214,17 @@ namespace Kenedia.Modules.BuildsManager
         public selectionType SelectionType;
         public List<SelectionEntry> List = new List<SelectionEntry>();
         public List<SelectionEntry> FilteredList = new List<SelectionEntry>();
-        public object SelectionTarget;
+        private object _SelectionTarget;
+        public object SelectionTarget
+        {
+            get => _SelectionTarget;
+            set
+            {
+                FilteredList = new List<SelectionEntry>();
+                _SelectionTarget = value;
+                UpdateLayouts = true;
+            }
+        }
         public Template Template;
         public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public int UpgradeIndex = 0;
@@ -224,6 +236,8 @@ namespace Kenedia.Modules.BuildsManager
         public CustomTooltip CustomTooltip;
         public bool Clicked = false;
         public DateTime LastClick = DateTime.Now;
+
+        private bool UpdateLayouts;
 
         public SelectionPopUp(Container parent)
         {
@@ -241,6 +255,7 @@ namespace Kenedia.Modules.BuildsManager
                 ZIndex = 998,
                 Visible = false,
             };
+            FilterBox.TextChanged += FilterBox_TextChanged;
 
             ContentService = new ContentService();
             Font = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
@@ -265,6 +280,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 FilterBox.Show();
                 FilterBox.Focused = true;
+                UpdateLayout();
                 Clicked = false;
             };
             Disposed += delegate
@@ -272,6 +288,13 @@ namespace Kenedia.Modules.BuildsManager
                 FilterBox.Dispose();
             };
         }
+
+        private void FilterBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateLayout();
+        }
+
+        public API.Profession SelectedProfession;
 
         public EventHandler Changed;
         private void OnChanged()
@@ -305,6 +328,11 @@ namespace Kenedia.Modules.BuildsManager
                             Template.Save();
                             break;
 
+                        case selectionType.Profession:
+                            SelectedProfession = (API.Profession)entry.Object;
+                            FilterBox.Text = null;
+                            break;
+
                         case selectionType.Stats:
                             var stat = (API.Stat)entry.Object;
                             var item = (TemplateItem)SelectionTarget;
@@ -334,7 +362,6 @@ namespace Kenedia.Modules.BuildsManager
                                     break;
                             }
 
-
                             Template.Save();
                             break;
 
@@ -347,6 +374,9 @@ namespace Kenedia.Modules.BuildsManager
                     }
 
                     LastClick = DateTime.Now;
+                    List = new List<SelectionEntry>();
+                    FilteredList = new List<SelectionEntry>();
+
                     Clicked = true;
                     Hide();
                     break;
@@ -444,16 +474,10 @@ namespace Kenedia.Modules.BuildsManager
 
             foreach (SelectionEntry entry in FilteredList)
             {
-                entry.Hovered = new Rectangle(0, FilterBox.Height + 5 + i * (size + 5), Width, size).Contains(RelativeMousePosition);
+                entry.AbsolutBounds = new Rectangle(0, FilterBox.Height + 5 + i * (size + 5), Width, size);
                 entry.TextureBounds = new Rectangle(0, FilterBox.Height + 5 + i * (size + 5), size, size);
                 entry.TextBounds = new Rectangle(size + 5, FilterBox.Height + i * (size + 5), size, size);
                 entry.ContentBounds = new List<Rectangle>();
-                if (entry.Hovered && SelectionType != selectionType.Weapons)
-                {
-                    CustomTooltip.Visible = true;
-                    CustomTooltip.Header = entry.Header;
-                    CustomTooltip.Content = entry.Content;
-                }
 
                 int j = 0;
                 int statSize = Font.LineHeight;
@@ -472,10 +496,31 @@ namespace Kenedia.Modules.BuildsManager
             Height = FilterBox.Height + 5 + Math.Min(10, Math.Max(FilteredList.Count, 1)) * (size + 5);
         }
 
+        private void UpdateStates()
+        {
+            foreach (SelectionEntry entry in FilteredList)
+            {
+                entry.Hovered = entry.AbsolutBounds.Contains(RelativeMousePosition);
+
+                if (entry.Hovered && SelectionType != selectionType.Weapons && CustomTooltip != null)
+                {
+                    CustomTooltip.Visible = true;
+                    CustomTooltip.Header = entry.Header;
+                    CustomTooltip.Content = entry.Content;
+                }
+            }
+        }
+
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             Clicked = false;
-            UpdateLayout();
+            if (UpdateLayouts)
+            {
+                UpdateLayout();
+                UpdateLayouts = false;
+            }
+
+            UpdateStates();
 
             spriteBatch.DrawOnCtrl(this,
                                     ContentService.Textures.Pixel,
@@ -566,7 +611,7 @@ namespace Kenedia.Modules.BuildsManager
         private Template _Template;
         public Template Template
         {
-            get => _Template;
+            get => BuildsManager.ModuleInstance.Selected_Template;
             set
             {
                 if (value != null)
@@ -712,11 +757,19 @@ namespace Kenedia.Modules.BuildsManager
 
             ProfessionChanged();
             UpdateLayout();
+
+           BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+        }
+
+        private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
+        {
+            UpdateLayout();
         }
 
         public EventHandler Changed;
         private void OnChanged()
         {
+            BuildsManager.ModuleInstance.Selected_Template.Save();
             this.Changed?.Invoke(this, EventArgs.Empty);
         }
 
@@ -751,9 +804,9 @@ namespace Kenedia.Modules.BuildsManager
                             SelectionPopUp.Show();
                             SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
                             SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Weapons;
-                            SelectionPopUp.SelectionTarget = item;
                             SelectionPopUp.List = Weapons_Selection;
                             SelectionPopUp.Slot = item.Slot;
+                            SelectionPopUp.SelectionTarget = item;
                         }
                     }
                 }
@@ -765,9 +818,9 @@ namespace Kenedia.Modules.BuildsManager
                         SelectionPopUp.Show();
                         SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
                         SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticWeapons;
-                        SelectionPopUp.SelectionTarget = item;
                         SelectionPopUp.List = Weapons_Selection;
                         SelectionPopUp.Slot = item.Slot;
+                        SelectionPopUp.SelectionTarget = item;
                     }
                 }
             }
@@ -1288,10 +1341,11 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (_Template == null) return;
+            if (Template == null) return;
             if (Template.Build.Profession != null && _Profession != Template.Build.Profession.Id) ProfessionChanged();
 
             UpdateStates();
+
             int i;
             Color itemColor = new Color(75, 75, 75, 255);
             Color frameColor = new Color(125, 125, 125, 255);
@@ -1301,7 +1355,6 @@ namespace Kenedia.Modules.BuildsManager
             {
                 if (item != null)
                 {
-
                     spriteBatch.DrawOnCtrl(this,
                                         ContentService.Textures.Pixel,
                                         item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
@@ -1474,7 +1527,7 @@ namespace Kenedia.Modules.BuildsManager
 
                     for (int j = 0; j < 2; j++)
                     {
-                            var sigil = item.Sigils != null && item.Sigils.Count > j ? item.Sigils[j] : null;
+                            var sigil = item.Sigils != null && item.Sigils.Count > j && item.Sigils[j] != null && item.Sigils[j].Id > 0 ? item.Sigils[j] : null;
 
                             spriteBatch.DrawOnCtrl(this,
                                                     ContentService.Textures.Pixel,

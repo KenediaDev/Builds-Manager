@@ -1,11 +1,50 @@
 ﻿using System;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Microsoft.Xna.Framework;
+using MonoGame.Extended.BitmapFonts;
 
 namespace Kenedia.Modules.BuildsManager
 {
     public static class ClassExtensions
     {  
+        public static Rectangle CalculateTextRectangle(this Rectangle rect, string text, BitmapFont font)
+        {
+            int rows = 0;
+            int width = 0;
+            foreach(char c in text)
+            {
+               var region = font.GetCharacterRegion(c);
+
+                if (width + region.Width > rect.Width) {
+                    rows++;
+                    width = 0;
+                }
+
+                width += region.Width;
+            }
+
+            return new Rectangle(rect.Location, new Point(rect.Width, rows * font.LineHeight));
+        }
+        public static Rectangle CalculateTextRectangle(this BitmapFont font, string text, Rectangle rect)
+        {
+            int rows = 0;
+            int width = 0;
+            foreach (char c in text)
+            {
+                var region = font.GetCharacterRegion(c);
+
+                if (width + region.Width > rect.Width)
+                {
+                    rows++;
+                    width = 0;
+                }
+
+                width += region.Width;
+            }
+
+            return new Rectangle(rect.Location, new Point(rect.Width, rows * font.LineHeight));
+        }
+
         public static int Distance2D(this Point p1, Point p2)
         {
             return (int)Math.Sqrt(Math.Pow((p2.X - p1.X), 2) + Math.Pow((p2.Y - p1.Y), 2));

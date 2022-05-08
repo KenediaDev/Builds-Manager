@@ -14,9 +14,114 @@ using Blish_HUD.Input;
 using Color = Microsoft.Xna.Framework.Color;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Gw2Sharp.ChatLinks;
+using MonoGame.Extended.BitmapFonts;
 
 namespace Kenedia.Modules.BuildsManager
 {
+    public class Control_AddButton : Control
+    {
+        Texture2D Add;
+        Texture2D AddHovered;
+        Texture2D _EmptyTraitLine;
+        Texture2D _Template_Border;
+        public BitmapFont Font;
+
+        private string _Text;
+        public string Text
+        {
+            get => _Text;
+            set
+            {
+                _Text = value;
+            }
+        }
+
+        public Control_AddButton()
+        {
+            //BackgroundColor = Color.Red;
+            Add = BuildsManager.TextureManager.getControlTexture(_Controls.Add);
+            AddHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Add_Hovered);
+            _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            _Template_Border = BuildsManager.TextureManager.getControlTexture(_Controls.Template_Border);
+
+            var cnt = new ContentService();
+            Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)16, ContentService.FontStyle.Regular);
+        }
+
+        protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
+        {
+            spriteBatch.DrawOnCtrl(this,
+                                   ContentService.Textures.Pixel,
+                                   bounds,
+                                   bounds,
+                                    new Color(0,0,0,125),
+                                   0f,
+                                   Vector2.Zero
+                                   );
+
+            var color = Color.Black;
+            var rect = bounds;
+
+            //Top
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
+
+            //Bottom
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
+
+            //Left
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
+
+            //Right
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
+
+            bounds = bounds.Add(1, 1, -2, -2);
+            
+            spriteBatch.DrawOnCtrl(this,
+                                   _EmptyTraitLine,
+                                   bounds.Add(2,2, -4, -6),
+                                   _EmptyTraitLine.Bounds,
+                                    MouseOver ? new Color(135, 135, 135, 255) : new Color(105, 105, 105, 255),
+                                   0f,
+                                   Vector2.Zero
+                                   );
+
+            spriteBatch.DrawOnCtrl(this,
+                                   _Template_Border,
+                                   bounds,
+                                   _Template_Border.Bounds,
+                                    MouseOver ? Color.Gray : Color.Black,
+                                   0f,
+                                   Vector2.Zero
+                                   );
+
+            spriteBatch.DrawOnCtrl(this,
+                                   MouseOver ? AddHovered : Add,
+                                   new Rectangle(6,6, Height - 12, Height- 12),
+                                   MouseOver ? AddHovered.Bounds : Add.Bounds,
+                                   Color.White,
+                                   0f,
+                                   Vector2.Zero
+                                   );
+
+            var textBounds = new Rectangle(12 + (Height - 12), 6, Width - (12 + (Height - 12)), Height - 12);
+            rect = Font.CalculateTextRectangle(Text, textBounds);
+
+            spriteBatch.DrawStringOnCtrl(this,
+                                    Text,
+                                    Font,
+                                    textBounds,
+                                    MouseOver ? Color.White : Color.LightGray,
+                                    false,
+                                    rect.Height > textBounds.Height ? HorizontalAlignment.Left: HorizontalAlignment.Center
+                                    );
+
+        }
+    }
+
     public class iTab : Panel
     {
         public bool Hovered;
@@ -101,7 +206,7 @@ namespace Kenedia.Modules.BuildsManager
         private Template _Template;
         public Template Template
         {
-            get => _Template;
+            get => BuildsManager.ModuleInstance.Selected_Template;
             set
             {
                 if (value != null)
@@ -110,7 +215,6 @@ namespace Kenedia.Modules.BuildsManager
                     NameBox.Text = value.Name;
                     NameLabel.Text = value.Name;
                     if (Gear != null) Gear.Template = value;
-                    if (Build != null) Build.Template = value;
 
                     _Template.Changed += delegate
                     {
@@ -121,12 +225,17 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
 
+        private Texture2D _EmptyTraitLine;
+        BitmapFont Font = Content.DefaultFont18;
+
         public iMainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion, TextureManager textureManager, Container parent, Template template) : base(background, windowRegion, contentRegion)
         {
 
             TextureManager = textureManager;
             Parent = parent;
             _Template = template;
+            BuildsManager.ModuleInstance.Selected_Template = template;
+            _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
 
             _Template.Changed += delegate
             {
@@ -147,8 +256,7 @@ namespace Kenedia.Modules.BuildsManager
             _BuildSelection_Bounds = new Rectangle(ContentBounds.X, 0 + TitleBarBounds.Height, 265, 40);
             _TemplateSelection = new Control_TemplateSelection(this)
             {                 
-                Location = new Point(ContentBounds.X + 5, 0),
-                Size = new Point(255, ContentRegion.Height),
+                Location = new Point(0, 50),
             };
             _TemplateSelection.TemplateChanged += _TemplateSelection_TemplateChanged;
 
@@ -199,13 +307,12 @@ namespace Kenedia.Modules.BuildsManager
                 ResetButton.Location = new Point(_BuildSelection_Bounds.Right + Gear.Width - ResetButton.Width, 0);
             };
 
-            var font = Content.DefaultFont18;
 
             ProfessionIcon = new Image()
             {
                 Texture = BuildsManager.TextureManager.getIcon(_Icons.Bug),
-                Location = new Point(_BuildSelection_Bounds.Right, 0),
-                Size = new Point(font.LineHeight + (4 * 3), font.LineHeight + (4 * 3)),
+                Location = new Point(_BuildSelection_Bounds.Right + 2, 2),
+                Size = new Point(Font.LineHeight + (4 * 3) - 4, Font.LineHeight + (4 * 3) - 4),
                 Parent = this,
             };
 
@@ -215,25 +322,25 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = this,
                 Location = new Point(_BuildSelection_Bounds.Right + ProfessionIcon.Width + 5, 0),
                 Visible = false,
-                Font = font,
-                Height = font.LineHeight + (4 * 3),
+                Font = Font,
+                Height = Font.LineHeight + (4 * 3),
             };
 
             ResetButton = new Image()
             {
-                BasicTooltipText = "Reset",
-                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton),
-                Size = new Point(NameBox.Height , NameBox.Height),
+                BasicTooltipText = "Delete",
+                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.Delete),
+                Size = new Point(NameBox.Height - 1, NameBox.Height - 1),
                 Parent = this,
-                Location = new Point(Width - 5 - NameBox.Height, 0),
+                Location = new Point(Width - 7 - NameBox.Height, 1),
         };
             ResetButton.MouseEntered += delegate
             {
-                ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton_Hovered);
+                ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.Delete_Hovered);
             };
             ResetButton.MouseLeft += delegate
             {
-                ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.ResetButton);
+                ResetButton.Texture = BuildsManager.TextureManager.getControlTexture(_Controls.Delete);
             };
             ResetButton.Click += delegate
             {
@@ -246,12 +353,12 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Text = "This Builds Name",
                 Parent = this,
-                Width = NameBox.Width,
+                Width = Width - ResetButton.Width - 10 - (_BuildSelection_Bounds.Right + ProfessionIcon.Width + 5),
                 VerticalAlignment = VerticalAlignment.Middle,
                 Location = new Point(_BuildSelection_Bounds.Right + ProfessionIcon.Width + 5, 0),
-                Height = font.LineHeight + (4 * 3),
+                Height = Font.LineHeight + (4 * 3),
                 //AutoSizeHeight = true,
-                Font = font,
+                Font = Font,
             };
             NameLabel.Click += delegate
             {
@@ -260,6 +367,16 @@ namespace Kenedia.Modules.BuildsManager
                 CancelName.Show();
                 SaveName.Show();
                 NameBox.Text = NameLabel.Text;
+                NameBox.Width = NameLabel.Width - (NameBox.Height * 2);
+                NameBox.Height = NameLabel.Height - 2;
+                NameBox.Location = new Point(NameLabel.Location.X, NameLabel.Location.Y + 1);
+                
+                NameBox.Focused = true;
+                NameBox.SelectionStart = 0;
+                NameBox.SelectionEnd= NameBox.Text.Length;
+                
+                SaveName.Location = new Point(NameBox.LocalBounds.Right + (NameBox.Height * 1), 0);
+                CancelName.Location = new Point(NameBox.LocalBounds.Right, 0);
             };
 
 
@@ -394,13 +511,26 @@ namespace Kenedia.Modules.BuildsManager
 
             TemplateBox.Text = Template.Build.ParseBuildCode();
             NameLabel.Text = Template.Name;
+
+            var button = new Control_AddButton()
+            {
+                Parent = this,
+                Text = "Create",
+                Location = new Point(0,0),
+                Size = new Point(125,30),
+            };
         }
+
+        private bool registered;
 
         private void _TemplateSelection_TemplateChanged(object sender, TemplateChangedEvent e)
         {
-            Template = e.Template;
-            Build.Template = e.Template;
-            Gear.Template = e.Template;
+            BuildsManager.ModuleInstance.Selected_Template = e.Template;
+            NameLabel.Text = e.Template.Name;
+            TemplateBox.Text = e.Template.Build.TemplateCode;
+            //Template = e.Template;
+            //Build.Template = e.Template;
+            //Gear.Template = e.Template;
         }
 
         private void UpdateTabStates()
@@ -454,9 +584,35 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds)
-        {
-
+        {         
             base.PaintBeforeChildren(spriteBatch, bounds);
+
+            var rect = new Rectangle(ProfessionIcon.Location.X - 2, 85, NameLabel.Width + ProfessionIcon.Width + 5, Font.LineHeight + (4 * 3));
+            spriteBatch.DrawOnCtrl(this,
+                                   _EmptyTraitLine,
+                                   rect,
+                                  _EmptyTraitLine.Bounds,
+                                    new Color(135, 135, 135, 255),
+                                  0f,
+                                  default);
+
+            var color = Color.Black;
+
+            //Top
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
+
+            //Bottom
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
+
+            //Left
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
+
+            //Right
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
         }
 
         public override void PaintAfterChildren(SpriteBatch spriteBatch, Rectangle bounds)

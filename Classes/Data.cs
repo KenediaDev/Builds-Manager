@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Kenedia.Modules.BuildsManager
 {
-   public class iData
+    public class iData
     {
         public static ContentsManager ContentsManager;
         public static DirectoriesManager DirectoriesManager;
@@ -30,11 +30,11 @@ namespace Kenedia.Modules.BuildsManager
         public iData(ContentsManager contentsManager = null, DirectoriesManager directoriesManager = null)
         {
             if (contentsManager != null) ContentsManager = contentsManager;
-            if(directoriesManager != null) DirectoriesManager = directoriesManager;
+            if (directoriesManager != null) DirectoriesManager = directoriesManager;
 
             string file_path;
             var culture = BuildsManager.getCultureString();
-            var base_path = BuildsManager.Paths.BasePath+ @"\api\";
+            var base_path = BuildsManager.Paths.BasePath + @"\api\";
 
             file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(System.IO.File.ReadAllText(file_path));
@@ -59,21 +59,21 @@ namespace Kenedia.Modules.BuildsManager
             if (System.IO.File.Exists(file_path)) Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(System.IO.File.ReadAllText(file_path));
 
             Trinkets = Trinkets.OrderBy(e => e.TrinketType).ToList();
-            Weapons = Weapons.OrderBy(e => (int) e.WeaponType).ToList();
+            Weapons = Weapons.OrderBy(e => (int)e.WeaponType).ToList();
 
-            Texture2D texture; 
+            Texture2D texture;
             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
             {
-                foreach(API.TrinketItem item in Trinkets) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach(API.WeaponItem item in Weapons) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach(API.ArmorItem item in Armors) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach(API.SigilItem item in Sigils) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach(API.RuneItem item in Runes) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach (API.TrinketItem item in Trinkets) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach (API.WeaponItem item in Weapons) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach (API.ArmorItem item in Armors) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach (API.SigilItem item in Sigils) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+                foreach (API.RuneItem item in Runes) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
 
                 foreach (API.Profession profession in Professions)
                 {
                     texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(profession.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    profession.Icon.Texture = texture;
+                    profession.Icon.Texture = texture.GetRegion(4, 4, 26, 26);
 
                     texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(profession.IconBig.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                     profession.IconBig.Texture = texture;
