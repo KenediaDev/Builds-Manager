@@ -225,7 +225,10 @@ namespace Kenedia.Modules.BuildsManager
                 UpdateLayouts = true;
             }
         }
-        public Template Template;
+        public Template Template
+        {
+            get => BuildsManager.ModuleInstance.Selected_Template;
+        }
         public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public int UpgradeIndex = 0;
 
@@ -685,7 +688,7 @@ namespace Kenedia.Modules.BuildsManager
             SelectionPopUp = new SelectionPopUp(GameService.Graphics.SpriteScreen)
             {
                 CustomTooltip = CustomTooltip,
-                Template = Template,
+                //Template = Template,
             };
             SelectionPopUp.Changed += delegate
             {
@@ -764,13 +767,19 @@ namespace Kenedia.Modules.BuildsManager
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
         {
             UpdateLayout();
+
+            BuildsManager.ModuleInstance.Selected_Template.Changed += delegate
+            {
+                UpdateLayout();
+            };
         }
 
         public EventHandler Changed;
         private void OnChanged()
         {
-            BuildsManager.ModuleInstance.Selected_Template.Save();
-            this.Changed?.Invoke(this, EventArgs.Empty);
+            BuildsManager.ModuleInstance.Selected_Template.SetChanged();
+            //BuildsManager.ModuleInstance.Selected_Template.Save();
+            //this.Changed?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnGlobalClick(object sender, MouseEventArgs m)
@@ -1075,7 +1084,7 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
-            SelectionPopUp.Template = Template;
+            //SelectionPopUp.Template = Template;
         }
 
         private void UpdateLayout()

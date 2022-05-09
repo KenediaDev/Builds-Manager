@@ -456,13 +456,26 @@ private void UpdateLayout()
         {
             if (MouseOver)
             {
-                Selector.Visible = true;
+                var highlight = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
+                var selector = SelectorBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
 
-                Selector.Location = LocalBounds.Location.Add(new Point(SelectorBounds.Width, 0));
-                Selector.Size = LocalBounds.Size.Add(new Point(-SelectorBounds.Width, 0));
+                if (selector || highlight)
+                {
+                    if (Selector.Visible)
+                    {
+                        Selector.Visible = false;
+                    }
+                    else
+                    {
+                        Selector.Visible = true;
 
-                Selector.Elite = Elite;
-                Selector.Specialization = Specialization;
+                        Selector.Location = LocalBounds.Location.Add(new Point(SelectorBounds.Width, 0));
+                        Selector.Size = LocalBounds.Size.Add(new Point(-SelectorBounds.Width, 0));
+
+                        Selector.Elite = Elite;
+                        Selector.Specialization = Specialization;
+                    }
+                }
             }
         }
 

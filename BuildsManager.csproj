@@ -158,6 +158,10 @@
       <HintPath>packages\protobuf-net.Core.3.0.101\lib\net461\protobuf-net.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SemVer, Version=1.2.2.0, Culture=neutral, PublicKeyToken=a89bb7dc6f7a145c, processorArchitecture=MSIL">
+      <HintPath>packages\SemanticVersioning.1.2.2\lib\net45\SemVer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>packages\SharpDX.4.0.1\lib\net45\SharpDX.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>

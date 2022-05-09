@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace Kenedia.Modules.BuildsManager
@@ -70,6 +71,7 @@ namespace Kenedia.Modules.BuildsManager
         public string Name;
         public GearTemplate_json Gear;
         public string BuildCode;
+        public string GearCode;
         public Template_json(string path = default)
         {
             if (path != default && File.Exists(path))
@@ -155,6 +157,129 @@ namespace Kenedia.Modules.BuildsManager
             new AquaticWeapon_TemplateItem(){ Slot = _EquipmentSlots.AquaticWeapon1},
             new AquaticWeapon_TemplateItem(){ Slot = _EquipmentSlots.AquaticWeapon2},
         };
+
+        public GearTemplate(string code = default)
+        {
+            if(code != default)
+            {
+                int j = 0;
+                var ItemStrings = code.Split(']');
+                if(ItemStrings.Length == 19)
+                {
+                    j = 0;
+                    for (int i = 0; i < Trinkets.Count; i++)
+                    {
+                        ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
+                        int id;
+                        Int32.TryParse(ItemStrings[i], out id);
+                        if(id > 0) Trinkets[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == id);
+                        BuildsManager.Logger.Debug("Trinkets[" + j + "].Stat: " + Trinkets[j].Stat?.Name);
+                        j++;
+                    }
+
+                    j = 0;
+                    for (int i = Trinkets.Count; i < Trinkets.Count + Armor.Count; i++)
+                    {
+                        ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
+                        var ids =  ItemStrings[i].Split('|');
+
+                        int stat_id;
+                        Int32.TryParse(ids[0], out stat_id);
+                       if(stat_id > 0 ) Armor[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        BuildsManager.Logger.Debug("Armor[" + j + "].Stat: " + Armor[j].Stat?.Name);
+
+                        int rune_id;
+                        Int32.TryParse(ids[1], out rune_id);
+                       if(stat_id > 0 ) Armor[j].Rune = BuildsManager.Data.Runes.Find(e => e.Id == rune_id);
+                        BuildsManager.Logger.Debug("Armor[" + j + "].Rune: " + Armor[j].Rune?.Name);
+
+                        j++;
+                    }
+
+                    j = 0;
+                    for (int i = (Trinkets.Count + Armor.Count); i < (Trinkets.Count + Armor.Count + Weapons.Count); i++)
+                    {
+                        ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
+                        var ids = ItemStrings[i].Split('|');
+
+                        int stat_id;
+                        Int32.TryParse(ids[0], out stat_id);
+                        if (stat_id > 0) Weapons[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        BuildsManager.Logger.Debug("Weapons[" + j + "].Stat: " + Weapons[j].Stat?.Name);
+
+                        int weaponType = -1;
+                        Int32.TryParse(ids[1], out weaponType);
+                        Weapons[j].WeaponType = (API.weaponType) weaponType;
+                        BuildsManager.Logger.Debug("Weapons[" + j + "].WeaponType: " + Weapons[j].WeaponType.ToString());
+
+                        int sigil_id;
+                        Int32.TryParse(ids[2], out sigil_id);
+                        if (stat_id > 0) Weapons[j].Sigil = BuildsManager.Data.Sigils.Find(e => e.Id == sigil_id);
+                        BuildsManager.Logger.Debug("Weapons[" + j + "].Sigil: " + Weapons[j].Sigil?.Name);
+
+                        j++;
+                    }
+
+                    j = 0;
+                    for (int i = (Trinkets.Count + Armor.Count + Weapons.Count); i < (Trinkets.Count + Armor.Count + Weapons.Count + AquaticWeapons.Count); i++)
+                    {
+                        ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
+                        var ids = ItemStrings[i].Split('|');
+
+                        int stat_id;
+                        Int32.TryParse(ids[0], out stat_id);
+                        if (stat_id > 0) AquaticWeapons[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].Stat: " + AquaticWeapons[j].Stat?.Name);
+
+                        int weaponType = -1;
+                        Int32.TryParse(ids[1], out weaponType);
+                        AquaticWeapons[j].WeaponType = (API.weaponType)weaponType;
+                        BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].WeaponType: " + AquaticWeapons[j].WeaponType.ToString());
+
+                        int sigil1_id;
+                        Int32.TryParse(ids[2], out sigil1_id);
+                        if (sigil1_id > 0) AquaticWeapons[j].Sigils[0] = BuildsManager.Data.Sigils.Find(e => e.Id == sigil1_id);
+                        BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].Sigil: " + AquaticWeapons[j].Sigils[0]?.Name);
+
+                        int sigil2_id;
+                        Int32.TryParse(ids[3], out sigil2_id);
+                        if (sigil2_id > 0) AquaticWeapons[j].Sigils[1] = BuildsManager.Data.Sigils.Find(e => e.Id == sigil2_id);
+                        BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].Sigil: " + AquaticWeapons[j].Sigils[1]?.Name);
+
+                        j++;
+                    }
+                }
+            }
+        }
+        public string TemplateCode
+        {
+            get
+            {
+                string code = "";
+
+                foreach(TemplateItem item in Trinkets)
+                {
+                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "]";
+                }
+
+                foreach(Armor_TemplateItem item in Armor)
+                {
+                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + (item.Rune != null ? item.Rune.Id : 0) + "]";
+                }
+
+                foreach(Weapon_TemplateItem item in Weapons)
+                {
+                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + ((int)item.WeaponType) + "|" + (item.Sigil != null ? item.Sigil.Id : 0)+ "]";
+                }
+
+                foreach(AquaticWeapon_TemplateItem item in AquaticWeapons)
+                {
+                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + ((int)item.WeaponType) + "|" + (item.Sigils[0] != null ? item.Sigils[0].Id : 0) +"|" + (item.Sigils[1] != null ? item.Sigils[1].Id : 0) + "]";
+                }
+
+                return code;
+            }
+        }
     }
 
     public class Template
@@ -336,69 +461,123 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (Path == null) return;
             if (Name == "[No Name Set]") return;
-            File.Delete(Path + Name + ".json");
-            BuildsManager.ModuleInstance.OnTemplate_Deleted();
+            var path = Path + Name + ".json";
+
+            FileInfo fi = null;
+            try
+            {
+                fi = new FileInfo(path);
+            }
+            catch (ArgumentException) { }
+            catch (PathTooLongException) { }
+            catch (NotSupportedException) { }
+
+            if (Name.Contains("/") || Name.Contains(@"\") || ReferenceEquals(fi, null))
+            {
+                // file name is not valid
+                ScreenNotification.ShowNotification(Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
+            }
+            else
+            {
+                File.Delete(Path + Name + ".json");
+                BuildsManager.ModuleInstance.OnTemplate_Deleted();
+            }
         }
 
         public void Save()
         {
             if (Path == null) return;
             if (Name == "[No Name Set]") return;
-            if (Template_json.Name != Name) File.Delete(Path + Template_json.Name + ".json");
 
-            Template_json.Name = Name;
-            Template_json.Profession = Profession != null ? Profession.Id : "Unkown";
-            Template_json.Specialization = Specialization != null ? Specialization.Id : 0;
+            var path = Path + Name + ".json";
 
-            Template_json.Gear = new GearTemplate_json();
-
-            for (int i = 0; i < Gear.Trinkets.Count; i++)
+            FileInfo fi = null;
+            try
             {
-                var item = Gear.Trinkets[i];
-                Template_json.Gear.Trinkets[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                fi = new FileInfo(path);
             }
+            catch (ArgumentException) { }
+            catch (PathTooLongException) { }
+            catch (NotSupportedException) { }
 
-            for (int i = 0; i < Gear.Armor.Count; i++)
+            if (Name.Contains("/") || Name.Contains(@"\") || ReferenceEquals(fi, null))
             {
-                var item = Gear.Armor[i];
-                Template_json.Gear.Armor[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                Template_json.Gear.Armor[i]._Rune = item.Rune != null ? item.Rune.Id : 0;
+                // file name is not valid
+                ScreenNotification.ShowNotification(Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
             }
-
-            for (int i = 0; i < Gear.Weapons.Count; i++)
+            else
             {
-                var item = Gear.Weapons[i];
-                Template_json.Gear.Weapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                Template_json.Gear.Weapons[i]._Sigil = item.Sigil != null ? item.Sigil.Id : 0;
-                Template_json.Gear.Weapons[i]._WeaponType = item.WeaponType.ToString();
+                // file name is valid... May check for existence by calling fi.Exists.
+
+                var existsAlready = File.Exists(Path + Name + ".json") || File.Exists(Path + Template_json.Name + ".json");
+
+                if (Template_json.Name != Name) File.Delete(Path + Template_json.Name + ".json");
+
+                Template_json.Name = Name;
+                Template_json.Profession = Profession != null ? Profession.Id : "Unkown";
+                Template_json.Specialization = Specialization != null ? Specialization.Id : 0;
+
+                Template_json.Gear = new GearTemplate_json();
+
+                for (int i = 0; i < Gear.Trinkets.Count; i++)
+                {
+                    var item = Gear.Trinkets[i];
+                    Template_json.Gear.Trinkets[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                }
+
+                for (int i = 0; i < Gear.Armor.Count; i++)
+                {
+                    var item = Gear.Armor[i];
+                    Template_json.Gear.Armor[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                    Template_json.Gear.Armor[i]._Rune = item.Rune != null ? item.Rune.Id : 0;
+                }
+
+                for (int i = 0; i < Gear.Weapons.Count; i++)
+                {
+                    var item = Gear.Weapons[i];
+                    Template_json.Gear.Weapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                    Template_json.Gear.Weapons[i]._Sigil = item.Sigil != null ? item.Sigil.Id : 0;
+                    Template_json.Gear.Weapons[i]._WeaponType = item.WeaponType.ToString();
+                }
+
+                for (int i = 0; i < Gear.AquaticWeapons.Count; i++)
+                {
+                    var item = Gear.AquaticWeapons[i];
+
+                    Template_json.Gear.AquaticWeapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
+                    Template_json.Gear.AquaticWeapons[i]._Sigils = item.Sigils != null ? item.Sigils.Select(e => e != null ? e.Id : 0).ToList() : new List<int>();
+                    Template_json.Gear.AquaticWeapons[i]._WeaponType = item.WeaponType.ToString();
+                }
+
+                Template_json.BuildCode = Build.ParseBuildCode();
+                Template_json.GearCode = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
+
+
+                File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
+                if (!existsAlready)
+                {
+                    BuildsManager.ModuleInstance.OnTemplates_Loaded();
+                }
             }
-
-            for (int i = 0; i < Gear.AquaticWeapons.Count; i++)
-            {
-                var item = Gear.AquaticWeapons[i];
-
-                Template_json.Gear.AquaticWeapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                Template_json.Gear.AquaticWeapons[i]._Sigils = item.Sigils != null ? item.Sigils.Select(e => e != null ? e.Id : 0).ToList() : new List<int>();
-                Template_json.Gear.AquaticWeapons[i]._WeaponType = item.WeaponType.ToString();
-            }
-
-            Template_json.BuildCode = Build.ParseBuildCode();
-
-            var existsAlready = File.Exists(Path + Name + ".json");
-
-            File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
-            if (!existsAlready) BuildsManager.ModuleInstance.OnTemplate_Deleted();
         }
 
-        public EventHandler Changed;
+        public event EventHandler Edit;
+        public event EventHandler Changed;
         private void OnChanged(object sender, EventArgs e)
         {
             this.Changed?.Invoke(this, EventArgs.Empty);
             Save();
         }
+
+        private void OnEdit(object sender, EventArgs e)
+        {
+            this.Edit?.Invoke(this, EventArgs.Empty);
+            Save();
+        }
+
         public void SetChanged()
         {
-            OnChanged(null, EventArgs.Empty);
+            OnEdit(null, EventArgs.Empty);
         }
     }
 
@@ -612,6 +791,10 @@ namespace Kenedia.Modules.BuildsManager
                         build.TerrestrialUtility3SkillPaletteId,
                         build.TerrestrialEliteSkillPaletteId,
                     };
+
+                        //build.RevenantActiveTerrestrialLegend;
+                       //build.RevenantInactiveTerrestrialLegend;
+
                         int skillindex = 0;
                         foreach (ushort pid in Terrestrial_PaletteIds)
                         {

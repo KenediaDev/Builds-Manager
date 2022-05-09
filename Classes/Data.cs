@@ -11,11 +11,18 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Blish_HUD;
 using Microsoft.Xna.Framework.Graphics;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace Kenedia.Modules.BuildsManager
 {
     public class iData
     {
+        public class SkillID_Pair
+        {
+            public int PaletteID;
+            public int ID;
+        }
+
         public static ContentsManager ContentsManager;
         public static DirectoriesManager DirectoriesManager;
 
@@ -26,101 +33,228 @@ namespace Kenedia.Modules.BuildsManager
         public List<API.ArmorItem> Armors = new List<API.ArmorItem>();
         public List<API.WeaponItem> Weapons = new List<API.WeaponItem>();
         public List<API.TrinketItem> Trinkets = new List<API.TrinketItem>();
+        public List<SkillID_Pair> SkillID_Pairs = new List<SkillID_Pair>();
+
+        private bool fetchAPI;
+        static Texture2D PlaceHolder;
+
+        private Texture2D LoadImage(string path,  GraphicsDevice graphicsDevice, List<string> filesToDelete, Rectangle region = default, Rectangle default_Bounds = default)
+        {
+            var texture = PlaceHolder;
+
+            {
+                try
+                {
+                    texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    double factor = 1;
+
+                    if (default_Bounds != default)
+                    {
+                        factor = (double) texture.Width / (double) default_Bounds.Width;
+                    }
+
+                    if(region != default)
+                    {
+                        region = region.Scale(factor);
+
+                        if(texture.Bounds.Contains(region))
+                        {
+                            texture = texture.GetRegion(region);
+                        }
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    if (System.IO.File.Exists(path)) filesToDelete.Add(path);
+                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    fetchAPI = true;
+                    return texture;
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    return texture;
+                }
+                catch (FileNotFoundException)
+                {
+                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    fetchAPI = true;
+                    return texture;
+                }
+                catch (FileLoadException)
+                {
+                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    fetchAPI = true;
+                    return texture;
+                }
+            }
+
+            return texture;
+        }
+
+        private string LoadFile(string path,  List<string> filesToDelete)
+        {
+            var txt = "";
+
+            {
+                try
+                {
+                    txt = System.IO.File.ReadAllText(path);
+                }
+                catch (InvalidOperationException)
+                {
+                    if (System.IO.File.Exists(path)) filesToDelete.Add(path);
+                    fetchAPI = true;
+                }
+                catch (UnauthorizedAccessException)
+                {
+
+                }
+                catch (FileNotFoundException)
+                {
+                    fetchAPI = true;
+                }
+                catch (FileLoadException)
+                {
+                    fetchAPI = true;
+                }
+            }
+
+            return txt;
+        }
 
         public iData(ContentsManager contentsManager = null, DirectoriesManager directoriesManager = null)
         {
             if (contentsManager != null) ContentsManager = contentsManager;
             if (directoriesManager != null) DirectoriesManager = directoriesManager;
 
+            PlaceHolder = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+            List<string> filesToDelete = new List<string>();
+
             string file_path;
             var culture = BuildsManager.getCultureString();
             var base_path = BuildsManager.Paths.BasePath + @"\api\";
 
+            SkillID_Pairs = JsonConvert.DeserializeObject<List<SkillID_Pair>>(new StreamReader(ContentsManager.GetFileStream(@"data\skillpalettes.json")).ReadToEnd());
+
             file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete));
             foreach (API.Stat stat in Stats) { stat.Icon.Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) { attri.Icon.Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
             file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete));
 
             file_path = BuildsManager.Paths.runes + @"runes [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Runes = JsonConvert.DeserializeObject<List<API.RuneItem>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Runes = JsonConvert.DeserializeObject<List<API.RuneItem>>(LoadFile(file_path, filesToDelete));
 
             file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Sigils = JsonConvert.DeserializeObject<List<API.SigilItem>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Sigils = JsonConvert.DeserializeObject<List<API.SigilItem>>(LoadFile(file_path, filesToDelete));
 
             file_path = BuildsManager.Paths.armory + @"armors [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Armors = JsonConvert.DeserializeObject<List<API.ArmorItem>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Armors = JsonConvert.DeserializeObject<List<API.ArmorItem>>(LoadFile(file_path, filesToDelete));
 
             file_path = BuildsManager.Paths.armory + @"weapons [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Weapons = JsonConvert.DeserializeObject<List<API.WeaponItem>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Weapons = JsonConvert.DeserializeObject<List<API.WeaponItem>>(LoadFile(file_path, filesToDelete));
 
             file_path = BuildsManager.Paths.armory + @"trinkets [" + culture + "].json";
-            if (System.IO.File.Exists(file_path)) Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(System.IO.File.ReadAllText(file_path));
+            if (System.IO.File.Exists(file_path)) Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(LoadFile(file_path, filesToDelete));
 
             Trinkets = Trinkets.OrderBy(e => e.TrinketType).ToList();
             Weapons = Weapons.OrderBy(e => (int)e.WeaponType).ToList();
+            
 
-            Texture2D texture;
+            Texture2D texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
-            {
-                foreach (API.TrinketItem item in Trinkets) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach (API.WeaponItem item in Weapons) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach (API.ArmorItem item in Armors) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach (API.SigilItem item in Sigils) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
-                foreach (API.RuneItem item in Runes) { item.Icon.Texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(item.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)); }
+            {                
+                foreach (API.TrinketItem item in Trinkets) {
+                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
+                }
+
+                foreach (API.WeaponItem item in Weapons)
+                {
+                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
+                }
+                foreach (API.ArmorItem item in Armors)
+                {
+                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
+                }
+                foreach (API.SigilItem item in Sigils)
+                {
+                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
+                }
+                foreach (API.RuneItem item in Runes)
+                {
+                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
+                }
 
                 foreach (API.Profession profession in Professions)
                 {
-                    texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(profession.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    profession.Icon.Texture = texture.GetRegion(4, 4, 26, 26);
+                    //Icon
+                    profession.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(4, 4, 26, 26));
 
-                    texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(profession.IconBig.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                    profession.IconBig.Texture = texture;
+                    //IconBig
+                    profession.IconBig.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.IconBig.Path, graphicsDevice, filesToDelete);                    
 
                     foreach (API.Specialization specialization in profession.Specializations)
                     {
-                        texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                        specialization.Icon.Texture = texture;
 
-                        texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.Background.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                        specialization.Background.Texture = texture.GetRegion(0, texture.Height - 133, texture.Width - (texture.Width - 643), texture.Height - (texture.Height - 133));
+                        //Icon
+                        specialization.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.Icon.Path, graphicsDevice, filesToDelete);
+
+                        //Background
+                        specialization.Background.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.Background.Path, graphicsDevice, filesToDelete, new Rectangle(0, 123, 643, 123));
 
                         if (specialization.ProfessionIcon != null)
                         {
-                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.ProfessionIcon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                            specialization.ProfessionIcon.Texture = texture;
+                            //ProfessionIcon
+                            specialization.ProfessionIcon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.ProfessionIcon.Path, graphicsDevice, filesToDelete);
                         }
                         if (specialization.ProfessionIconBig != null)
                         {
-                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.ProfessionIconBig.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                            specialization.ProfessionIconBig.Texture = texture;
+                            //ProfessionIconBig
+                            specialization.ProfessionIconBig.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.ProfessionIconBig.Path, graphicsDevice, filesToDelete);
                         }
                         if (specialization.WeaponTrait != null)
                         {
-                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(specialization.WeaponTrait.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                            specialization.WeaponTrait.Icon.Texture = texture.GetRegion(3, 3, texture.Width - 6, texture.Height - 6);
+                            //WeaponTrait Icon
+                            specialization.WeaponTrait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.WeaponTrait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3,3, 58, 58));
                         }
 
 
                         foreach (API.Trait trait in specialization.MajorTraits)
                         {
-                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(trait.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                            trait.Icon.Texture = texture.GetRegion(3, 3, texture.Width - 6, texture.Height - 6);
+                            trait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + trait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58), new Rectangle(0,0,64,64));
                         }
 
                         foreach (API.Trait trait in specialization.MinorTraits)
                         {
-                            texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(trait.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                            trait.Icon.Texture = texture.GetRegion(3, 3, texture.Width - 6, texture.Height - 6);
+                            trait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + trait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58));
                         }
                     }
 
                     foreach (API.Skill skill in profession.Skills)
                     {
-                        texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, new FileStream(skill.Icon.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                        skill.Icon.Texture = texture.GetRegion(12, 12, texture.Width - (12 * 2), texture.Height - (12 * 2));
+                        skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
                     }
+                }
+
+                foreach(string path in filesToDelete)
+                {
+                    try
+                    {
+                        System.IO.File.Delete(path);
+                    }
+                    catch (IOException)
+                    {
+
+                    }
+                }
+
+                if (fetchAPI)
+                {
+                    fetchAPI = false;
+                    BuildsManager.ModuleInstance.Fetch_APIData(true);
+                    return;
                 }
 
                 BuildsManager.DataLoaded = true;

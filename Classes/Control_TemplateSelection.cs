@@ -58,7 +58,7 @@ namespace Kenedia.Modules.BuildsManager
 
             var cnt = new ContentService();
             Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
-            TemplateTooltip = new Control_TemplateTooltip();
+            //TemplateTooltip = new Control_TemplateTooltip();
         }
 
         public event EventHandler<TemplateChangedEvent> TemplateChanged;
@@ -80,7 +80,7 @@ namespace Kenedia.Modules.BuildsManager
         }
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            TemplateTooltip.Visible = MouseOver;
+            if(TemplateTooltip != null) TemplateTooltip.Visible = MouseOver;
 
             spriteBatch.DrawOnCtrl(this,
                                    _Template_Border,
@@ -348,7 +348,8 @@ namespace Kenedia.Modules.BuildsManager
                 RefreshList();
             };
 
-            BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Template_Deleted;
+            BuildsManager.ModuleInstance.Templates_Loaded += ModuleInstance_Templates_Loaded;
+            BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Templates_Loaded;
             ContentPanel.ChildAdded += ContentPanel_ChildsChanged;
             ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;
         }
@@ -363,7 +364,7 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
 
-        private void ModuleInstance_Template_Deleted(object sender, EventArgs e)
+        private void ModuleInstance_Templates_Loaded(object sender, EventArgs e)
         {
             Refresh();
         }

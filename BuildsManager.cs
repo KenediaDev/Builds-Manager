@@ -57,6 +57,7 @@ namespace Kenedia.Modules.BuildsManager
         public SettingEntry<bool> PasteOnCopy;
         public SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
         public SettingEntry<int> GameVersion;
+        public SettingEntry<string> ModuleVersion;
 
         public List<Template> Templates = new List<Template>();
         private Template _Selected_Template;
@@ -65,21 +66,50 @@ namespace Kenedia.Modules.BuildsManager
             get => _Selected_Template;
             set
             {
+                if (_Selected_Template != null)
+                {
+                    _Selected_Template.Edit -= OnSelected_Template_Edit;
+                }
+
                 _Selected_Template = value;
-                OnSelected_Template_Changed();
+
+                if (value != null)
+                {
+                    OnSelected_Template_Changed();
+                    _Selected_Template.Edit += OnSelected_Template_Edit;
+                }
             }
         }
+
+        public event EventHandler Selected_Template_Edit;
+        public void OnSelected_Template_Edit(object sender, EventArgs e)
+        {
+            ScreenNotification.ShowNotification("Edited: " + _Selected_Template?.Name, ScreenNotification.NotificationType.Warning);
+            this.Selected_Template_Edit?.Invoke(this, EventArgs.Empty);
+        }
+
         public event EventHandler Selected_Template_Changed;
         public void OnSelected_Template_Changed()
         {
+            ScreenNotification.ShowNotification("Changed to: " + _Selected_Template?.Name, ScreenNotification.NotificationType.Warning);
             this.Selected_Template_Changed?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler Template_Deleted;
         public void OnTemplate_Deleted()
         {
+            ScreenNotification.ShowNotification("Deleted: " + _Selected_Template?.Name, ScreenNotification.NotificationType.Warning);
+
+            Selected_Template = new Template();
             LoadTemplates();
             this.Template_Deleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler Templates_Loaded;
+        public void OnTemplates_Loaded()
+        {
+            LoadTemplates();
+            this.Templates_Loaded?.Invoke(this, EventArgs.Empty);
         }
 
         public Window_MainWindow MainWindow;
@@ -119,10 +149,12 @@ namespace Kenedia.Modules.BuildsManager
 
             var internal_settings = settings.AddSubCollection("Internal Settings", false);
             GameVersion = internal_settings.DefineSetting(nameof(GameVersion), 0);
+            ModuleVersion = internal_settings.DefineSetting(nameof(ModuleVersion), "0.0.0");
         }
 
         protected override void Initialize()
-        {
+        {            
+            Logger.Info("Starting Builds Manager v." + Version.BaseVersion());
             Paths = new iPaths(DirectoriesManager.GetFullDirectoryPath("builds-manager"));
             ArmoryItems.AddRange(new int[] {
                   80248, //Perfected Envoy armor (light) Head
@@ -189,6 +221,7 @@ namespace Kenedia.Modules.BuildsManager
         public void LoadTemplates()
         {
             var currentTemplate = _Selected_Template?.Name;
+            ScreenNotification.ShowNotification(_Selected_Template?.Name, ScreenNotification.NotificationType.Error);
 
             Templates = new List<Template>();
             var files = Directory.GetFiles(BuildsManager.Paths.builds, "*.json", SearchOption.AllDirectories).ToList();
@@ -202,6 +235,9 @@ namespace Kenedia.Modules.BuildsManager
 
                 if (template.Name == currentTemplate) _Selected_Template = template;
             }
+
+            _Selected_Template?.SetChanged();
+            OnSelected_Template_Changed();
         }
 
         protected override void OnModuleLoaded(EventArgs e)
@@ -268,6 +304,11 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Unload()
         {
+            MainWindow.Dispose();
+            Data = null;
+            TextureManager = null;
+            cornerIcon.Dispose();
+
             ModuleInstance = null;
         }
 
@@ -295,9 +336,9 @@ namespace Kenedia.Modules.BuildsManager
             return culture;
         }
 
-        private async Task Fetch_APIData()
+        public async Task Fetch_APIData(bool force = false)
         {
-            if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || false)
+            if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || ModuleVersion.Value != Version.BaseVersion().ToString() || force == true || false)
             {
                 var downloadList = new List<APIDownload_Image>();
                 var culture = getCultureString();
@@ -387,18 +428,18 @@ namespace Kenedia.Modules.BuildsManager
                                 Name = rune.Name,
                                 Id = rune.Id,
                                 ChatLink = rune.ChatLink,
-                                Icon = new API.Icon() { Url = rune.Icon.Url.ToString(), Path = Paths.rune_icons + Regex.Match(rune.Icon, "[0-9]*.png") },
+                                Icon = new API.Icon() { Url = rune.Icon.Url.ToString(), Path = Paths.rune_icons.Replace(Paths.BasePath, "") + Regex.Match(rune.Icon, "[0-9]*.png") },
                                 Bonuses = rune.Details.Bonuses.ToList(),
                             };
                             Runes.Add(temp);
 
-                            if (!System.IO.File.Exists(temp.Icon.Path))
+                            if (!System.IO.File.Exists(Paths.BasePath + temp.Icon.Path))
                             {
                                 downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading Item Icon '{0}'", rune.Name),
                                     url = temp.Icon.Url,
-                                    path = temp.Icon.Path,
+                                    path = Paths.BasePath + temp.Icon.Path,
                                 });
                             }
 
@@ -420,18 +461,18 @@ namespace Kenedia.Modules.BuildsManager
                                 Name = sigil.Name,
                                 Id = sigil.Id,
                                 ChatLink = sigil.ChatLink,
-                                Icon = new API.Icon() { Url = sigil.Icon.Url.ToString(), Path = Paths.sigil_icons + Regex.Match(sigil.Icon, "[0-9]*.png") },
+                                Icon = new API.Icon() { Url = sigil.Icon.Url.ToString(), Path = Paths.sigil_icons.Replace(Paths.BasePath, "") + Regex.Match(sigil.Icon, "[0-9]*.png") },
                                 Description = sigil.Details.InfixUpgrade.Buff.Description,
                             };
                             Sigils.Add(temp);
 
-                            if (!System.IO.File.Exists(temp.Icon.Path))
+                            if (!System.IO.File.Exists(Paths.BasePath + temp.Icon.Path))
                             {
                                 downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading Item Icon '{0}'", sigil.Name),
                                     url = temp.Icon.Url,
-                                    path = temp.Icon.Path,
+                                    path = Paths.BasePath + temp.Icon.Path,
                                 });
                             }
 
@@ -491,7 +532,7 @@ namespace Kenedia.Modules.BuildsManager
                                     Name = item.Name,
                                     Id = item.Id,
                                     ChatLink = item.ChatLink,
-                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons.Replace(Paths.BasePath, "") + Regex.Match(item.Icon, "[0-9]*.png") },
                                     AttributeAdjustment = item.Details.AttributeAdjustment,
                                 };
 
@@ -512,7 +553,7 @@ namespace Kenedia.Modules.BuildsManager
                                     Name = item.Name,
                                     Id = item.Id,
                                     ChatLink = item.ChatLink,
-                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons.Replace(Paths.BasePath, "") + Regex.Match(item.Icon, "[0-9]*.png") },
                                     AttributeAdjustment = item.Details.AttributeAdjustment,
                                 };
 
@@ -533,7 +574,7 @@ namespace Kenedia.Modules.BuildsManager
                                     Name = item.Name,
                                     Id = item.Id,
                                     ChatLink = item.ChatLink,
-                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons.Replace(Paths.BasePath, "") + Regex.Match(item.Icon, "[0-9]*.png") },
                                     AttributeAdjustment = item.Details.AttributeAdjustment,
                                 };
 
@@ -553,7 +594,7 @@ namespace Kenedia.Modules.BuildsManager
                                     Name = item.Name,
                                     Id = item.Id,
                                     ChatLink = item.ChatLink,
-                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons + Regex.Match(item.Icon, "[0-9]*.png") },
+                                    Icon = new API.Icon() { Url = item.Icon.Url.ToString(), Path = Paths.armory_icons.Replace(Paths.BasePath, "") + Regex.Match(item.Icon, "[0-9]*.png") },
                                     TrinketType = API.trinketType.Back,
                                     AttributeAdjustment = item.Details.AttributeAdjustment,
                                 });
@@ -586,7 +627,7 @@ namespace Kenedia.Modules.BuildsManager
                             Name = trait.Name,
                             Description = trait.Description,
                             Id = trait.Id,
-                            Icon = new API.Icon() { Url = trait.Icon.Url.ToString(), Path = Paths.traits_icons + Regex.Match(trait.Icon, "[0-9]*.png") },
+                            Icon = new API.Icon() { Url = trait.Icon.Url.ToString(), Path = Paths.traits_icons.Replace(Paths.BasePath, "") + Regex.Match(trait.Icon, "[0-9]*.png") },
                             Specialization = trait.Specialization,
                             Tier = trait.Tier,
                             Order = trait.Order,
@@ -605,20 +646,20 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             Name = spec.Name,
                             Id = spec.Id,
-                            Icon = new API.Icon() { Url = spec.Icon.Url.ToString(), Path = Paths.spec_icons + Regex.Match(spec.Icon, "[0-9]*.png") },
-                            Background = new API.Icon() { Url = spec.Background.Url.ToString(), Path = Paths.spec_backgrounds + Regex.Match(spec.Background, "[0-9]*.png") },
-                            ProfessionIconBig = spec.ProfessionIconBig != null ? new API.Icon() { Url = spec.ProfessionIconBig.ToString(), Path = Paths.spec_icons + Regex.Match(spec.ProfessionIconBig, "[0-9]*.png") } : null,
-                            ProfessionIcon = spec.ProfessionIcon != null ? new API.Icon() { Url = spec.ProfessionIcon.ToString(), Path = Paths.spec_icons + Regex.Match(spec.ProfessionIcon, "[0-9]*.png") } : null,
+                            Icon = new API.Icon() { Url = spec.Icon.Url.ToString(), Path = Paths.spec_icons.Replace(Paths.BasePath, "") + Regex.Match(spec.Icon, "[0-9]*.png") },
+                            Background = new API.Icon() { Url = spec.Background.Url.ToString(), Path = Paths.spec_backgrounds.Replace(Paths.BasePath, "") + Regex.Match(spec.Background, "[0-9]*.png") },
+                            ProfessionIconBig = spec.ProfessionIconBig != null ? new API.Icon() { Url = spec.ProfessionIconBig.ToString(), Path = Paths.spec_icons.Replace(Paths.BasePath, "") + Regex.Match(spec.ProfessionIconBig, "[0-9]*.png") } : null,
+                            ProfessionIcon = spec.ProfessionIcon != null ? new API.Icon() { Url = spec.ProfessionIcon.ToString(), Path = Paths.spec_icons.Replace(Paths.BasePath, "") + Regex.Match(spec.ProfessionIcon, "[0-9]*.png") } : null,
                             Profession = spec.Profession,
                             Elite = spec.Elite,
                         };
 
                         temp.WeaponTrait = Traits.Find(e => e.Id == spec.WeaponTrait);
-                        if (temp.WeaponTrait != null && !System.IO.File.Exists(temp.WeaponTrait.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                        if (temp.WeaponTrait != null && !System.IO.File.Exists(Paths.BasePath + temp.WeaponTrait.Icon.Path)) downloadList.Add(new APIDownload_Image()
                         {
                             display_text = string.Format("Downloading Trait Icon '{0}'", temp.WeaponTrait.Name),
                             url = temp.WeaponTrait.Icon.Url,
-                            path = temp.WeaponTrait.Icon.Path,
+                            path = Paths.BasePath + temp.WeaponTrait.Icon.Path,
                         });
 
                         foreach (int id in spec.MinorTraits)
@@ -628,11 +669,11 @@ namespace Kenedia.Modules.BuildsManager
                             if (trait != null)
                             {
                                 temp.MinorTraits.Add(trait);
-                                if (!System.IO.File.Exists(trait.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                if (!System.IO.File.Exists(Paths.BasePath + trait.Icon.Path)) downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading Trait Icon '{0}'", trait.Name),
                                     url = trait.Icon.Url,
-                                    path = trait.Icon.Path,
+                                    path = Paths.BasePath + trait.Icon.Path,
                                 });
                             }
                         }
@@ -643,11 +684,11 @@ namespace Kenedia.Modules.BuildsManager
                             if (trait != null)
                             {
                                 temp.MajorTraits.Add(trait);
-                                if (!System.IO.File.Exists(trait.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                if (!System.IO.File.Exists(Paths.BasePath + trait.Icon.Path)) downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading Trait Icon '{0}'", trait.Name),
                                     url = trait.Icon.Url,
-                                    path = trait.Icon.Path,
+                                    path = Paths.BasePath + trait.Icon.Path,
                                 });
                             }
                         }
@@ -666,7 +707,7 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             Name = skill.Name,
                             Id = skill.Id,
-                            Icon = new API.Icon() { Url = skill.Icon.Url.ToString(), Path = Paths.skill_icons + Regex.Match(skill.Icon, "[0-9]*.png") },
+                            Icon = new API.Icon() { Url = skill.Icon.Url.ToString(), Path = Paths.skill_icons.Replace(Paths.BasePath, "") + Regex.Match(skill.Icon, "[0-9]*.png") },
                             ChatLink = skill.ChatLink,
                             Description = skill.Description,
                             Specialization = skill.Specialization != null ? (int)skill.Specialization : 0,
@@ -697,8 +738,8 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             Name = profession.Name,
                             Id = profession.Id,
-                            Icon = new API.Icon() { Url = profession.Icon.Url.ToString(), Path = Paths.profession_icons + Regex.Match(profession.Icon, "[0-9]*.png") },
-                            IconBig = new API.Icon() { Url = profession.IconBig.Url.ToString(), Path = Paths.profession_icons + Regex.Match(profession.IconBig, "[0-9]*.png") },
+                            Icon = new API.Icon() { Url = profession.Icon.Url.ToString(), Path = Paths.profession_icons.Replace(Paths.BasePath, "") + Regex.Match(profession.Icon, "[0-9]*.png") },
+                            IconBig = new API.Icon() { Url = profession.IconBig.Url.ToString(), Path = Paths.profession_icons.Replace(Paths.BasePath, "") + Regex.Match(profession.IconBig, "[0-9]*.png") },
                         };
 
                         Logger.Debug("Adding Specs ....");
@@ -709,32 +750,32 @@ namespace Kenedia.Modules.BuildsManager
                             {
                                 temp.Specializations.Add(spec);
 
-                                if (!System.IO.File.Exists(spec.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                if (!System.IO.File.Exists(Paths.BasePath + spec.Icon.Path)) downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading Specialization Icon '{0}'", spec.Name),
                                     url = spec.Icon.Url,
-                                    path = spec.Icon.Path,
+                                    path = Paths.BasePath + spec.Icon.Path,
                                 });
 
-                                if (!System.IO.File.Exists(spec.Background.Path)) downloadList.Add(new APIDownload_Image()
+                                if (!System.IO.File.Exists(Paths.BasePath + spec.Background.Path)) downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading Background '{0}'", spec.Name),
                                     url = spec.Background.Url,
-                                    path = spec.Background.Path,
+                                    path = Paths.BasePath + spec.Background.Path,
                                 });
 
-                                if (spec.ProfessionIcon != null && !System.IO.File.Exists(spec.ProfessionIcon.Path)) downloadList.Add(new APIDownload_Image()
+                                if (spec.ProfessionIcon != null && !System.IO.File.Exists(Paths.BasePath + spec.ProfessionIcon.Path)) downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading ProfessionIcon '{0}'", spec.Name),
                                     url = spec.ProfessionIcon.Url,
-                                    path = spec.ProfessionIcon.Path,
+                                    path = Paths.BasePath + spec.ProfessionIcon.Path,
                                 });
 
-                                if (spec.ProfessionIconBig != null && !System.IO.File.Exists(spec.ProfessionIconBig.Path)) downloadList.Add(new APIDownload_Image()
+                                if (spec.ProfessionIconBig != null && !System.IO.File.Exists(Paths.BasePath + spec.ProfessionIconBig.Path)) downloadList.Add(new APIDownload_Image()
                                 {
                                     display_text = string.Format("Downloading ProfessionIconBig '{0}'", spec.Name),
                                     url = spec.ProfessionIconBig.Url,
-                                    path = spec.ProfessionIconBig.Path,
+                                    path = Paths.BasePath + spec.ProfessionIconBig.Path,
                                 });
                             }
                         }
@@ -753,36 +794,63 @@ namespace Kenedia.Modules.BuildsManager
                         }
 
                         Logger.Debug("Adding Skills ....");
-                        foreach (KeyValuePair<int, int> skillIDs in profession.SkillsByPalette)
-                        {
-                            var skill = Skills.Find(e => e.Id == skillIDs.Value);
-                            if (skill != null)
-                            {
-                                skill.PaletteId = skillIDs.Key;
-                                temp.Skills.Add(skill);
 
-                                if (!System.IO.File.Exists(skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                        var SkillID_Pairs = JsonConvert.DeserializeObject<List<iData.SkillID_Pair>>(new StreamReader(ContentsManager.GetFileStream(@"data\skillpalettes.json")).ReadToEnd());
+
+                        if (profession.Id == "Revenant")
+                        {
+                            foreach (ProfessionSkill iSkill in profession.Skills)
+                            {
+                                var skill = Skills.Find(e => e.Id == iSkill.Id);
+                                var paletteID = SkillID_Pairs.Find(e => e.ID == iSkill.Id);
+
+                                if (skill != null && paletteID != null)
                                 {
-                                    display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
-                                    url = skill.Icon.Url,
-                                    path = skill.Icon.Path,
-                                });
+                                    skill.PaletteId = paletteID.PaletteID;
+                                    temp.Skills.Add(skill);
+
+                                    if (!System.IO.File.Exists(Paths.BasePath + skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                    {
+                                        display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
+                                        url = skill.Icon.Url,
+                                        path = Paths.BasePath + skill.Icon.Path,
+                                    });
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (KeyValuePair<int, int> skillIDs in profession.SkillsByPalette)
+                            {
+                                var skill = Skills.Find(e => e.Id == skillIDs.Value);
+                                if (skill != null)
+                                {
+                                    skill.PaletteId = skillIDs.Key;
+                                    temp.Skills.Add(skill);
+
+
+                                    if (!System.IO.File.Exists(Paths.BasePath + skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                    {
+                                        display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
+                                        url = skill.Icon.Url,
+                                        path = Paths.BasePath + skill.Icon.Path,
+                                    });
+                                }
                             }
                         }
 
-
-                        if (!System.IO.File.Exists(temp.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                        if (!System.IO.File.Exists(Paths.BasePath + temp.Icon.Path)) downloadList.Add(new APIDownload_Image()
                         {
                             display_text = string.Format("Downloading Profession Icon '{0}'", temp.Name),
                             url = temp.Icon.Url,
-                            path = temp.Icon.Path,
+                            path = Paths.BasePath + temp.Icon.Path,
                         });
 
-                        if (!System.IO.File.Exists(temp.IconBig.Path)) downloadList.Add(new APIDownload_Image()
+                        if (!System.IO.File.Exists(Paths.BasePath + temp.IconBig.Path)) downloadList.Add(new APIDownload_Image()
                         {
                             display_text = string.Format("Downloading Profession Icon '{0}'", temp.Name),
                             url = temp.IconBig.Url,
-                            path = temp.IconBig.Path,
+                            path = Paths.BasePath + temp.IconBig.Path,
                         });
 
                         Professions.Add(temp);
@@ -816,7 +884,9 @@ namespace Kenedia.Modules.BuildsManager
 
                 loadingSpinner.Visible = false;
                 downloadBar.Visible = false;
+
                 GameVersion.Value = Gw2MumbleService.Gw2Mumble.Info.Version;
+                ModuleVersion.Value = Version.BaseVersion().ToString();
             }
         }
 
@@ -848,6 +918,8 @@ namespace Kenedia.Modules.BuildsManager
                 SavesPosition = true,
                 Id = $"BuildsManager New",
             };
+
+            Selected_Template = Selected_Template;
 
             //MainWindow.ToggleWindow();
         }
