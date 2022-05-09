@@ -55,7 +55,9 @@ namespace Kenedia.Modules.BuildsManager
         public static List<int> ArmoryItems = new List<int>();
 
         public SettingEntry<bool> PasteOnCopy;
+        public SettingEntry<bool> ShowCornerIcon;
         public SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
+        public SettingEntry<Blish_HUD.Input.KeyBinding> ToggleWindow;
         public SettingEntry<int> GameVersion;
         public SettingEntry<string> ModuleVersion;
 
@@ -141,14 +143,24 @@ namespace Kenedia.Modules.BuildsManager
         {
 
             ReloadKey = settings.DefineSetting(nameof(ReloadKey),
-                                                      new Blish_HUD.Input.KeyBinding(Keys.LeftControl),
+                                                      new Blish_HUD.Input.KeyBinding(Keys.None),
                                                       () => "Reload Button",
                                                       () => "");
 
+            ToggleWindow = settings.DefineSetting(nameof(ToggleWindow),
+                                                      new Blish_HUD.Input.KeyBinding(ModifierKeys.Ctrl, Keys.B),
+                                                      () => "Toggle Window",
+                                                      () => "Show / Hide the UI");
+
             PasteOnCopy = settings.DefineSetting(nameof(PasteOnCopy),
-                                                      true,
+                                                      false,
                                                       () => "Paste Stat/Upgrade Name",
                                                       () => "Paste Stat/Upgrade Name after copying it.");
+
+            ShowCornerIcon = settings.DefineSetting(nameof(ShowCornerIcon),
+                                                      true,
+                                                      () => "Show Corner Icon",
+                                                      () => "Show / Hide the Corner Icon of this module.");
 
             var internal_settings = settings.AddSubCollection("Internal Settings", false);
             GameVersion = internal_settings.DefineSetting(nameof(GameVersion), 0);
@@ -216,12 +228,20 @@ namespace Kenedia.Modules.BuildsManager
                 });
 
             ReloadKey.Value.Enabled = true;
-            ReloadKey.Value.Activated += Value_Activated;
+            ReloadKey.Value.Activated += ReloadKey_Activated;
+
+            ToggleWindow.Value.Enabled = true;
+            ToggleWindow.Value.Activated += ToggleWindow_Activated;
 
             DataLoaded = false;
         }
 
-        private void Value_Activated(object sender, EventArgs e)
+        private void ToggleWindow_Activated(object sender, EventArgs e)
+        {
+            MainWindow?.ToggleWindow();
+        }
+
+        private void ReloadKey_Activated(object sender, EventArgs e)
         {
             ScreenNotification.ShowNotification("Rebuilding the UI", ScreenNotification.NotificationType.Warning);
             MainWindow?.Dispose();
@@ -261,7 +281,8 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Icon = TextureManager.getIcon(_Icons.Template),
                 BasicTooltipText = $"{Name}",
-                Parent = GameService.Graphics.SpriteScreen
+                Parent = GameService.Graphics.SpriteScreen,
+                Visible = ShowCornerIcon.Value,
             };
             cornerIcon.MouseEntered += delegate
             {
@@ -297,11 +318,18 @@ namespace Kenedia.Modules.BuildsManager
                 downloadBar.Location = new Point(cornerIcon.Location.X, cornerIcon.Location.Y + cornerIcon.Height + 5 + 3);
             };
 
+            ShowCornerIcon.SettingChanged += ShowCornerIcon_SettingChanged;
+
             // Base handler must be called
             base.OnModuleLoaded(e);
 
             DataLoaded_Event += delegate { CreateUI(); };
             LoadData();
+        }
+
+        private void ShowCornerIcon_SettingChanged(object sender, ValueChangedEventArgs<bool> e)
+        {
+            if(cornerIcon!=null) cornerIcon.Visible = e.NewValue;
         }
 
         protected override void Update(GameTime gameTime)

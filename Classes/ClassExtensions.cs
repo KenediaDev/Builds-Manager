@@ -2,6 +2,7 @@
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended.BitmapFonts;
+using System.Text.RegularExpressions;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -9,37 +10,49 @@ namespace Kenedia.Modules.BuildsManager
     {  
         public static Rectangle CalculateTextRectangle(this Rectangle rect, string text, BitmapFont font)
         {
-            int rows = 0;
+            int rows = 1;
             int width = 0;
-            foreach(char c in text)
+            var placeholder = font.GetCharacterRegion(' ');
+
+            foreach (char c in text)
             {
                var region = font.GetCharacterRegion(c);
 
-                if (width + region.Width > rect.Width) {
+                if (region != null && width + region.Width > rect.Width) { 
                     rows++;
                     width = 0;
                 }
 
-                width += region.Width;
+                width += region != null ? region.Width : placeholder.Width;
             }
 
             return new Rectangle(rect.Location, new Point(rect.Width, rows * font.LineHeight));
         }
         public static Rectangle CalculateTextRectangle(this BitmapFont font, string text, Rectangle rect)
         {
-            int rows = 0;
+            int rows = 1;
             int width = 0;
+            var placeholder = font.GetCharacterRegion(' ');
+
             foreach (char c in text)
             {
-                var region = font.GetCharacterRegion(c);
+                if(c == '\n')
+                {
+                    rows++;
+                    width = 0;
+                    continue;
+                }
 
-                if (width + region.Width > rect.Width)
+                var region = font.GetCharacterRegion(c);
+                var cWidth = region != null ? region.Width : placeholder.Width;
+
+                if (width + cWidth > rect.Width)
                 {
                     rows++;
                     width = 0;
                 }
 
-                width += region.Width;
+                width += cWidth;
             }
 
             return new Rectangle(rect.Location, new Point(rect.Width, rows * font.LineHeight));

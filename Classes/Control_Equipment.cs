@@ -83,46 +83,49 @@ namespace Kenedia.Modules.BuildsManager
             var ItemNameSize = headerFont.GetStringRectangle(Header);
 
             var width = (int)ItemNameSize.Width + 30;
-            var height = 10 + (int)ItemNameSize.Height;
+            //var height = 10 + (int)ItemNameSize.Height;
+            var height = 0;
+
             List<string> newStrings = new List<string>();
             foreach (string s in Content)
             {
                 var ss = s;
 
-                if (s.Contains("<c=@reminder>"))
-                {
-                    if (CurrentObject != null && CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
-                    ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
-                }
-
+                ss = Regex.Replace(ss, "<c=@reminder>", "\n\n");
                 ss = Regex.Replace(ss, "<c=@abilitytype>", "");
                 ss = Regex.Replace(ss, "</c>", "");
                 ss = Regex.Replace(ss, "<br>", "");
+                ss = ss.Replace(Environment.NewLine, "\n");
                 newStrings.Add(ss);
 
                 var rect = font.GetStringRectangle(ss);
-                width = Math.Max(width, Math.Min((int)rect.Width + 30, 300));
-
-                height += (int)(rect.Height);
-                height += (int)((int)(rect.Width / (width - 20)) * (font.LineHeight));
+                width = Math.Max(width, Math.Min((int) rect.Width + 20, 300));
             }
+
+            foreach (string s in newStrings)
+            {
+                var yRect = font.CalculateTextRectangle(s, new Rectangle(0, 0, width, 0));
+                height += (int) yRect.Height;                
+            }
+
             Content = newStrings;
+            var hRect = headerFont.CalculateTextRectangle(Header, new Rectangle(0, 0, width, 0));
 
-            var firstWidth = font.MeasureString(Content[0]).Width;
-
-            if (_Height == -1) _Height = height + (Content.Count == 1 ? firstWidth > (width - 20) ? font.LineHeight : 20 : Content.Count == 6 ? 20 : 20);
-            Height = _Height;
-            Width = width;
+            Height = 10 + hRect.Height + 15 + height + 5;
+            Width = width + 20;
+            _Height = Height;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             if (Header == null || Content == null) return;
             if (_Height == -1) UpdateLayout();
-
+           // UpdateLayout();
             var cnt = new ContentService();
             var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
             var headerFont = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
+
+            var hRect = headerFont.CalculateTextRectangle(Header, new Rectangle(0, 0, Width - 20, 0));
 
             var rect = font.GetStringRectangle(Header);
 
@@ -136,7 +139,7 @@ namespace Kenedia.Modules.BuildsManager
 
             spriteBatch.DrawOnCtrl(this,
                                     Background,
-                                    bounds.Add(2, 0, 0, 0),
+                                    bounds,
                                     bounds,
                                     Color.White,
                                     0f,
@@ -172,7 +175,7 @@ namespace Kenedia.Modules.BuildsManager
             spriteBatch.DrawStringOnCtrl(this,
                                    string.Join(Environment.NewLine, Content),
                                    font,
-                                   new Rectangle(10, (int)rect.Height + 25, Width - 10, Height),
+                                   new Rectangle(10, 10 + (int)rect.Height + 15, Width - 20, Height - (10 + (int)rect.Height + 15)),
                                    ContentColor,
                                    true,
                                    HorizontalAlignment.Left,
@@ -477,8 +480,8 @@ namespace Kenedia.Modules.BuildsManager
             foreach (SelectionEntry entry in FilteredList)
             {
                 entry.AbsolutBounds = new Rectangle(0, FilterBox.Height + 5 + i * (size + 5), Width, size);
-                entry.TextureBounds = new Rectangle(0, FilterBox.Height + 5 + i * (size + 5), size, size);
-                entry.TextBounds = new Rectangle(size + 5, FilterBox.Height + i * (size + 5), size, size);
+                entry.TextureBounds = new Rectangle(2, FilterBox.Height + 5 + i * (size + 5), size, size);
+                entry.TextBounds = new Rectangle(2 + size + 5, FilterBox.Height + i * (size + 5), size, size);
                 entry.ContentBounds = new List<Rectangle>();
 
                 int j = 0;
@@ -540,22 +543,6 @@ namespace Kenedia.Modules.BuildsManager
                                     0f,
                                     default);
 
-            var color = Color.Black;
-            //Top
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
-
-            //Bottom
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
-
-            //Left
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
-
-            //Right
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
             int i = 0;
             int size = 42;
@@ -587,7 +574,7 @@ namespace Kenedia.Modules.BuildsManager
                                                 texture,
                                                 entry.ContentBounds[j],
                                                 texture.Bounds,
-                                       entry.Hovered ? Color.Orange : Color.White,
+                                                entry.Hovered ? Color.Orange : Color.White,
                                                 0f,
                                                 default);
                         j++;
@@ -595,16 +582,53 @@ namespace Kenedia.Modules.BuildsManager
                 }
                 else
                 {
+                    List<string> strings = new List<string>();
+                    foreach (string s in entry.Content)
+                    {
+                        var ss = s;
+
+                        if (s.Contains("<c=@reminder>"))
+                        {
+                            ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
+
+                            //if (CurrentObject != null && CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
+                            //ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
+                        }
+
+                        ss = Regex.Replace(ss, "<c=@abilitytype>", "");
+                        ss = Regex.Replace(ss, "</c>", "");
+                        ss = Regex.Replace(ss, "<br>", "");
+                        strings.Add(ss);
+                    }
+
                     spriteBatch.DrawStringOnCtrl(this,
-                                            string.Join("; ", entry.Content),
+                                            string.Join("; ", strings).Replace(Environment.NewLine, ""),
                                             Font,
-                                            new Rectangle(size + 5, Font.LineHeight + FilterBox.Height + i * (size + 5), size, size),
+                                            new Rectangle(2 + size + 5, Font.LineHeight + FilterBox.Height + i * (size + 5) + Font.LineHeight -5, size, Font.LineHeight),
                                             Color.LightGray,
                                             false,
-                                            HorizontalAlignment.Left);
+                                            HorizontalAlignment.Left,
+                                            VerticalAlignment.Top);
                 }
                 i++;
             }
+
+            var color = Color.Black;
+            //Top
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
+
+            //Bottom
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
+
+            //Left
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
+
+            //Right
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
         }
     }
 
@@ -637,7 +661,7 @@ namespace Kenedia.Modules.BuildsManager
         public Control_Equipment(Container parent)
         {
             Parent = parent;
-
+            
             // BackgroundColor = Color.Aqua;
             _RuneTexture = BuildsManager.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
 
@@ -749,7 +773,7 @@ namespace Kenedia.Modules.BuildsManager
             ProfessionChanged();
             UpdateLayout();
 
-           BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
         }
 
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
@@ -1291,7 +1315,7 @@ namespace Kenedia.Modules.BuildsManager
 
                                 if (CustomTooltip.CurrentObject != item.Sigils[j])
                                 {
-                                    CustomTooltip.CurrentObject = item;
+                                    CustomTooltip.CurrentObject = item.Sigils[j];
                                     CustomTooltip.Header = item.Sigils[j].Name;
                                     CustomTooltip.Content = new List<string>() { item.Sigils[j].Description };
                                 }
@@ -1517,23 +1541,23 @@ namespace Kenedia.Modules.BuildsManager
 
                     for (int j = 0; j < 2; j++)
                     {
-                            var sigil = item.Sigils != null && item.Sigils.Count > j && item.Sigils[j] != null && item.Sigils[j].Id > 0 ? item.Sigils[j] : null;
+                        var sigil = item.Sigils != null && item.Sigils.Count > j && item.Sigils[j] != null && item.Sigils[j].Id > 0 ? item.Sigils[j] : null;
 
-                            spriteBatch.DrawOnCtrl(this,
-                                                    ContentService.Textures.Pixel,
-                                                    item.SigilsBounds[j].Add(new Rectangle(-1, -1, 2, 2)),
-                                                    Rectangle.Empty,
-                                                    sigil == null ? Color.Transparent : frameColor,
-                                                    0f,
-                                                    default);
+                        spriteBatch.DrawOnCtrl(this,
+                                                ContentService.Textures.Pixel,
+                                                item.SigilsBounds[j].Add(new Rectangle(-1, -1, 2, 2)),
+                                                Rectangle.Empty,
+                                                sigil == null ? Color.Transparent : frameColor,
+                                                0f,
+                                                default);
 
-                            spriteBatch.DrawOnCtrl(this,
-                                                    sigil == null ? _RuneTexture : sigil.Icon.Texture,
-                                                    item.SigilsBounds[j],
-                                                    sigil == null ? _RuneTexture.Bounds : sigil.Icon.Texture.Bounds,
-                                                    Color.White,
-                                                    0f,
-                                                    default);
+                        spriteBatch.DrawOnCtrl(this,
+                                                sigil == null ? _RuneTexture : sigil.Icon.Texture,
+                                                item.SigilsBounds[j],
+                                                sigil == null ? _RuneTexture.Bounds : sigil.Icon.Texture.Bounds,
+                                                Color.White,
+                                                0f,
+                                                default);
                     }
                 }
 
