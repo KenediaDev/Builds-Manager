@@ -510,7 +510,6 @@ namespace Kenedia.Modules.BuildsManager
 
         private void NameLabel_Click(object sender, MouseEventArgs e)
         {
-            ScreenNotification.ShowNotification("NameLabel : " + NameLabel.Text.Length, ScreenNotification.NotificationType.Error);
             NameLabel.Visible = false;
             NameBox.Visible = true;
             NameBox.Text = NameLabel.Text;
@@ -521,8 +520,6 @@ namespace Kenedia.Modules.BuildsManager
 
         private void Button_Click(object sender, MouseEventArgs e)
         {
-            //BuildsManager.ModuleInstance.Selected_Template = new Template();
-
             ProfessionSelection.Show();
             ProfessionSelection.Location = Add_Button.Location.Add(new Point(Add_Button.Width + 5, 0));
             ProfessionSelection.SelectionType = SelectionPopUp.selectionType.Profession;

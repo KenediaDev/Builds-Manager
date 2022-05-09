@@ -216,7 +216,7 @@ namespace Kenedia.Modules.BuildsManager
                 });
 
             ReloadKey.Value.Enabled = true;
-            ReloadKey.Value.Activated += Value_Activated;
+            //ReloadKey.Value.Activated += Value_Activated;
 
             DataLoaded = false;
         }

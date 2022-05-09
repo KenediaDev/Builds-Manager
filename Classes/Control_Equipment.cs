@@ -334,6 +334,7 @@ namespace Kenedia.Modules.BuildsManager
                         case selectionType.Profession:
                             SelectedProfession = (API.Profession)entry.Object;
                             FilterBox.Text = null;
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Stats:
