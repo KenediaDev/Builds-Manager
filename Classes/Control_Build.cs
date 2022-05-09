@@ -219,7 +219,7 @@ private void UpdateLayout()
                                 //var traits = new List<API.Trait>(sp.Traits);
                                 Template.Build.SpecLines[Index].Specialization = sp.Specialization;
                                 Template.Build.SpecLines[Index].Traits = sp.Traits;
-                                Template.Build.SpecLines[Index].Control.UpdateLayout();
+                                //Template.Build.SpecLines[Index].Control.UpdateLayout();
                                 Template.SetChanged();
 
                                 sp.Specialization = null;
@@ -238,8 +238,11 @@ private void UpdateLayout()
                                         }
                                     }
 
-                                    Template.Build.SpecLines[Index].Specialization = spec;
-                                    Template.SetChanged();
+                                    if(Template.Build.SpecLines[Index].Specialization != spec)
+                                    {
+                                        Template.Build.SpecLines[Index].Specialization = spec;
+                                        Template.SetChanged();
+                                    }
                                 }
                             }
 

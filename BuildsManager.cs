@@ -216,7 +216,7 @@ namespace Kenedia.Modules.BuildsManager
                 });
 
             ReloadKey.Value.Enabled = true;
-            //ReloadKey.Value.Activated += Value_Activated;
+            ReloadKey.Value.Activated += Value_Activated;
 
             DataLoaded = false;
         }
@@ -927,7 +927,7 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = GameService.Graphics.SpriteScreen,
                 Title = "Builds Manager",
                 Emblem = TextureManager._Emblems[(int)_Emblems.SwordAndShield],
-                Subtitle = "❤",
+                Subtitle = "v." + Version.BaseVersion().ToString(),
                 SavesPosition = true,
                 Id = $"BuildsManager New",
             };

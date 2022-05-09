@@ -1,6 +1,6 @@
 {
   "name": "Builds Manager",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "namespace": "Kenedia.Modules.BuildsManager",
   "package": "BuildsManager.dll",
   "manifest_version": 1,
