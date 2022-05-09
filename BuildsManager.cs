@@ -81,24 +81,27 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
 
+        public event EventHandler Selected_Template_Redraw;
+        public void OnSelected_Template_Redraw(object sender, EventArgs e)
+        {
+            this.Selected_Template_Redraw?.Invoke(this, EventArgs.Empty);
+        }
+
         public event EventHandler Selected_Template_Edit;
         public void OnSelected_Template_Edit(object sender, EventArgs e)
         {
-            ScreenNotification.ShowNotification("Edited: " + _Selected_Template?.Name, ScreenNotification.NotificationType.Warning);
             this.Selected_Template_Edit?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler Selected_Template_Changed;
         public void OnSelected_Template_Changed()
         {
-            ScreenNotification.ShowNotification("Changed to: " + _Selected_Template?.Name, ScreenNotification.NotificationType.Warning);
             this.Selected_Template_Changed?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler Template_Deleted;
         public void OnTemplate_Deleted()
         {
-            ScreenNotification.ShowNotification("Deleted: " + _Selected_Template?.Name, ScreenNotification.NotificationType.Warning);
 
             Selected_Template = new Template();
             LoadTemplates();
@@ -212,7 +215,18 @@ namespace Kenedia.Modules.BuildsManager
                   30689, //Eternity
                 });
 
+            ReloadKey.Value.Enabled = true;
+            ReloadKey.Value.Activated += Value_Activated;
+
             DataLoaded = false;
+        }
+
+        private void Value_Activated(object sender, EventArgs e)
+        {
+            ScreenNotification.ShowNotification("Rebuilding the UI", ScreenNotification.NotificationType.Warning);
+            MainWindow?.Dispose();
+            CreateUI();
+            MainWindow.ToggleWindow();
         }
 
         protected override async Task LoadAsync()
@@ -221,7 +235,6 @@ namespace Kenedia.Modules.BuildsManager
         public void LoadTemplates()
         {
             var currentTemplate = _Selected_Template?.Name;
-            ScreenNotification.ShowNotification(_Selected_Template?.Name, ScreenNotification.NotificationType.Error);
 
             Templates = new List<Template>();
             var files = Directory.GetFiles(BuildsManager.Paths.builds, "*.json", SearchOption.AllDirectories).ToList();

@@ -387,8 +387,6 @@ namespace Kenedia.Modules.BuildsManager
                     }
 
                     Build = new BuildTemplate(Template_json.BuildCode);
-
-                    Build.Changed += OnChanged;
                 }
             }
             else
@@ -562,12 +560,6 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         public event EventHandler Edit;
-        public event EventHandler Changed;
-        private void OnChanged(object sender, EventArgs e)
-        {
-            this.Changed?.Invoke(this, EventArgs.Empty);
-            Save();
-        }
 
         private void OnEdit(object sender, EventArgs e)
         {

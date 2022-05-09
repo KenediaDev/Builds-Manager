@@ -314,21 +314,21 @@ namespace Kenedia.Modules.BuildsManager
                             var rune = (API.RuneItem)entry.Object;
                             var armor = (Armor_TemplateItem)SelectionTarget;
                             armor.Rune = rune;
-                            Template.Save();
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Sigils:
                             var sigil = (API.SigilItem)entry.Object;
                             var weapon = (Weapon_TemplateItem)SelectionTarget;
                             weapon.Sigil = sigil;
-                            Template.Save();
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.AquaticSigils:
                             var aquaSigil = (API.SigilItem)entry.Object;
                             var aquaWeapon = (AquaticWeapon_TemplateItem)SelectionTarget;
                             aquaWeapon.Sigils[UpgradeIndex] = aquaSigil;
-                            Template.Save();
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Profession:
@@ -340,7 +340,7 @@ namespace Kenedia.Modules.BuildsManager
                             var stat = (API.Stat)entry.Object;
                             var item = (TemplateItem)SelectionTarget;
                             item.Stat = stat;
-                            Template.Save();
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Weapons:
@@ -365,14 +365,14 @@ namespace Kenedia.Modules.BuildsManager
                                     break;
                             }
 
-                            Template.Save();
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.AquaticWeapons:
                             var selectedAquaWeapon = (API.WeaponItem)entry.Object;
                             var AquaWeapon = (AquaticWeapon_TemplateItem)SelectionTarget;
                             AquaWeapon.WeaponType = selectedAquaWeapon.WeaponType;
-                            Template.Save();
+                            this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
                     }
 
@@ -385,8 +385,6 @@ namespace Kenedia.Modules.BuildsManager
                     break;
                 }
             }
-
-            this.Changed?.Invoke(this, EventArgs.Empty);
         }
 
         class filterTag
@@ -611,19 +609,9 @@ namespace Kenedia.Modules.BuildsManager
 
     public class Control_Equipment : Control
     {
-        private Template _Template;
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                    UpdateTemplate();
-                    UpdateLayout();
-                }
-            }
         }
 
         public double Scale;
@@ -645,10 +633,9 @@ namespace Kenedia.Modules.BuildsManager
         public CustomTooltip CustomTooltip;
         public SelectionPopUp SelectionPopUp;
 
-        public Control_Equipment(Container parent, Template template)
+        public Control_Equipment(Container parent)
         {
             Parent = parent;
-            _Template = template;
 
             // BackgroundColor = Color.Aqua;
             _RuneTexture = BuildsManager.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
@@ -767,19 +754,12 @@ namespace Kenedia.Modules.BuildsManager
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
         {
             UpdateLayout();
-
-            BuildsManager.ModuleInstance.Selected_Template.Changed += delegate
-            {
-                UpdateLayout();
-            };
         }
 
         public EventHandler Changed;
         private void OnChanged()
         {
             BuildsManager.ModuleInstance.Selected_Template.SetChanged();
-            //BuildsManager.ModuleInstance.Selected_Template.Save();
-            //this.Changed?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnGlobalClick(object sender, MouseEventArgs m)
@@ -1087,7 +1067,7 @@ namespace Kenedia.Modules.BuildsManager
             //SelectionPopUp.Template = Template;
         }
 
-        private void UpdateLayout()
+        public void UpdateLayout()
         {
             Point mPos = RelativeMousePosition;
             int i;

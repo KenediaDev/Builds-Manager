@@ -36,7 +36,6 @@ namespace Kenedia.Modules.BuildsManager
         }
         private const int _TraitSize = 38;
         private Texture2D _Line;
-        private Template _Template;
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -50,7 +49,7 @@ namespace Kenedia.Modules.BuildsManager
 
         private CustomTooltip CustomTooltip;
         private Specialization_Control Specialization_Control;
-        public Trait_Control(Container parent, Point p, API.Trait trait, CustomTooltip customTooltip, Specialization_Control specialization_Control, Template template)
+        public Trait_Control(Container parent, Point p, API.Trait trait, CustomTooltip customTooltip, Specialization_Control specialization_Control)
         {
             Parent = parent;
             CustomTooltip = customTooltip;
@@ -180,7 +179,6 @@ private void UpdateLayout()
         public Specialization_Control Specialization_Control;
         public int Index;
         public bool Elite;
-        private Template _Template;
         private API.Specialization _Specialization;
         public API.Specialization Specialization
         {
@@ -270,6 +268,8 @@ private void UpdateLayout()
 
             if (Template.Build.Profession != null)
             {
+                string text = "";
+
                 var i = 0;
                 var size = 64;
                 foreach (API.Specialization spec in Template.Build.Profession.Specializations)
@@ -277,6 +277,8 @@ private void UpdateLayout()
                     if (!spec.Elite || Elite)
                     {
                         var rect = new Rectangle(20 + i * size, (Height - size) / 2, size, size);
+                        if (rect.Contains(RelativeMousePosition)) text = spec.Name;
+
                         spriteBatch.DrawOnCtrl(Parent,
                                                 spec.Icon.Texture,
                                                 rect.Add(Location),
@@ -287,6 +289,15 @@ private void UpdateLayout()
                                                 );
                         i++;
                     }
+                }
+
+                if(text != "")
+                {
+                    BasicTooltipText = text;
+                }
+                else
+                {
+                    BasicTooltipText = null;
                 }
             }
         }
@@ -337,7 +348,6 @@ private void UpdateLayout()
             }
         }
 
-        private Template _Template;
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -372,11 +382,11 @@ private void UpdateLayout()
         public List<Trait_Control> _MinorTraits = new List<Trait_Control>();
         public List<Trait_Control> _MajorTraits = new List<Trait_Control>();
         private bool _Created;
+        private bool SpecHovered;
 
-        public Specialization_Control(Container parent, Template template, int index, Point p, CustomTooltip customTooltip)
+        public Specialization_Control(Container parent, int index, Point p, CustomTooltip customTooltip)
         {
             Parent = parent;
-            _Template = template;
             CustomTooltip = customTooltip;
             Index = index;
             Size = new Point(_Width, _Height);
@@ -384,11 +394,6 @@ private void UpdateLayout()
             Location = p;
 
             //BackgroundColor = Color.Magenta;
-
-            _Template.Changed += delegate
-            {
-
-            };
 
             _SpecSideSelector_Hovered = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
             _SpecSideSelector = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector);
@@ -401,21 +406,21 @@ private void UpdateLayout()
 
             _MinorTraits = new List<Trait_Control>()
                 {
-                    new Trait_Control(Parent, new Point(215, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[0] : null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Minor},
-                    new Trait_Control(Parent, new Point(360, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[1]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Minor},
-                    new Trait_Control(Parent, new Point(505, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[2]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(Parent, new Point(215, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[0] : null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(Parent, new Point(360, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[1]: null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(Parent, new Point(505, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[2]: null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Minor},
                 };
             _MajorTraits = new List<Trait_Control>()
                 {
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[0]: null, CustomTooltip, this, Template){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Major },
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[1]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[2]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1 , TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[3]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 3, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[4]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 4, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[5]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 5, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[6]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 6, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[7]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 7, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[8]: null, CustomTooltip, this, Template){ZIndex= ZIndex + 1, TraitIndex = 8, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[0]: null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Major },
+                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[1]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[2]: null, CustomTooltip, this){ZIndex= ZIndex + 1 , TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[3]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 3, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[4]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 4, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[5]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 5, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[6]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 6, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[7]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 7, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[8]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 8, SpecIndex = Index, TraitType = API.traitType.Major},
                 };
 
             var TemplateSpecLine = Template.Build.SpecLines.Find(e => e.Specialization == Specialization);
@@ -491,6 +496,16 @@ private void UpdateLayout()
 
             FirstLine.Bounds = new Rectangle(HighlightBounds.Right - 5.Scale(_Scale), HighlightBounds.Center.Y, 225 - HighlightBounds.Right, _LineThickness.Scale(_Scale));
             WeaponTraitBounds = new Rectangle(HighlightBounds.Right - _TraitSize - 6, (_Height + HighlightBounds.Height - 165), _TraitSize, _TraitSize).Scale(Scale).Add(Location);
+
+            SpecHovered = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
+            if (SpecHovered)
+            {
+                BasicTooltipText = Specialization?.Name;
+            }
+            else
+            {
+                BasicTooltipText = null;
+            }
 
             foreach (Trait_Control trait in _MajorTraits)
             {
@@ -705,7 +720,6 @@ private void UpdateLayout()
     }
     public class Skill_Control : Control
     {
-        private Template _Template;
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -742,10 +756,9 @@ private void UpdateLayout()
             }
         }
 
-        public Skill_Control(Container parent, Template template)
+        public Skill_Control(Container parent)
         {
             Parent = parent;
-            _Template = template;
             Size = new Point(_SkillSize, _SkillSize + 15);
 
             _SelectorTexture = BuildsManager.TextureManager.getControlTexture(_Controls.SkillSelector).GetRegion(0, 2, 64, 12);
@@ -1067,148 +1080,9 @@ private void UpdateLayout()
     public class SkillBar_Control : Control
     {
         private CustomTooltip CustomTooltip;
-        private Template _Template;
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
-            set
-            {
-                if (value != null)
-                {
-                    _Template = value;
-                    _Template.Changed += delegate
-                    {
-                        ApplyBuild();
-                    };
-
-                    ApplyBuild();
-                }
-            }
-        }
-
-        public void ApplyBuild()
-        {
-            foreach(Skill_Control skill in _Skills_Aquatic)
-            {
-                skill.Dispose();
-            }
-
-            foreach(Skill_Control skill in _Skills_Terrestial)
-            {
-                skill.Dispose();
-            }
-
-                _Skills_Aquatic = new List<Skill_Control>();
-                foreach (API.Skill skill in Template.Build.Skills_Aquatic)
-                {
-                    _Skills_Aquatic.Add(new Skill_Control(Parent, Template)
-                    {
-                        Location = new Point(27 + _Skills_Aquatic.Count * (_SkillSize + 1), 0),
-                        Skill = Template.Build.Skills_Aquatic[_Skills_Aquatic.Count],
-                        Slot = (SkillSlots)_Skills_Aquatic.Count,
-                        Aquatic = true,
-                    });
-
-                    var control = _Skills_Aquatic[_Skills_Aquatic.Count - 1];
-                    control.Click += delegate
-                    {
-                        if (!SkillSelector.Visible || SkillSelector.currentObject != control)
-                        {
-                            SkillSelector.Visible = true;
-                            SkillSelector.Skill_Control = control;
-                            SkillSelector.Location = control.Location.Add(new Point(2, control.Height));
-                            List<API.Skill> Skills = new List<API.Skill>();
-
-                            if (Template.Build.Profession != null)
-                            {
-                                foreach (API.Skill iSkill in Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
-                                {
-                                    if (iSkill.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
-                                    {
-                                        switch (control.Slot)
-                                        {
-                                            case SkillSlots.Heal:
-                                                if (iSkill.Slot == API.skillSlot.Heal) Skills.Add(iSkill);
-                                                break;
-
-                                            case SkillSlots.Elite:
-                                                if (iSkill.Slot == API.skillSlot.Elite) Skills.Add(iSkill);
-                                                break;
-
-                                            default:
-                                                if (iSkill.Slot == API.skillSlot.Utility) Skills.Add(iSkill);
-                                                break;
-                                        }
-                                    }
-                                }
-                            }
-
-                            SkillSelector.Skills = Skills;
-                            SkillSelector.Aquatic = true;
-                            SkillSelector.currentObject = control;
-                        }
-                        else
-                        {
-                            SkillSelector.Visible = false;
-                        }
-                    };
-                }
-
-                var p = _Width - (_Skills_Aquatic.Count * (_SkillSize + 1));
-                _Skills_Terrestial = new List<Skill_Control>();
-                foreach (API.Skill skill in Template.Build.Skills_Terrestial)
-                {
-                    _Skills_Terrestial.Add(new Skill_Control(Parent, Template)
-                    {
-                        Location = new Point(p + _Skills_Terrestial.Count * (_SkillSize + 1), 0),
-                        Skill = Template.Build.Skills_Terrestial[_Skills_Terrestial.Count],
-                        Slot = (SkillSlots)_Skills_Terrestial.Count,
-                    });
-
-                    var control = _Skills_Terrestial[_Skills_Terrestial.Count - 1];
-                    control.Click += delegate
-                    {
-                        if (!SkillSelector.Visible || SkillSelector.currentObject != control)
-                        {
-                            SkillSelector.Visible = true;
-                            SkillSelector.Skill_Control = control;
-                            SkillSelector.Location = control.Location.Add(new Point(-2, control.Height));
-
-                            List<API.Skill> Skills = new List<API.Skill>();
-                            if (Template.Build.Profession != null)
-                            {
-                                foreach (API.Skill iSkill in Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
-                                {
-                                    if (iSkill.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
-                                    {
-                                        switch (control.Slot)
-                                        {
-                                            case SkillSlots.Heal:
-                                                if (iSkill.Slot == API.skillSlot.Heal) Skills.Add(iSkill);
-                                                break;
-
-                                            case SkillSlots.Elite:
-                                                if (iSkill.Slot == API.skillSlot.Elite) Skills.Add(iSkill);
-                                                break;
-
-                                            default:
-                                                if (iSkill.Slot == API.skillSlot.Utility) Skills.Add(iSkill);
-                                                break;
-                                        }
-                                    }
-                                }
-                            }
-
-                            SkillSelector.Skills = Skills;
-                            SkillSelector.Aquatic = false;
-                            SkillSelector.currentObject = control;
-                        }
-                        else
-                        {
-                            SkillSelector.Visible = false;
-                        }
-                    };
-                }
         }
 
         private List<Skill_Control> _Skills_Aquatic;
@@ -1241,10 +1115,9 @@ private void UpdateLayout()
         private int _SkillSize = 55;
         public int _Width = 643;
 
-        public SkillBar_Control(Container parent, Template template)
+        public SkillBar_Control(Container parent)
         {
             Parent = parent;
-            _Template = template;
             CustomTooltip = new CustomTooltip(Parent)
             {
                 ClipsBounds = false,
@@ -1259,7 +1132,7 @@ private void UpdateLayout()
             _Skills_Aquatic = new List<Skill_Control>();
             foreach (API.Skill skill in Template.Build.Skills_Aquatic)
             {
-                _Skills_Aquatic.Add(new Skill_Control(Parent, Template)
+                _Skills_Aquatic.Add(new Skill_Control(Parent)
                 {
                     Location = new Point(27 + _Skills_Aquatic.Count * (_SkillSize + 1), 0),
                     Skill = Template.Build.Skills_Aquatic[_Skills_Aquatic.Count],
@@ -1310,14 +1183,14 @@ private void UpdateLayout()
                     }
                 };
 
-                BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+                BuildsManager.ModuleInstance.Selected_Template_Changed += ApplyBuild;
             }
 
             var p = _Width - (_Skills_Aquatic.Count * (_SkillSize + 1));
             _Skills_Terrestial = new List<Skill_Control>();
             foreach (API.Skill skill in Template.Build.Skills_Terrestial)
             {
-                _Skills_Terrestial.Add(new Skill_Control(Parent, Template)
+                _Skills_Terrestial.Add(new Skill_Control(Parent)
                 {
                     Location = new Point(p + _Skills_Terrestial.Count * (_SkillSize + 1), 0),
                     Skill = Template.Build.Skills_Terrestial[_Skills_Terrestial.Count],
@@ -1380,7 +1253,7 @@ private void UpdateLayout()
             Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
         }
 
-        private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
+        public void ApplyBuild(object sender, EventArgs e)
         {
             SetTemplate();
         }
@@ -1446,7 +1319,7 @@ private void UpdateLayout()
         }
         protected override void DisposeControl()
         {
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= ApplyBuild;
             base.DisposeControl();
         }
         public void SetTemplate()
@@ -1472,7 +1345,6 @@ private void UpdateLayout()
 
     public class Control_Build : Control
     {
-        private Template _Template;
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -1529,13 +1401,12 @@ private void UpdateLayout()
         }
 
         private List<Specialization_Control> Specializations;
-        private SkillBar_Control SkillBar;
+        public SkillBar_Control SkillBar;
         private CustomTooltip CustomTooltip;
 
-        public Control_Build(Container parent, Template template)
+        public Control_Build(Container parent)
         {
             Parent = parent;
-            _Template = template;
             Size = new Point((int)(_Width * Scale), (int)(_Height * Scale));
 
             CustomTooltip = new CustomTooltip(Parent)
@@ -1543,8 +1414,6 @@ private void UpdateLayout()
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
             };
-
-            BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
 
             //BackgroundColor = Color.Honeydew;
             Click += OnClick;
@@ -1562,7 +1431,7 @@ private void UpdateLayout()
             _Line = BuildsManager.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
             _Background = _EmptyTraitLine;
 
-            SkillBar = new SkillBar_Control(Parent, Template)
+            SkillBar = new SkillBar_Control(Parent)
             {
                 Location = new Point(0, 0),
                 Size = new Point(_Width, Skillbar_Height),
@@ -1571,7 +1440,7 @@ private void UpdateLayout()
             Specializations = new List<Specialization_Control>();
             for (int i = 0; i < Template.Build.SpecLines.Count; i++)
             {
-                Specializations.Add(new Specialization_Control(Parent, Template, i, new Point(0, 5 + Skillbar_Height + i * 134), CustomTooltip)
+                Specializations.Add(new Specialization_Control(Parent, i, new Point(0, 5 + Skillbar_Height + i * 134), CustomTooltip)
                 {
                     ZIndex = ZIndex + 1,
                     Elite = i == 2,
@@ -1587,16 +1456,8 @@ private void UpdateLayout()
             UpdateTemplate();
         }
 
-        private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
-        {
-            BuildsManager.ModuleInstance.Selected_Template.Changed += delegate
-            {
-                UpdateTemplate();
-            };
-        }
         protected override void DisposeControl()
         {
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
             base.DisposeControl();
         }
         public EventHandler Changed;
@@ -1615,22 +1476,18 @@ private void UpdateLayout()
             for (int i = 0; i < Template.Build.SpecLines.Count; i++)
             {
                 Template.Build.SpecLines[i].Control = Specializations[i];
-
-                SkillBar.Template = Template;
                 //SkillBar.SetTemplate();
             }
         }
 
         private void UpdateLayout()
         {
-            if (_Template == null) return;
 
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (_Template == null) return;
-            UpdateLayout();
+
         }
 
         public void SetTemplate()

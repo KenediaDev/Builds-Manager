@@ -52,6 +52,7 @@ namespace Kenedia.Modules.BuildsManager
                 Width = Width,
                 Location = new Point(5, 45)
             };
+            TemplateBox.InputFocusChanged += TemplateBox_InputFocusChanged;
 
             GearBox = new TextBox()
             {
@@ -59,6 +60,34 @@ namespace Kenedia.Modules.BuildsManager
                 Width = Width,
                 Location = new Point(5, 45 + 5 + TemplateBox.Height)
             };
+            GearBox.InputFocusChanged += GearBox_InputFocusChanged;
+        }
+
+        private void GearBox_InputFocusChanged(object sender, ValueEventArgs<bool> e)
+        {
+            if (e.Value)
+            {
+                GearBox.SelectionStart = 0;
+                GearBox.SelectionEnd = GearBox.Text.Length;
+            }
+            else
+            {
+                GearBox.SelectionStart = 0;
+                GearBox.SelectionEnd = 0;
+            }
+        }
+        private void TemplateBox_InputFocusChanged(object sender, ValueEventArgs<bool> e)
+        {
+            if (e.Value)
+            {
+                TemplateBox.SelectionStart = 0;
+                TemplateBox.SelectionEnd = TemplateBox.Text.Length;
+            }
+            else
+            {
+                TemplateBox.SelectionStart = 0;
+                TemplateBox.SelectionEnd = 0;
+            }
         }
 
         protected override void DisposeControl()
@@ -82,7 +111,9 @@ namespace Kenedia.Modules.BuildsManager
 
                 if (rect.Contains(RelativeMousePosition))
                 {
-                    System.Windows.Forms.Clipboard.SetText(i == 0 ? TemplateBox.Text : GearBox.Text);
+                    var text = i == 0 ? TemplateBox.Text : GearBox.Text;
+                    ClipboardUtil.WindowsClipboardService.SetTextAsync(text);
+
                     return;
                 }
             }
@@ -362,14 +393,14 @@ namespace Kenedia.Modules.BuildsManager
                 Gear.Size = Detail_Panel.Tabs[0].Panel.Size.Add(new Point(0, - Detail_Panel.GearBox.Bottom + 30));
             };
 
-            Build = new Control_Build(Detail_Panel.Tabs[0].Panel, BuildsManager.ModuleInstance.Selected_Template)
+            Build = new Control_Build(Detail_Panel.Tabs[0].Panel)
             {
                 Parent = Detail_Panel.Tabs[0].Panel,
                 Size = Detail_Panel.Tabs[0].Panel.Size,
                 Scale = 1,
             };
 
-            Gear = new Control_Equipment(Detail_Panel.Tabs[1].Panel, BuildsManager.ModuleInstance.Selected_Template)
+            Gear = new Control_Equipment(Detail_Panel.Tabs[1].Panel)
             {
                 Parent = Detail_Panel.Tabs[1].Panel,
                 Size = Detail_Panel.Tabs[1].Panel.Size,
@@ -404,11 +435,30 @@ namespace Kenedia.Modules.BuildsManager
             };
             NameLabel.Click += NameLabel_Click;
 
+            BuildsManager.ModuleInstance.Selected_Template_Edit += Selected_Template_Edit;
             BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
-            BuildsManager.ModuleInstance.Templates_Loaded += ModuleInstance_Templates_Loaded;
+            BuildsManager.ModuleInstance.Templates_Loaded += Templates_Loaded;
+            BuildsManager.ModuleInstance.Selected_Template_Redraw += Selected_Template_Redraw;
 
             Detail_Panel.TemplateBox.EnterPressed += TemplateBox_EnterPressed;
-            Detail_Panel.GearBox.EnterPressed += GearBox_EnterPressed; ;
+            Detail_Panel.GearBox.EnterPressed += GearBox_EnterPressed;
+
+            Input.Mouse.LeftMouseButtonPressed += GlobalClick;
+        }
+
+        private void GlobalClick(object sender, MouseEventArgs e)
+        {
+            if (!NameBox.MouseOver)
+            {
+                NameBox.Visible = false;
+                NameLabel.Visible = true;
+            }
+        }
+
+        private void Selected_Template_Redraw(object sender, EventArgs e)
+        {
+            Build.SkillBar.ApplyBuild(sender, e);
+            Gear.UpdateLayout();
         }
 
         private void GearBox_EnterPressed(object sender, EventArgs e)
@@ -420,6 +470,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 BuildsManager.ModuleInstance.Selected_Template.Gear = gear;
                 BuildsManager.ModuleInstance.Selected_Template.SetChanged();
+                BuildsManager.ModuleInstance.OnSelected_Template_Redraw(null, null);
             }
         }
 
@@ -443,6 +494,7 @@ namespace Kenedia.Modules.BuildsManager
                 }
 
                 BuildsManager.ModuleInstance.Selected_Template.SetChanged();
+                BuildsManager.ModuleInstance.OnSelected_Template_Redraw(null, null);
             }
         }
 
@@ -458,6 +510,7 @@ namespace Kenedia.Modules.BuildsManager
 
         private void NameLabel_Click(object sender, MouseEventArgs e)
         {
+            ScreenNotification.ShowNotification("NameLabel : " + NameLabel.Text.Length, ScreenNotification.NotificationType.Error);
             NameLabel.Visible = false;
             NameBox.Visible = true;
             NameBox.Text = NameLabel.Text;
@@ -479,7 +532,7 @@ namespace Kenedia.Modules.BuildsManager
             ProfessionSelection.List = _Professions;
         }
 
-        private void ModuleInstance_Templates_Loaded(object sender, EventArgs e)
+        private void Templates_Loaded(object sender, EventArgs e)
         {
             _TemplateSelection.Invalidate();
         }
@@ -489,23 +542,23 @@ namespace Kenedia.Modules.BuildsManager
             NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
             Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.TemplateCode;
             Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template.Gear.TemplateCode;
+        }
 
-            BuildsManager.ModuleInstance.Selected_Template.Changed += delegate
+        private void Selected_Template_Edit(object sender, EventArgs e)
+        {
+            BuildsManager.ModuleInstance.Selected_Template.Specialization = null;
+
+            foreach (SpecLine spec in BuildsManager.ModuleInstance.Selected_Template.Build.SpecLines)
             {
-                BuildsManager.ModuleInstance.Selected_Template.Specialization = null;
-
-                foreach (SpecLine spec in BuildsManager.ModuleInstance.Selected_Template.Build.SpecLines)
+                if (spec.Specialization?.Elite == true)
                 {
-                    if (spec.Specialization?.Elite == true)
-                    {
-                        BuildsManager.ModuleInstance.Selected_Template.Specialization = spec.Specialization;
-                        break;
-                    }
+                    BuildsManager.ModuleInstance.Selected_Template.Specialization = spec.Specialization;
+                    break;
                 }
+            }
 
-                Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.ParseBuildCode();
-                Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
-            };
+            Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.ParseBuildCode();
+            Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
         }
 
         protected override void OnClick(MouseEventArgs e)
