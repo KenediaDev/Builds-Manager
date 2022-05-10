@@ -1,0 +1,100 @@
+[
+  {
+    "Id": 1,
+    "Specialization": 52,
+    "Skill": 28085,
+    "Name": "Legendary Dragon Stance",
+    "Swap": 28085,
+    "Heal": 27220,
+    "Elite": 27760,
+    "Utilities": [
+      28379,
+      27014,
+      26644
+    ]
+  },
+  {
+    "Id": 2,
+    "Specialization": 0,
+    "Skill": 28134,
+    "Name": "Legendary Assasin Stance",
+    "Swap": 28134,
+    "Heal": 26937,
+    "Elite": 28406,
+    "Utilities": [
+      29209,
+      28231,
+      27107
+    ]
+  },
+  {
+    "Id": 3,
+    "Specialization": 0,
+    "Skill": 28419,
+    "Name": "Legendary Dwarf Stance",
+    "Swap": 28419,
+    "Heal": 27372,
+    "Elite": 27975,
+    "Utilities": [
+      28516,
+      26679,
+      26557
+    ]
+  },
+  {
+    "Id": 4,
+    "Specialization": 0,
+    "Skill": 28494,
+    "Name": "Legendary Demon Stance",
+    "Swap": 28494,
+    "Heal": 28219,
+    "Elite": 28287,
+    "Utilities": [
+      27322,
+      27505,
+      27917
+    ]
+  },
+  {
+    "Id": 5,
+    "Specialization": 63,
+    "Skill": 41858,
+    "Name": "Legendary Renegade Stance",
+    "Swap": 41858,
+    "Heal": 45686,
+    "Elite": 45773,
+    "Utilities": [
+      42949,
+      40485,
+      41220
+    ]
+  },
+  {
+    "Id": 6,
+    "Specialization": 0,
+    "Skill": 28195,
+    "Name": "Legendary Centaur Stance",
+    "Swap": 28195,
+    "Heal": 28427,
+    "Elite": 27356,
+    "Utilities": [
+      26821,
+      27025,
+      27715
+    ]
+  },
+  {
+    "Id": 7,
+    "Specialization": 69,
+    "Skill": 62891,
+    "Name": "Legendary Alliance Stance",
+    "Swap": 62891,
+    "Heal": 62719,
+    "Elite": 62942,
+    "Utilities": [
+      62832,
+      62962,
+      62878
+    ]
+  }
+]

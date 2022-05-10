@@ -58,7 +58,7 @@ namespace Kenedia.Modules.BuildsManager
             new Weapon_TemplateItem_json(){_Slot = "Weapon2_MainHand"},
             new Weapon_TemplateItem_json(){_Slot = "Weapon2_OffHand"},
         };
-        public List<AquaticWeapon_TemplateItem_json> AquaticWeapons = new List<AquaticWeapon_TemplateItem_json>() 
+        public List<AquaticWeapon_TemplateItem_json> AquaticWeapons = new List<AquaticWeapon_TemplateItem_json>()
         {
             new AquaticWeapon_TemplateItem_json() {_Slot = "AquaticWeapon1"},
             new AquaticWeapon_TemplateItem_json() {_Slot = "AquaticWeapon2"},
@@ -114,7 +114,7 @@ namespace Kenedia.Modules.BuildsManager
     public class AquaticWeapon_TemplateItem : TemplateItem
     {
         public API.weaponType WeaponType = API.weaponType.Unkown;
-        public List<API.SigilItem> Sigils = new List<API.SigilItem>() 
+        public List<API.SigilItem> Sigils = new List<API.SigilItem>()
         {
             new API.SigilItem(),
             new API.SigilItem(),
@@ -160,11 +160,11 @@ namespace Kenedia.Modules.BuildsManager
 
         public GearTemplate(string code = default)
         {
-            if(code != default)
+            if (code != default)
             {
                 int j = 0;
                 var ItemStrings = code.Split(']');
-                if(ItemStrings.Length == 19)
+                if (ItemStrings.Length == 19)
                 {
                     j = 0;
                     for (int i = 0; i < Trinkets.Count; i++)
@@ -172,7 +172,7 @@ namespace Kenedia.Modules.BuildsManager
                         ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
                         int id;
                         Int32.TryParse(ItemStrings[i], out id);
-                        if(id > 0) Trinkets[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == id);
+                        if (id > 0) Trinkets[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == id);
                         BuildsManager.Logger.Debug("Trinkets[" + j + "].Stat: " + Trinkets[j].Stat?.Name);
                         j++;
                     }
@@ -181,16 +181,16 @@ namespace Kenedia.Modules.BuildsManager
                     for (int i = Trinkets.Count; i < Trinkets.Count + Armor.Count; i++)
                     {
                         ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
-                        var ids =  ItemStrings[i].Split('|');
+                        var ids = ItemStrings[i].Split('|');
 
                         int stat_id;
                         Int32.TryParse(ids[0], out stat_id);
-                       if(stat_id > 0 ) Armor[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        if (stat_id > 0) Armor[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
                         BuildsManager.Logger.Debug("Armor[" + j + "].Stat: " + Armor[j].Stat?.Name);
 
                         int rune_id;
                         Int32.TryParse(ids[1], out rune_id);
-                       if(stat_id > 0 ) Armor[j].Rune = BuildsManager.Data.Runes.Find(e => e.Id == rune_id);
+                        if (stat_id > 0) Armor[j].Rune = BuildsManager.Data.Runes.Find(e => e.Id == rune_id);
                         BuildsManager.Logger.Debug("Armor[" + j + "].Rune: " + Armor[j].Rune?.Name);
 
                         j++;
@@ -209,7 +209,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         int weaponType = -1;
                         Int32.TryParse(ids[1], out weaponType);
-                        Weapons[j].WeaponType = (API.weaponType) weaponType;
+                        Weapons[j].WeaponType = (API.weaponType)weaponType;
                         BuildsManager.Logger.Debug("Weapons[" + j + "].WeaponType: " + Weapons[j].WeaponType.ToString());
 
                         int sigil_id;
@@ -257,24 +257,24 @@ namespace Kenedia.Modules.BuildsManager
             {
                 string code = "";
 
-                foreach(TemplateItem item in Trinkets)
+                foreach (TemplateItem item in Trinkets)
                 {
                     code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "]";
                 }
 
-                foreach(Armor_TemplateItem item in Armor)
+                foreach (Armor_TemplateItem item in Armor)
                 {
                     code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + (item.Rune != null ? item.Rune.Id : 0) + "]";
                 }
 
-                foreach(Weapon_TemplateItem item in Weapons)
+                foreach (Weapon_TemplateItem item in Weapons)
                 {
-                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + ((int)item.WeaponType) + "|" + (item.Sigil != null ? item.Sigil.Id : 0)+ "]";
+                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + ((int)item.WeaponType) + "|" + (item.Sigil != null ? item.Sigil.Id : 0) + "]";
                 }
 
-                foreach(AquaticWeapon_TemplateItem item in AquaticWeapons)
+                foreach (AquaticWeapon_TemplateItem item in AquaticWeapons)
                 {
-                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + ((int)item.WeaponType) + "|" + (item.Sigils[0] != null ? item.Sigils[0].Id : 0) +"|" + (item.Sigils[1] != null ? item.Sigils[1].Id : 0) + "]";
+                    code += "[" + (item.Stat != null ? item.Stat.Id : 0) + "|" + ((int)item.WeaponType) + "|" + (item.Sigils[0] != null ? item.Sigils[0].Id : 0) + "|" + (item.Sigils[1] != null ? item.Sigils[1].Id : 0) + "]";
                 }
 
                 return code;
@@ -631,6 +631,17 @@ namespace Kenedia.Modules.BuildsManager
             new API.Skill(),
             new API.Skill()
         };
+        public List<API.Legend> Legends_Terrestial = new List<API.Legend>()
+        {
+            new API.Legend(),
+            new API.Legend(),
+        };
+        public List<API.Legend> Legends_Aquatic = new List<API.Legend>()
+        {
+            new API.Legend(),
+            new API.Legend(),
+        };
+
         public string ParseBuildCode()
         {
             string code = "";
@@ -776,38 +787,69 @@ namespace Kenedia.Modules.BuildsManager
                             }
                         }
 
-                        List<ushort> Terrestrial_PaletteIds = new List<ushort>{
-                        build.TerrestrialHealingSkillPaletteId,
-                        build.TerrestrialUtility1SkillPaletteId,
-                        build.TerrestrialUtility2SkillPaletteId,
-                        build.TerrestrialUtility3SkillPaletteId,
-                        build.TerrestrialEliteSkillPaletteId,
-                    };
-
-                        //build.RevenantActiveTerrestrialLegend;
-                       //build.RevenantInactiveTerrestrialLegend;
-
-                        int skillindex = 0;
-                        foreach (ushort pid in Terrestrial_PaletteIds)
+                        //[&DQkDJg8mPz3cEQAABhIAACsSAADUEQAAyhEAAAUCAADUESsSBhIAAAAAAAA=]
+                        if (Profession.Id == "Revenant")
                         {
-                            API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
-                            if (skill != null) Skills_Terrestial[skillindex] = skill;
-                            skillindex++;
+                            Legends_Terrestial[0] = Profession.Legends.Find(e => e.Id == (int)build.RevenantActiveTerrestrialLegend);
+                            Legends_Terrestial[1] = Profession.Legends.Find(e => e.Id == (int)build.RevenantInactiveTerrestrialLegend);
+
+                            var legend = Legends_Terrestial[0] != null ? Legends_Terrestial[0] : Legends_Terrestial[1];
+
+                            if (legend != null)
+                            {
+                                Skills_Terrestial[0] = legend.Heal;
+                                Skills_Terrestial[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility1SkillPaletteId);
+                                Skills_Terrestial[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility2SkillPaletteId);
+                                Skills_Terrestial[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility3SkillPaletteId);
+                                Skills_Terrestial[4] = legend.Elite;
+                            }
+
+                            Legends_Aquatic[0] = Profession.Legends.Find(e => e.Id == (int)build.RevenantActiveAquaticLegend);
+                            Legends_Aquatic[1] = Profession.Legends.Find(e => e.Id == (int)build.RevenantInactiveAquaticLegend);
+
+                            legend = Legends_Aquatic[0] != null ? Legends_Aquatic[0] : Legends_Aquatic[1];
+                             
+                            if (legend != null)
+                            {
+                                Skills_Aquatic[0] = legend.Heal;
+                                Skills_Aquatic[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.AquaticUtility1SkillPaletteId);
+                                Skills_Aquatic[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.AquaticUtility2SkillPaletteId);
+                                Skills_Aquatic[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.AquaticUtility3SkillPaletteId);
+                                Skills_Aquatic[4] = legend.Elite;
+                            }
                         }
-
-                        List<ushort> Aqua_PaletteIds = new List<ushort>{
-                        build.AquaticHealingSkillPaletteId,
-                        build.AquaticUtility1SkillPaletteId,
-                        build.AquaticUtility2SkillPaletteId,
-                        build.AquaticUtility3SkillPaletteId,
-                        build.AquaticEliteSkillPaletteId,
-                    };
-                        skillindex = 0;
-                        foreach (ushort pid in Aqua_PaletteIds)
+                        else
                         {
-                            API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
-                            if (skill != null) Skills_Aquatic[skillindex] = skill;
-                            skillindex++;
+                            List<ushort> Terrestrial_PaletteIds = new List<ushort>{
+                                build.TerrestrialHealingSkillPaletteId,
+                                build.TerrestrialUtility1SkillPaletteId,
+                                build.TerrestrialUtility2SkillPaletteId,
+                                build.TerrestrialUtility3SkillPaletteId,
+                                build.TerrestrialEliteSkillPaletteId,
+                            };
+
+                            int skillindex = 0;
+                            foreach (ushort pid in Terrestrial_PaletteIds)
+                            {
+                                API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
+                                if (skill != null) Skills_Terrestial[skillindex] = skill;
+                                skillindex++;
+                            }
+
+                            List<ushort> Aqua_PaletteIds = new List<ushort>{
+                                build.AquaticHealingSkillPaletteId,
+                                build.AquaticUtility1SkillPaletteId,
+                                build.AquaticUtility2SkillPaletteId,
+                                build.AquaticUtility3SkillPaletteId,
+                                build.AquaticEliteSkillPaletteId,
+                            };
+                            skillindex = 0;
+                            foreach (ushort pid in Aqua_PaletteIds)
+                            {
+                                API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
+                                if (skill != null) Skills_Aquatic[skillindex] = skill;
+                                skillindex++;
+                            }
                         }
 
                         foreach (SpecLine specLine in SpecLines)

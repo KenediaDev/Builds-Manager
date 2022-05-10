@@ -17,6 +17,17 @@ namespace Kenedia.Modules.BuildsManager
 {
     public class iData
     {
+        public class _Legend
+        {
+            public string Name;
+            public int Id;
+            public int Skill;
+            public List<int> Utilities;
+            public int Heal;
+            public int Elite;
+            public int Swap;
+            public int Specialization;
+        }
         public class SkillID_Pair
         {
             public int PaletteID;
@@ -34,11 +45,12 @@ namespace Kenedia.Modules.BuildsManager
         public List<API.WeaponItem> Weapons = new List<API.WeaponItem>();
         public List<API.TrinketItem> Trinkets = new List<API.TrinketItem>();
         public List<SkillID_Pair> SkillID_Pairs = new List<SkillID_Pair>();
+        public List<API.Legend> Legends = new List<API.Legend>();
 
         private bool fetchAPI;
         static Texture2D PlaceHolder;
 
-        private Texture2D LoadImage(string path,  GraphicsDevice graphicsDevice, List<string> filesToDelete, Rectangle region = default, Rectangle default_Bounds = default)
+        private Texture2D LoadImage(string path, GraphicsDevice graphicsDevice, List<string> filesToDelete, Rectangle region = default, Rectangle default_Bounds = default)
         {
             var texture = PlaceHolder;
 
@@ -50,14 +62,14 @@ namespace Kenedia.Modules.BuildsManager
 
                     if (default_Bounds != default)
                     {
-                        factor = (double) texture.Width / (double) default_Bounds.Width;
+                        factor = (double)texture.Width / (double)default_Bounds.Width;
                     }
 
-                    if(region != default)
+                    if (region != default)
                     {
                         region = region.Scale(factor);
 
-                        if(texture.Bounds.Contains(region))
+                        if (texture.Bounds.Contains(region))
                         {
                             texture = texture.GetRegion(region);
                         }
@@ -67,6 +79,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     if (System.IO.File.Exists(path)) filesToDelete.Add(path);
                     texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    BuildsManager.Logger.Debug("InvalidOperationException: Failed to load {0}. Fetching the API again.", path);
                     fetchAPI = true;
                     return texture;
                 }
@@ -78,12 +91,14 @@ namespace Kenedia.Modules.BuildsManager
                 catch (FileNotFoundException)
                 {
                     texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    BuildsManager.Logger.Debug("FileNotFoundException: Failed to load {0}. Fetching the API again.", path);
                     fetchAPI = true;
                     return texture;
                 }
                 catch (FileLoadException)
                 {
                     texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    BuildsManager.Logger.Debug("FileLoadException: Failed to load {0}. Fetching the API again.", path);
                     fetchAPI = true;
                     return texture;
                 }
@@ -92,7 +107,7 @@ namespace Kenedia.Modules.BuildsManager
             return texture;
         }
 
-        private string LoadFile(string path,  List<string> filesToDelete)
+        private string LoadFile(string path, List<string> filesToDelete)
         {
             var txt = "";
 
@@ -161,12 +176,13 @@ namespace Kenedia.Modules.BuildsManager
 
             Trinkets = Trinkets.OrderBy(e => e.TrinketType).ToList();
             Weapons = Weapons.OrderBy(e => (int)e.WeaponType).ToList();
-            
+
 
             Texture2D texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
-            {                
-                foreach (API.TrinketItem item in Trinkets) {
+            {
+                foreach (API.TrinketItem item in Trinkets)
+                {
                     item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
                 }
 
@@ -193,7 +209,7 @@ namespace Kenedia.Modules.BuildsManager
                     profession.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(4, 4, 26, 26));
 
                     //IconBig
-                    profession.IconBig.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.IconBig.Path, graphicsDevice, filesToDelete);                    
+                    profession.IconBig.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.IconBig.Path, graphicsDevice, filesToDelete);
 
                     foreach (API.Specialization specialization in profession.Specializations)
                     {
@@ -217,13 +233,13 @@ namespace Kenedia.Modules.BuildsManager
                         if (specialization.WeaponTrait != null)
                         {
                             //WeaponTrait Icon
-                            specialization.WeaponTrait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.WeaponTrait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3,3, 58, 58));
+                            specialization.WeaponTrait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.WeaponTrait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58));
                         }
 
 
                         foreach (API.Trait trait in specialization.MajorTraits)
                         {
-                            trait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + trait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58), new Rectangle(0,0,64,64));
+                            trait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + trait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58), new Rectangle(0, 0, 64, 64));
                         }
 
                         foreach (API.Trait trait in specialization.MinorTraits)
@@ -236,9 +252,28 @@ namespace Kenedia.Modules.BuildsManager
                     {
                         skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
                     }
+
+                    if (profession.Legends.Count > 0)
+                    {
+                        foreach (API.Legend legend in profession.Legends)
+                        {
+                            BuildsManager.Logger.Debug("Loading " + legend.Name);
+
+                            if(legend.Heal.Icon != null && legend.Heal.Icon.Path != "") legend.Heal.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Heal.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
+                            if (legend.Elite.Icon != null && legend.Elite.Icon.Path != "") legend.Elite.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Elite.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
+                            if (legend.Swap.Icon != null && legend.Swap.Icon.Path != "") legend.Swap.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Swap.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
+                            if (legend.Skill.Icon != null && legend.Skill.Icon.Path != "") legend.Skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
+
+                            BuildsManager.Logger.Debug("Loading Utility of " + legend.Name);
+                            foreach (API.Skill skill in legend.Utilities)
+                            {
+                                if (skill.Icon != null && skill.Icon.Path != "") skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
+                            }
+                        }
+                    }
                 }
 
-                foreach(string path in filesToDelete)
+                foreach (string path in filesToDelete)
                 {
                     try
                     {

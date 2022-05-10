@@ -597,6 +597,17 @@ namespace Kenedia.Modules.BuildsManager
             public List<string> Flags;
             public List<string> Categories;
         }
+        public class Legend
+        {
+            public string Name; 
+            public int Id;
+            public List<Skill> Utilities;
+            public Skill Heal;
+            public Skill Elite;
+            public Skill Swap;
+            public Skill Skill;
+            public int Specialization;
+        }
 
         public class Trait
         {
@@ -640,6 +651,7 @@ namespace Kenedia.Modules.BuildsManager
             public List<Specialization> Specializations = new List<Specialization>();
             public List<ProfessionWeapon> Weapons = new List<ProfessionWeapon>();
             public List<Skill> Skills = new List<Skill>();
+            public List<Legend> Legends = new List<Legend>();
         }
 
         public class StatAttribute

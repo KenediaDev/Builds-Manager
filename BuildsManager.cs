@@ -63,7 +63,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public List<Template> Templates = new List<Template>();
         private Template _Selected_Template;
-        public Template Selected_Template 
+        public Template Selected_Template
         {
             get => _Selected_Template;
             set
@@ -168,7 +168,7 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         protected override void Initialize()
-        {            
+        {
             Logger.Info("Starting Builds Manager v." + Version.BaseVersion());
             Paths = new iPaths(DirectoriesManager.GetFullDirectoryPath("builds-manager"));
             ArmoryItems.AddRange(new int[] {
@@ -329,7 +329,7 @@ namespace Kenedia.Modules.BuildsManager
 
         private void ShowCornerIcon_SettingChanged(object sender, ValueChangedEventArgs<bool> e)
         {
-            if(cornerIcon!=null) cornerIcon.Visible = e.NewValue;
+            if (cornerIcon != null) cornerIcon.Visible = e.NewValue;
         }
 
         protected override void Update(GameTime gameTime)
@@ -397,70 +397,86 @@ namespace Kenedia.Modules.BuildsManager
                 var _runes = JsonConvert.DeserializeObject<List<int>>(new StreamReader(ContentsManager.GetFileStream(@"data\runes.json")).ReadToEnd());
                 var _sigils = JsonConvert.DeserializeObject<List<int>>(new StreamReader(ContentsManager.GetFileStream(@"data\sigils.json")).ReadToEnd());
 
+                int totalFetches = 9;
+
                 Logger.Debug("Fetching all required Data from the API!");
                 loadingSpinner.Visible = true;
                 downloadBar.Visible = true;
                 downloadBar.Progress = progress;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
 
                 var sigils = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(_sigils);
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Sigils"));
 
                 var runes = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(_runes);
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Runes"));
 
                 var armory_items = await Gw2ApiManager.Gw2ApiClient.V2.Items.ManyAsync(ArmoryItems);
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Armory"));
 
                 var professions = await Gw2ApiManager.Gw2ApiClient.V2.Professions.AllAsync();
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Professions"));
 
                 var specs = await Gw2ApiManager.Gw2ApiClient.V2.Specializations.AllAsync();
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Specs"));
 
                 var traits = await Gw2ApiManager.Gw2ApiClient.V2.Traits.AllAsync();
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Traits"));
 
                 List<int> Skill_Ids = new List<int>();
+
+                var legends = JsonConvert.DeserializeObject<List<iData._Legend>>(new StreamReader(ContentsManager.GetFileStream(@"data\legends.json")).ReadToEnd());
+
+                foreach (iData._Legend legend in legends)
+                {
+                    if (!Skill_Ids.Contains(legend.Skill)) Skill_Ids.Add(legend.Skill);
+                    if (!Skill_Ids.Contains(legend.Swap)) Skill_Ids.Add(legend.Swap);
+                    if (!Skill_Ids.Contains(legend.Heal)) Skill_Ids.Add(legend.Heal);
+                    if (!Skill_Ids.Contains(legend.Elite)) Skill_Ids.Add(legend.Elite);
+                    foreach (int id in legend.Utilities)
+                    {
+                        if (!Skill_Ids.Contains(id)) Skill_Ids.Add(id);
+                    }
+                }
 
                 foreach (Profession profession in professions)
                 {
                     Logger.Debug(string.Format("Checking {0} Skills", profession.Name));
                     foreach (ProfessionSkill skill in profession.Skills)
                     {
-                        if(!Skill_Ids.Contains(skill.Id)) Skill_Ids.Add(skill.Id);
+                        if (!Skill_Ids.Contains(skill.Id)) Skill_Ids.Add(skill.Id);
                     }
                 }
                 Logger.Debug(string.Format("Fetching a total of {0} Skills", Skill_Ids.Count));
 
                 var skills = await Gw2ApiManager.Gw2ApiClient.V2.Skills.ManyAsync(Skill_Ids);
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Skills"));
 
                 var stats = await Gw2ApiManager.Gw2ApiClient.V2.Itemstats.AllAsync();
                 completed++;
-                downloadBar.Progress = completed / 9;
-                downloadBar.Text = string.Format("{0} / 9", completed);
+                downloadBar.Progress = completed / totalFetches;
+                downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
                 Logger.Debug(string.Format("Fetched {0}", "Itemstats"));
 
                 List<API.RuneItem> Runes = new List<API.RuneItem>();
@@ -648,7 +664,7 @@ namespace Kenedia.Modules.BuildsManager
                             }
                         }
 
-                        if(!System.IO.File.Exists(Paths.armory_icons + Regex.Match(i.Icon, "[0-9]*.png")))
+                        if (!System.IO.File.Exists(Paths.armory_icons + Regex.Match(i.Icon, "[0-9]*.png")))
                         {
                             downloadList.Add(new APIDownload_Image()
                             {
@@ -833,10 +849,11 @@ namespace Kenedia.Modules.BuildsManager
                             API.weaponType weaponType;
                             Enum.TryParse(weapon.Key, out weaponType);
 
-                            temp.Weapons.Add(new API.ProfessionWeapon() {
+                            temp.Weapons.Add(new API.ProfessionWeapon()
+                            {
                                 Weapon = weaponType,
                                 Specialization = weapon.Value.Specialization,
-                                Wielded = weapon.Value.Flags.Select(e => (API.weaponHand) Enum.Parse(typeof(API.weaponHand), e.RawValue)).ToList(),
+                                Wielded = weapon.Value.Flags.Select(e => (API.weaponHand)Enum.Parse(typeof(API.weaponHand), e.RawValue)).ToList(),
                             });
                         }
 
@@ -846,6 +863,69 @@ namespace Kenedia.Modules.BuildsManager
 
                         if (profession.Id == "Revenant")
                         {
+                            foreach (iData._Legend legend in legends)
+                            {
+                                var tempLegend = new API.Legend()
+                                {
+                                };
+
+                                tempLegend.Name = Skills.Find(e => e.Id == legend.Skill).Name;
+                                tempLegend.Skill = Skills.Find(e => e.Id == legend.Skill);
+                                tempLegend.Id = legend.Id;
+                                tempLegend.Specialization = legend.Specialization;
+                                tempLegend.Swap = Skills.Find(e => e.Id == legend.Swap);
+                                tempLegend.Heal = Skills.Find(e => e.Id == legend.Heal);
+                                tempLegend.Elite = Skills.Find(e => e.Id == legend.Elite);
+
+
+                                if (!System.IO.File.Exists(Paths.BasePath + tempLegend.Skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                {
+                                    display_text = string.Format("Downloading Skill Icon '{0}'", tempLegend.Skill.Name),
+                                    url = tempLegend.Skill.Icon.Url,
+                                    path = Paths.BasePath + tempLegend.Skill.Icon.Path,
+                                });
+
+                                if (!System.IO.File.Exists(Paths.BasePath + tempLegend.Swap.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                {
+                                    display_text = string.Format("Downloading Skill Icon '{0}'", tempLegend.Swap.Name),
+                                    url = tempLegend.Swap.Icon.Url,
+                                    path = Paths.BasePath + tempLegend.Swap.Icon.Path,
+                                });
+
+                                if (!System.IO.File.Exists(Paths.BasePath + tempLegend.Heal.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                {
+                                    display_text = string.Format("Downloading Skill Icon '{0}'", tempLegend.Heal.Name),
+                                    url = tempLegend.Heal.Icon.Url,
+                                    path = Paths.BasePath + tempLegend.Heal.Icon.Path,
+                                });
+
+                                if (!System.IO.File.Exists(Paths.BasePath + tempLegend.Heal.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                {
+                                    display_text = string.Format("Downloading Skill Icon '{0}'", tempLegend.Elite.Name),
+                                    url = tempLegend.Elite.Icon.Url,
+                                    path = Paths.BasePath + tempLegend.Elite.Icon.Path,
+                                });
+
+
+                                tempLegend.Utilities = new List<API.Skill>();
+
+                                foreach (int id in legend.Utilities)
+                                {
+                                    var skill = Skills.Find(e => e.Id == id);
+                                    tempLegend.Utilities.Add(skill);
+
+                                    if (!System.IO.File.Exists(Paths.BasePath + skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                    {
+                                        display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
+                                        url = skill.Icon.Url,
+                                        path = Paths.BasePath + skill.Icon.Path,
+                                    });
+                                }
+
+                                temp.Legends.Add(tempLegend);
+                            }
+
+
                             foreach (ProfessionSkill iSkill in profession.Skills)
                             {
                                 var skill = Skills.Find(e => e.Id == iSkill.Id);
@@ -855,6 +935,24 @@ namespace Kenedia.Modules.BuildsManager
                                 {
                                     skill.PaletteId = paletteID.PaletteID;
                                     temp.Skills.Add(skill);
+
+                                    if (!System.IO.File.Exists(Paths.BasePath + skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
+                                    {
+                                        display_text = string.Format("Downloading Skill Icon '{0}'", skill.Name),
+                                        url = skill.Icon.Url,
+                                        path = Paths.BasePath + skill.Icon.Path,
+                                    });
+                                }
+                            }
+
+                            foreach (KeyValuePair<int, int> skillIDs in profession.SkillsByPalette)
+                            {
+                                var skill = Skills.Find(e => e.Id == skillIDs.Value);
+                                if (skill != null && !temp.Skills.Contains(skill))
+                                {
+                                    skill.PaletteId = skillIDs.Key;
+                                    temp.Skills.Add(skill);
+
 
                                     if (!System.IO.File.Exists(Paths.BasePath + skill.Icon.Path)) downloadList.Add(new APIDownload_Image()
                                     {
@@ -934,6 +1032,7 @@ namespace Kenedia.Modules.BuildsManager
 
                 GameVersion.Value = Gw2MumbleService.Gw2Mumble.Info.Version;
                 ModuleVersion.Value = Version.BaseVersion().ToString();
+                Logger.Debug("API Data sucessfully fetched!");
             }
         }
 

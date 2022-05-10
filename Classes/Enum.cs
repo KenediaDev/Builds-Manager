@@ -163,7 +163,7 @@
         Healing,
         HealingPower = 5,
         Power,
-        Precision, 
+        Precision,
         Toughness,
         Vitality,
         CritChance,
@@ -228,7 +228,7 @@
         Weapon2_MainHand,
         Weapon2_OffHand,
         AquaticWeapon2,
-     //   Aquabreather,
+        //   Aquabreather,
         Back,
         Amulet,
         Ring1,
@@ -240,7 +240,7 @@
     {
         Unkown = -1,
         Helm = 6,
-        Shoulders  = 8,
+        Shoulders = 8,
         Coat = 3,
         Gloves = 5,
         Leggings = 7,
@@ -313,5 +313,28 @@
         Edit_Feather_Highlight,
         Edit_Feather_Pressed,
         Mouse,
+    }
+    public enum _RevenantLegends
+    {
+        //      Legend1 = 1,
+        LegendaryDragonStance = 1,
+
+        //    Legend2 = 2,
+        LegendaryAssassinStance = 2,
+
+        //    Legend3 = 3,
+        LegendaryDwarfStance = 3,
+
+        //    Legend4 = 4,
+        LegendaryDemonStance = 4,
+
+        //     Legend5 = 5,
+        LegendaryRenegadeStance = 5,
+
+        // Legend6 = 6,
+        LegendaryCentaurStance = 6,
+
+        // Legend7 = 7,
+        LegendaryAllianceStance = 7,
     }
 }
