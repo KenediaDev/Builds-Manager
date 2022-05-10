@@ -196,6 +196,17 @@ private void UpdateLayout()
             get => BuildsManager.ModuleInstance.Selected_Template;
         }
 
+        public SpecializationSelector_Control()
+        {
+            BuildsManager.ModuleInstance.Selected_Template_Changed += ClosePopUp;
+            Input.Mouse.LeftMouseButtonPressed += ClosePopUp;
+        }
+
+        private void ClosePopUp(object sender, EventArgs e)
+        {
+            if(!MouseOver) Hide();
+        }
+
         protected override void OnClick(MouseEventArgs e)
         {
             base.OnClick(e);
@@ -305,10 +316,11 @@ private void UpdateLayout()
             }
         }
 
-        public void SetTemplate()
+        protected override void DisposeControl()
         {
-            var template = BuildsManager.ModuleInstance.Selected_Template;
-
+            base.DisposeControl();
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= ClosePopUp;
+            Input.Mouse.LeftMouseButtonPressed -= ClosePopUp;
         }
     }
     public class Specialization_Control : Control

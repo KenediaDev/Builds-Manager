@@ -112,7 +112,21 @@ namespace Kenedia.Modules.BuildsManager
                 if (rect.Contains(RelativeMousePosition))
                 {
                     var text = i == 0 ? TemplateBox.Text : GearBox.Text;
-                    ClipboardUtil.WindowsClipboardService.SetTextAsync(text);
+                    if(text != "" && text != null)
+                    {
+                        try
+                        {
+                            ClipboardUtil.WindowsClipboardService.SetTextAsync(text);
+                        }
+                        catch (ArgumentException)
+                        {
+                            ScreenNotification.ShowNotification("Failed to set the clipboard text!", ScreenNotification.NotificationType.Error);
+                        }
+                        catch
+                        {
+
+                        }
+                    }
 
                     return;
                 }
@@ -291,6 +305,7 @@ namespace Kenedia.Modules.BuildsManager
         TextBox NameBox;
         Label NameLabel;
         Control_AddButton Add_Button;
+        private BitmapFont Font;
 
         private void _TemplateSelection_TemplateChanged(object sender, TemplateChangedEvent e)
         {
@@ -307,6 +322,9 @@ namespace Kenedia.Modules.BuildsManager
             _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
             _Delete = BuildsManager.TextureManager.getControlTexture(_Controls.Delete);
             _DeleteHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Delete_Hovered);
+
+            var cnt = new ContentService();
+            Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
 
             Templates_Panel = new Panel()
             {
@@ -409,9 +427,6 @@ namespace Kenedia.Modules.BuildsManager
 
             Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Build.ParseBuildCode();
             Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
-
-            var cnt = new ContentService();
-            var Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
 
             NameBox = new TextBox()
             {
@@ -571,7 +586,51 @@ namespace Kenedia.Modules.BuildsManager
 
             ProfessionSelection.Hide();
         }
+        public override void PaintAfterChildren(SpriteBatch spriteBatch, Rectangle bounds)
+        {
+            base.PaintAfterChildren(spriteBatch, bounds);
 
+            var template = BuildsManager.ModuleInstance.Selected_Template;
+            if (template != null && template.Profession != null && template.Profession.Id == "Revenant")
+            {
+                var texture = BuildsManager.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
+                var rect = new Rectangle(Detail_Panel.LocalBounds.X + 5, Detail_Panel.LocalBounds.Y + Detail_Panel.LocalBounds.Height / 2 - 50, Detail_Panel.LocalBounds.Width - 10, Font.LineHeight + 100);
+                spriteBatch.DrawOnCtrl(this,
+                                       texture,
+                                        rect,
+                                        texture.Bounds,
+                                        new Color(0, 0, 0, 175),
+                                      0f,
+                                      default);
+
+                var color = Color.Black;
+
+                //Top
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
+
+                //Bottom
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
+
+                //Left
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
+
+                //Right
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
+                spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
+
+                spriteBatch.DrawStringOnCtrl(this,
+                                        "Revenant is currently not supported! It is in development tho and hopefully comes soon!",
+                                        Font,
+                                        new Rectangle(Detail_Panel.LocalBounds.X + 10, Detail_Panel.LocalBounds.Y + Detail_Panel.LocalBounds.Height / 2, Detail_Panel.LocalBounds.Width, Font.LineHeight),
+                                        Color.Red,
+                                        false,
+                                        HorizontalAlignment.Left
+                                        );
+            }
+        }
         public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
             base.PaintBeforeChildren(spriteBatch, bounds);

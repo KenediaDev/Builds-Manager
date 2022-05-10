@@ -227,8 +227,8 @@ namespace Kenedia.Modules.BuildsManager
                   30689, //Eternity
                 });
 
-            ReloadKey.Value.Enabled = true;
-            ReloadKey.Value.Activated += ReloadKey_Activated;
+            //ReloadKey.Value.Enabled = true;
+            //ReloadKey.Value.Activated += ReloadKey_Activated;
 
             ToggleWindow.Value.Enabled = true;
             ToggleWindow.Value.Activated += ToggleWindow_Activated;
@@ -349,6 +349,12 @@ namespace Kenedia.Modules.BuildsManager
             Data = null;
             TextureManager = null;
             cornerIcon.Dispose();
+
+            //ReloadKey.Value.Enabled = false;
+            //ReloadKey.Value.Activated -= ReloadKey_Activated;
+
+            ToggleWindow.Value.Enabled = false;
+            ToggleWindow.Value.Activated -= ToggleWindow_Activated;
 
             ModuleInstance = null;
         }

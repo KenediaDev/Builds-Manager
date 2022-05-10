@@ -792,6 +792,24 @@ namespace Kenedia.Modules.BuildsManager
             if (!MouseOver && !SelectionPopUp.MouseOver) SelectionPopUp.Hide();
         }
 
+        private void SetClipboard(string text)
+        {
+            if (text != "" && text != null)
+            {
+                try
+                {
+                    ClipboardUtil.WindowsClipboardService.SetTextAsync(text);
+                }
+                catch (ArgumentException)
+                {
+                    ScreenNotification.ShowNotification("Failed to set the clipboard text!", ScreenNotification.NotificationType.Error);
+                }
+                catch
+                {
+
+                }
+            }
+        }
         private void OnRightClick(object sender, MouseEventArgs mouse)
         {
             if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
@@ -845,12 +863,12 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
                     if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Sigil != null)
                     {
-                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigil.Name);
+                        SetClipboard(item.Sigil.Name);
                         text = item.Sigil.Name;
                     }
                 }
@@ -859,7 +877,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
                     if (item.Sigils != null)
@@ -868,7 +886,7 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             if (item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition))
                             {
-                                ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Sigils[i].Name);
+                                SetClipboard(item.Sigils[i].Name);
                                 text = item.Sigils[i].Name;
                             }
                         }
@@ -879,12 +897,12 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
                     if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Rune != null)
                     {
-                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Rune.Name);
+                        SetClipboard(item.Rune.Name);
                         text = item.Rune.Name;
                     }
                 }
@@ -893,7 +911,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        ClipboardUtil.WindowsClipboardService.SetTextAsync(item.Stat.Name);
+                        SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
                 }
