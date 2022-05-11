@@ -298,6 +298,7 @@ namespace Kenedia.Modules.BuildsManager
         Texture2D _Delete;
         Texture2D _DeleteHovered;
         Texture2D ProfessionIcon;
+        Texture2D Disclaimer_Background;
 
         SelectionPopUp ProfessionSelection;
         List<SelectionPopUp.SelectionEntry> _Professions;
@@ -322,6 +323,8 @@ namespace Kenedia.Modules.BuildsManager
             _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
             _Delete = BuildsManager.TextureManager.getControlTexture(_Controls.Delete);
             _DeleteHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Delete_Hovered);
+
+            Disclaimer_Background = BuildsManager.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
 
             var cnt = new ContentService();
             Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
@@ -591,9 +594,10 @@ namespace Kenedia.Modules.BuildsManager
             base.PaintAfterChildren(spriteBatch, bounds);
 
             var template = BuildsManager.ModuleInstance.Selected_Template;
+
             if (template != null && template.Profession != null && template.Profession.Id == "Revenant")
             {
-                var texture = BuildsManager.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
+                var texture = Disclaimer_Background;
                 var rect = new Rectangle(Detail_Panel.LocalBounds.X + 5, Detail_Panel.LocalBounds.Y + Detail_Panel.LocalBounds.Height / 2 - 50, Detail_Panel.LocalBounds.Width - 10, Font.LineHeight + 100);
                 spriteBatch.DrawOnCtrl(this,
                                        texture,

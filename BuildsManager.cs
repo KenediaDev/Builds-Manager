@@ -385,6 +385,8 @@ namespace Kenedia.Modules.BuildsManager
 
         public async Task Fetch_APIData(bool force = false)
         {
+
+            ScreenNotification.ShowNotification("Fetching API", ScreenNotification.NotificationType.Warning);
             if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || ModuleVersion.Value != Version.BaseVersion().ToString() || force == true || false)
             {
                 var downloadList = new List<APIDownload_Image>();

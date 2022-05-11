@@ -489,6 +489,8 @@ namespace Kenedia.Modules.BuildsManager
 
             var path = Path + Name + ".json";
 
+            BuildsManager.Logger.Debug("Saving: " + path);
+
             FileInfo fi = null;
             try
             {
