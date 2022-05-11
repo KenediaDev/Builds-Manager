@@ -661,6 +661,46 @@ namespace Kenedia.Modules.BuildsManager
             public double Multiplier;
             public int Value;
             public Icon Icon;
+
+            public string getLocalName
+            {
+                get
+                {
+                    string text = Name;
+
+                    switch (Id)
+                    {
+                        case (int) _Stats.Power:
+                            return Strings.common.Power;
+
+                        case (int) _Stats.Precision:
+                            return Strings.common.Precision;
+
+                        case (int) _Stats.Toughness:
+                            return Strings.common.Toughness;
+
+                        case (int) _Stats.Vitality:
+                            return Strings.common.Vitality;
+
+                        case (int) _Stats.Ferocity:
+                            return Strings.common.Ferocity;
+
+                        case (int) _Stats.HealingPower:
+                            return Strings.common.HealingPower;
+
+                        case (int) _Stats.ConditionDamage:
+                            return Strings.common.ConditionDamage;
+
+                        case (int) _Stats.Concentration:
+                            return Strings.common.Concentration;
+
+                        case (int) _Stats.Expertise:
+                            return Strings.common.Expertise;
+                    }
+
+                    return text;
+                }
+            }
         }
         public class Stat
         {

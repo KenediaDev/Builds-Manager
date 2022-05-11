@@ -538,6 +538,20 @@ namespace Kenedia.Modules.BuildsManager
 
         private void Button_Click(object sender, MouseEventArgs e)
         {
+            _Professions = new List<SelectionPopUp.SelectionEntry>();
+            foreach (API.Profession profession in BuildsManager.Data.Professions)
+            {
+                _Professions.Add(new SelectionPopUp.SelectionEntry()
+                {
+                    Object = profession,
+                    Texture = profession.IconBig.Texture,
+                    Header = profession.Name,
+                    Content = new List<string>(),
+                    ContentTextures = new List<Texture2D>(),
+                });
+            }
+            ProfessionSelection.List = _Professions;
+
             ProfessionSelection.Show();
             ProfessionSelection.Location = Add_Button.Location.Add(new Point(Add_Button.Width + 5, 0));
             ProfessionSelection.SelectionType = SelectionPopUp.selectionType.Profession;

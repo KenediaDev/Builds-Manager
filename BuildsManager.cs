@@ -61,6 +61,7 @@ namespace Kenedia.Modules.BuildsManager
         public SettingEntry<int> GameVersion;
         public SettingEntry<string> ModuleVersion;
 
+        public string CultureString;
         public List<Template> Templates = new List<Template>();
         private Template _Selected_Template;
         public Template Selected_Template
@@ -169,6 +170,7 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Initialize()
         {
+            CultureString = BuildsManager.getCultureString();
             Logger.Info("Starting Builds Manager v." + Version.BaseVersion());
             Paths = new iPaths(DirectoriesManager.GetFullDirectoryPath("builds-manager"));
             ArmoryItems.AddRange(new int[] {
@@ -385,8 +387,6 @@ namespace Kenedia.Modules.BuildsManager
 
         public async Task Fetch_APIData(bool force = false)
         {
-
-            ScreenNotification.ShowNotification("Fetching API", ScreenNotification.NotificationType.Warning);
             if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || ModuleVersion.Value != Version.BaseVersion().ToString() || force == true || false)
             {
                 var downloadList = new List<APIDownload_Image>();
@@ -1042,7 +1042,24 @@ namespace Kenedia.Modules.BuildsManager
         {
             await Fetch_APIData();
 
-            Data = new iData(ContentsManager, DirectoriesManager);
+
+            if (Data == null)
+            {
+                Data = new iData(ContentsManager, DirectoriesManager);
+            }
+            else
+            {
+                Data.UpdateLanguage();
+            }
+
+            OverlayService.Overlay.UserLocale.SettingChanged += UserLocale_SettingChanged;
+        }
+
+        private async void UserLocale_SettingChanged(object sender, ValueChangedEventArgs<Gw2Sharp.WebApi.Locale> e)
+        {
+            CultureString = BuildsManager.getCultureString();
+            OverlayService.Overlay.UserLocale.SettingChanged -= UserLocale_SettingChanged;
+            await LoadData();
         }
 
         private void CreateUI()

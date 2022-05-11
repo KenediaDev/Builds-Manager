@@ -12,6 +12,7 @@ using System.Text.Json.Serialization;
 using Blish_HUD;
 using Microsoft.Xna.Framework.Graphics;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+using Blish_HUD.Controls;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -49,6 +50,151 @@ namespace Kenedia.Modules.BuildsManager
 
         private bool fetchAPI;
         static Texture2D PlaceHolder;
+
+        public void UpdateLanguage()
+        {
+            string file_path;
+            var culture = BuildsManager.getCultureString();
+            List<string> filesToDelete = new List<string>();
+
+            file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
+            if (System.IO.File.Exists(file_path))
+            {
+                foreach (API.Profession entry in JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete)))
+                {
+                    var target = Professions.Find(e => e.Id == entry.Id);
+
+                    if (target != null)
+                    {
+                        target.Name = entry.Name;
+
+                        foreach (API.Specialization specialization in entry.Specializations)
+                        {
+                            var targetSpecialization = target.Specializations.Find(e => e.Id == specialization.Id);
+                            if (targetSpecialization != null)
+                            {
+                                targetSpecialization.Name = specialization.Name;
+
+                                foreach (API.Trait trait in specialization.MajorTraits)
+                                {
+                                    var targetTrait = targetSpecialization.MajorTraits.Find(e => e.Id == trait.Id);
+                                    if (targetTrait != null)
+                                    {
+                                        targetTrait.Name = trait.Name;
+                                        targetTrait.Description = trait.Description;
+                                    }
+                                }
+
+                                foreach (API.Trait trait in specialization.MinorTraits)
+                                {
+                                    var targetTrait = targetSpecialization.MinorTraits.Find(e => e.Id == trait.Id);
+                                    if (targetTrait != null)
+                                    {
+                                        targetTrait.Name = trait.Name;
+                                        targetTrait.Description = trait.Description;
+                                    }
+                                }
+
+                                if (specialization.WeaponTrait != null)
+                                {
+                                    targetSpecialization.WeaponTrait.Name = specialization.WeaponTrait.Name;
+                                    targetSpecialization.WeaponTrait.Description = specialization.WeaponTrait.Description;
+                                }
+                            }
+                        }
+
+                        foreach (API.Skill skill in entry.Skills)
+                        {
+                            var targetSkill = target.Skills.Find(e => e.Id == skill.Id);
+                            if (targetSkill != null)
+                            {
+                                targetSkill.Name = skill.Name;
+                                targetSkill.Description = skill.Description;
+                            }
+                        }
+
+                        foreach (API.Legend legend in entry.Legends)
+                        {
+                            var targetLegend = target.Legends.Find(e => e.Id == legend.Id);
+                            if (targetLegend != null)
+                            {
+                                targetLegend.Name = legend.Name;
+                            }
+                        }
+                    }
+                }
+
+                file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
+                foreach (API.Stat tStat in JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete)))
+                {
+                    var stat = Stats.Find(e => e.Id == tStat.Id);
+                    if (stat != null)
+                    {
+                        stat.Name = tStat.Name;
+
+                        foreach(API.StatAttribute attribute in stat.Attributes)
+                        {
+                            attribute.Name = attribute.getLocalName;
+                        }
+                    }
+                }
+
+                file_path = BuildsManager.Paths.runes + @"runes [" + culture + "].json";
+                foreach (API.RuneItem tRune in JsonConvert.DeserializeObject<List<API.RuneItem>>(LoadFile(file_path, filesToDelete))){
+                    var rune = Runes.Find(e => e.Id == tRune.Id);
+
+                    if(rune != null)
+                    {
+                        rune.Name = tRune.Name;
+                        rune.Bonuses = tRune.Bonuses;
+                    }
+                }
+
+                file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
+                foreach (API.SigilItem tSigil in JsonConvert.DeserializeObject<List<API.SigilItem>>(LoadFile(file_path, filesToDelete))){
+                    var sigil = Sigils.Find(e => e.Id == tSigil.Id);
+
+                    if(sigil != null)
+                    {
+                        sigil.Name = tSigil.Name;
+                        sigil.Description = tSigil.Description;
+                    }
+                }
+
+                file_path = BuildsManager.Paths.armory + @"armors [" + culture + "].json";
+                foreach (API.ArmorItem tArmor in JsonConvert.DeserializeObject<List<API.ArmorItem>>(LoadFile(file_path, filesToDelete))){
+                    var armor = Armors.Find(e => e.Id == tArmor.Id);
+
+                    if(armor != null)
+                    {
+                        armor.Name = tArmor.Name;
+                    }
+                }
+
+
+                file_path = BuildsManager.Paths.armory + @"weapons [" + culture + "].json";
+                foreach (API.WeaponItem tWeapon in JsonConvert.DeserializeObject<List<API.WeaponItem>>(LoadFile(file_path, filesToDelete)))
+                {
+                    var weapon = Weapons.Find(e => e.Id == tWeapon.Id);
+
+                    if (weapon != null)
+                    {
+                        weapon.Name = tWeapon.Name;
+                    }
+                }
+
+                file_path = BuildsManager.Paths.armory + @"trinkets [" + culture + "].json";
+                foreach (API.TrinketItem tTrinket in JsonConvert.DeserializeObject<List<API.TrinketItem>>(LoadFile(file_path, filesToDelete)))
+                {
+                    var trinket = Trinkets.Find(e => e.Id == tTrinket.Id);
+
+                    if (trinket != null)
+                    {
+                        trinket.Name = tTrinket.Name;
+                    }
+                }
+            }
+        }
 
         private Texture2D LoadImage(string path, GraphicsDevice graphicsDevice, List<string> filesToDelete, Rectangle region = default, Rectangle default_Bounds = default)
         {
@@ -154,7 +300,7 @@ namespace Kenedia.Modules.BuildsManager
 
             file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete));
-            foreach (API.Stat stat in Stats) { stat.Icon.Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) { attri.Icon.Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
+            foreach (API.Stat stat in Stats) { stat.Icon.Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) {attri.Name = attri.getLocalName; attri.Icon.Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
             file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete));
@@ -259,7 +405,7 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             BuildsManager.Logger.Debug("Loading " + legend.Name);
 
-                            if(legend.Heal.Icon != null && legend.Heal.Icon.Path != "") legend.Heal.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Heal.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
+                            if (legend.Heal.Icon != null && legend.Heal.Icon.Path != "") legend.Heal.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Heal.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
                             if (legend.Elite.Icon != null && legend.Elite.Icon.Path != "") legend.Elite.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Elite.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
                             if (legend.Swap.Icon != null && legend.Swap.Icon.Path != "") legend.Swap.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Swap.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
                             if (legend.Skill.Icon != null && legend.Skill.Icon.Path != "") legend.Skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));

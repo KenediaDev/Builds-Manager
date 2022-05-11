@@ -82,6 +82,11 @@
     <Compile Include="Classes\Enum.cs" />
     <Compile Include="Classes\TraitLine.cs" />
     <Compile Include="Classes\Window_MainWindow.cs" />
+    <Compile Include="Strings\common.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>common.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AsyncClipboardService, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -281,6 +286,15 @@
     <Content Include="ref\155985.png" />
     <Content Include="ref\603447.png" />
     <Content Include="ref\test\603447.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings\common.de.resx" />
+    <EmbeddedResource Include="Strings\common.es.resx" />
+    <EmbeddedResource Include="Strings\common.fr.resx" />
+    <EmbeddedResource Include="Strings\common.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>common.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
