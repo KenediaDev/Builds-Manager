@@ -90,6 +90,12 @@ namespace Kenedia.Modules.BuildsManager
             this.Selected_Template_Redraw?.Invoke(this, EventArgs.Empty);
         }
 
+        public event EventHandler LanguageChanged;
+        public void OnLanguageChanged(object sender, EventArgs e)
+        {
+            this.LanguageChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         public event EventHandler Selected_Template_Edit;
         public void OnSelected_Template_Edit(object sender, EventArgs e)
         {
@@ -1060,6 +1066,8 @@ namespace Kenedia.Modules.BuildsManager
             CultureString = BuildsManager.getCultureString();
             OverlayService.Overlay.UserLocale.SettingChanged -= UserLocale_SettingChanged;
             await LoadData();
+
+            OnLanguageChanged(null, null);
         }
 
         private void CreateUI()

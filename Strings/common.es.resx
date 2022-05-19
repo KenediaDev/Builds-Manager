@@ -117,17 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Build" xml:space="preserve">
+    <value>Perfil</value>
+  </data>
   <data name="Concentration" xml:space="preserve">
     <value>Concentración</value>
   </data>
   <data name="ConditionDamage" xml:space="preserve">
     <value>Daño de condición</value>
   </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Borrar</value>
+  </data>
   <data name="Expertise" xml:space="preserve">
     <value>Pericia</value>
   </data>
   <data name="Ferocity" xml:space="preserve">
     <value>Ferocidad</value>
+  </data>
+  <data name="Gear" xml:space="preserve">
+    <value>Engranaje</value>
+  </data>
+  <data name="GearTab_Tips" xml:space="preserve">
+    <value>Click izquierdo para seleccionar Stat/Upgrade
+Alt + Click Derecho para seleccionar Arma
+Clic derecho para copiar el nombre de la estadística/actualización</value>
   </data>
   <data name="HealingPower" xml:space="preserve">
     <value>Poder de curación</value>
@@ -137,6 +157,15 @@
   </data>
   <data name="Precision" xml:space="preserve">
     <value>Precisión</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Busque en</value>
+  </data>
+  <data name="Template" xml:space="preserve">
+    <value>Plantilla</value>
+  </data>
+  <data name="TemplateCode" xml:space="preserve">
+    <value>Código de plantilla</value>
   </data>
   <data name="Toughness" xml:space="preserve">
     <value>Dureza</value>

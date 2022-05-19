@@ -256,12 +256,13 @@ namespace Kenedia.Modules.BuildsManager
             FilterBox = new TextBox()
             {
                 Parent = Parent,
-                PlaceholderText = "Search ...",
+                PlaceholderText = Strings.common.Search + " ...",
                 Width = Width - 6,
                 ZIndex = 998,
                 Visible = false,
             };
             FilterBox.TextChanged += FilterBox_TextChanged;
+            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
 
             ContentService = new ContentService();
             Font = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
@@ -293,6 +294,11 @@ namespace Kenedia.Modules.BuildsManager
             {
                 FilterBox.Dispose();
             };
+        }
+
+        private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
+        {
+            FilterBox.PlaceholderText = Strings.common.Search + " ...";
         }
 
         private void FilterBox_TextChanged(object sender, EventArgs e)
@@ -758,12 +764,8 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            Instructions = new List<string>()
-            {
-                "Left Click to select Stat/Upgrade",
-                "Alt + Right Click to select Weapon",
-                "Right Click to copy Stat/Upgrade Name",
-            };
+            Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
+            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
 
             Shown += delegate
             {
@@ -774,6 +776,11 @@ namespace Kenedia.Modules.BuildsManager
             UpdateLayout();
 
             BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+        }
+
+        private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
+        {
+            Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
         }
 
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)

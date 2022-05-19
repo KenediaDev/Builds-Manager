@@ -318,9 +318,9 @@ namespace Kenedia.Modules.BuildsManager
                 Location = new Point(5,0),
                 Parent = this,
                 Width = Width - 5,
-                PlaceholderText = "Search ...",
+                PlaceholderText = Strings.common.Search + " ..."
             };
-
+            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
             _ProfessionSelector = new Control_ProfessionSelector()
             {
                 Parent = this,
@@ -352,6 +352,11 @@ namespace Kenedia.Modules.BuildsManager
             BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Templates_Loaded;
             ContentPanel.ChildAdded += ContentPanel_ChildsChanged;
             ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;
+        }
+
+        private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
+        {
+            FilterBox.PlaceholderText = Strings.common.Search + " ...";
         }
 
         private void ContentPanel_ChildsChanged(object sender, ChildChangedEventArgs e)

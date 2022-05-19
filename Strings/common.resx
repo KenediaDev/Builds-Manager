@@ -117,17 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Build" xml:space="preserve">
+    <value>Build</value>
+  </data>
   <data name="Concentration" xml:space="preserve">
     <value>Concentration</value>
   </data>
   <data name="ConditionDamage" xml:space="preserve">
     <value>Condition Damage</value>
   </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
   <data name="Expertise" xml:space="preserve">
     <value>Expertise</value>
   </data>
   <data name="Ferocity" xml:space="preserve">
     <value>Ferocity</value>
+  </data>
+  <data name="Gear" xml:space="preserve">
+    <value>Gear</value>
+  </data>
+  <data name="GearTab_Tips" xml:space="preserve">
+    <value>Left Click to select Stat/Upgrade
+Alt + Right Click to select Weapon
+Right Click to copy Stat/Upgrade Name</value>
   </data>
   <data name="HealingPower" xml:space="preserve">
     <value>Healing Power</value>
@@ -137,6 +157,15 @@
   </data>
   <data name="Precision" xml:space="preserve">
     <value>Precision</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Template" xml:space="preserve">
+    <value>Template</value>
+  </data>
+  <data name="TemplateCode" xml:space="preserve">
+    <value>Template Code</value>
   </data>
   <data name="Toughness" xml:space="preserve">
     <value>Toughness</value>

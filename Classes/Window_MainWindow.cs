@@ -261,7 +261,7 @@ namespace Kenedia.Modules.BuildsManager
                                         Color.White,
                                         0f,
                                         default);
-                BasicTooltipText = hovered ? "Copy Template" : null;
+                BasicTooltipText = hovered ? Strings.common.Copy + " " + Strings.common.Template : null;
 
                 color = Color.Black;
                 rect = bounds;
@@ -379,11 +379,12 @@ namespace Kenedia.Modules.BuildsManager
             Add_Button = new Control_AddButton()
             {
                 Parent = Templates_Panel,
-                Text = "Create",
+                Text = Strings.common.Create,
                 Location = new Point(Templates_Panel.Width - 130, 0),
                 Size = new Point(125, 35),
             };
             Add_Button.Click += Button_Click;
+            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
 
             _TemplateSelection = new Control_TemplateSelection(this)
             {
@@ -396,13 +397,13 @@ namespace Kenedia.Modules.BuildsManager
             {
                 new Tab()
                 {
-                    Name = "Build",
+                    Name = Strings.common.Build,
                     Icon = BuildsManager.TextureManager.getIcon(_Icons.Template),
                     Panel = new Panel(){ Parent = Detail_Panel, Visible = true },
                 },
                 new Tab()
                 {
-                    Name = "Gear",
+                    Name = Strings.common.Gear,
                     Icon = BuildsManager.TextureManager.getIcon(_Icons.Helmet),
                     Panel = new Panel(){ Parent = Detail_Panel, Visible = false },
                 },
@@ -462,6 +463,13 @@ namespace Kenedia.Modules.BuildsManager
             Detail_Panel.GearBox.EnterPressed += GearBox_EnterPressed;
 
             Input.Mouse.LeftMouseButtonPressed += GlobalClick;
+        }
+
+        private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
+        {
+            Add_Button.Text = Strings.common.Create;
+            Detail_Panel.Tabs[0].Name = Strings.common.Build;
+            Detail_Panel.Tabs[1].Name = Strings.common.Gear;
         }
 
         private void GlobalClick(object sender, MouseEventArgs e)
@@ -694,7 +702,7 @@ namespace Kenedia.Modules.BuildsManager
                                   0f,
                                   default);
 
-            BasicTooltipText = hovered ? "Delete Template" : null;
+            BasicTooltipText = hovered ? Strings.common.Delete + " " + Strings.common.Template : null;
 
             if(BuildsManager.ModuleInstance.Selected_Template.Profession != null)
             {

@@ -61,6 +61,15 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Build.
+        /// </summary>
+        internal static string Build {
+            get {
+                return ResourceManager.GetString("Build", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Concentration.
         /// </summary>
         internal static string Concentration {
@@ -79,6 +88,33 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copy.
+        /// </summary>
+        internal static string Copy {
+            get {
+                return ResourceManager.GetString("Copy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create.
+        /// </summary>
+        internal static string Create {
+            get {
+                return ResourceManager.GetString("Create", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete.
+        /// </summary>
+        internal static string Delete {
+            get {
+                return ResourceManager.GetString("Delete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Expertise.
         /// </summary>
         internal static string Expertise {
@@ -93,6 +129,26 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         internal static string Ferocity {
             get {
                 return ResourceManager.GetString("Ferocity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gear.
+        /// </summary>
+        internal static string Gear {
+            get {
+                return ResourceManager.GetString("Gear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Left Click to select Stat/Upgrade
+        ///Alt + Right Click to select Weapon
+        ///Right Click to copy Stat/Upgrade Name.
+        /// </summary>
+        internal static string GearTab_Tips {
+            get {
+                return ResourceManager.GetString("GearTab_Tips", resourceCulture);
             }
         }
         
@@ -120,6 +176,33 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         internal static string Precision {
             get {
                 return ResourceManager.GetString("Precision", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search.
+        /// </summary>
+        internal static string Search {
+            get {
+                return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template.
+        /// </summary>
+        internal static string Template {
+            get {
+                return ResourceManager.GetString("Template", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template Code.
+        /// </summary>
+        internal static string TemplateCode {
+            get {
+                return ResourceManager.GetString("TemplateCode", resourceCulture);
             }
         }
         
