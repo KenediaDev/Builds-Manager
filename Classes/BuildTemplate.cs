@@ -66,10 +66,7 @@ namespace Kenedia.Modules.BuildsManager
     }
     public class Template_json
     {
-        public string Profession;
-        public int Specialization;
         public string Name;
-        public GearTemplate_json Gear;
         public string BuildCode;
         public string GearCode;
         public Template_json(string path = default)
@@ -80,13 +77,13 @@ namespace Kenedia.Modules.BuildsManager
                 if (template != null)
                 {
                     Name = template.Name;
-                    Gear = template.Gear;
                     BuildCode = template.BuildCode;
+                    GearCode = template.GearCode;
                 }
             }
             else
             {
-                Gear = new GearTemplate_json();
+                GearCode = "[0][0][0][0][0][0][0|0][0|0][0|0][0|0][0|0][0|0][0|0|0][0|0|0][0|0|0][0|0|0][0|0|0|0][0|0|0|0]";
                 BuildCode = "[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]";
             }
         }
@@ -334,59 +331,14 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     Template_json = template;
                     Name = template.Name;
-                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == template.Profession);
-                    Specialization = Profession != null ? Profession.Specializations.Find(e => e.Id == template.Specialization) : null;
 
                     Path = path.Replace(Name + ".json", "");
 
-                    foreach (Armor_TemplateItem_json jItem in Template_json.Gear.Armor)
-                    {
-                        var index = (int)Enum.Parse(typeof(_AmorSlots), jItem._Slot);
-                        if (Gear.Armor[index] == null) Gear.Armor[index] = new Armor_TemplateItem();
-                        Gear.Armor[index].Stat = BuildsManager.Data.Stats.Find(e => e.Id == jItem._Stat);
-                        Gear.Armor[index].Rune = BuildsManager.Data.Runes.Find(e => e.Id == jItem._Rune);
-                        Gear.Armor[index].Slot = (_EquipmentSlots)Enum.Parse(typeof(_EquipmentSlots), jItem._Slot);
-                    }
-                    foreach (TemplateItem_json jItem in Template_json.Gear.Trinkets)
-                    {
-                        var index = (int)Enum.Parse(typeof(_TrinketSlots), jItem._Slot);
-                        if (Gear.Trinkets[index] == null) Gear.Trinkets[index] = new TemplateItem();
-                        Gear.Trinkets[index].Stat = BuildsManager.Data.Stats.Find(e => e.Id == jItem._Stat);
-                        Gear.Trinkets[index].Slot = (_EquipmentSlots)Enum.Parse(typeof(_EquipmentSlots), jItem._Slot);
-                    }
-                    foreach (Weapon_TemplateItem_json jItem in Template_json.Gear.Weapons)
-                    {
-                        var index = (int)Enum.Parse(typeof(_WeaponSlots), jItem._Slot);
-                        if (Gear.Weapons[index] == null) Gear.Weapons[index] = new Weapon_TemplateItem();
-                        Gear.Weapons[index].Stat = BuildsManager.Data.Stats.Find(e => e.Id == jItem._Stat);
-                        Gear.Weapons[index].Sigil = BuildsManager.Data.Sigils.Find(e => e.Id == jItem._Sigil);
-                        Gear.Weapons[index].Slot = (_EquipmentSlots)Enum.Parse(typeof(_EquipmentSlots), jItem._Slot);
-                        Gear.Weapons[index].WeaponType = (API.weaponType)Enum.Parse(typeof(API.weaponType), jItem._WeaponType);
-                    }
-                    foreach (AquaticWeapon_TemplateItem_json jItem in Template_json.Gear.AquaticWeapons)
-                    {
-                        var index = (int)Enum.Parse(typeof(_AquaticWeaponSlots), jItem._Slot);
-                        if (Gear.AquaticWeapons[index] == null) Gear.AquaticWeapons[index] = new AquaticWeapon_TemplateItem();
-                        Gear.AquaticWeapons[index].Stat = BuildsManager.Data.Stats.Find(e => e.Id == jItem._Stat);
-                        Gear.AquaticWeapons[index].Slot = (_EquipmentSlots)Enum.Parse(typeof(_EquipmentSlots), jItem._Slot);
-                        Gear.AquaticWeapons[index].WeaponType = (API.weaponType)Enum.Parse(typeof(API.weaponType), jItem._WeaponType);
-                        Gear.AquaticWeapons[index].Sigils = new List<API.SigilItem>();
-
-                        if (jItem._Sigils != null)
-                        {
-                            foreach (int id in jItem._Sigils)
-                            {
-                                Gear.AquaticWeapons[index].Sigils.Add(BuildsManager.Data.Sigils.Find(e => e.Id == id));
-                            }
-                        }
-
-                        for (int i = Gear.AquaticWeapons[index].Sigils.Count; i < 2; i++)
-                        {
-                            Gear.AquaticWeapons[index].Sigils.Add(new API.SigilItem());
-                        }
-                    }
-
                     Build = new BuildTemplate(Template_json.BuildCode);
+                    Gear = new GearTemplate(Template_json.GearCode);
+
+                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == Build?.Profession.Id);
+                    Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization.Elite)?.Specialization : null;
                 }
             }
             else
@@ -514,43 +466,9 @@ namespace Kenedia.Modules.BuildsManager
                 if (Template_json.Name != Name) File.Delete(Path + Template_json.Name + ".json");
 
                 Template_json.Name = Name;
-                Template_json.Profession = Profession != null ? Profession.Id : "Unkown";
-                Template_json.Specialization = Specialization != null ? Specialization.Id : 0;
 
-                Template_json.Gear = new GearTemplate_json();
-
-                for (int i = 0; i < Gear.Trinkets.Count; i++)
-                {
-                    var item = Gear.Trinkets[i];
-                    Template_json.Gear.Trinkets[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                }
-
-                for (int i = 0; i < Gear.Armor.Count; i++)
-                {
-                    var item = Gear.Armor[i];
-                    Template_json.Gear.Armor[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                    Template_json.Gear.Armor[i]._Rune = item.Rune != null ? item.Rune.Id : 0;
-                }
-
-                for (int i = 0; i < Gear.Weapons.Count; i++)
-                {
-                    var item = Gear.Weapons[i];
-                    Template_json.Gear.Weapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                    Template_json.Gear.Weapons[i]._Sigil = item.Sigil != null ? item.Sigil.Id : 0;
-                    Template_json.Gear.Weapons[i]._WeaponType = item.WeaponType.ToString();
-                }
-
-                for (int i = 0; i < Gear.AquaticWeapons.Count; i++)
-                {
-                    var item = Gear.AquaticWeapons[i];
-
-                    Template_json.Gear.AquaticWeapons[i]._Stat = item.Stat != null ? item.Stat.Id : 0;
-                    Template_json.Gear.AquaticWeapons[i]._Sigils = item.Sigils != null ? item.Sigils.Select(e => e != null ? e.Id : 0).ToList() : new List<int>();
-                    Template_json.Gear.AquaticWeapons[i]._WeaponType = item.WeaponType.ToString();
-                }
-
-                Template_json.BuildCode = Build.ParseBuildCode();
-                Template_json.GearCode = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
+                Template_json.BuildCode = Build?.ParseBuildCode();
+                Template_json.GearCode = Gear?.TemplateCode;
 
 
                 File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
