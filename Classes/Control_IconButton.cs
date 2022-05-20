@@ -21,8 +21,8 @@ namespace Kenedia.Modules.BuildsManager
 
     public class Control_AddButton : Control
     {
-        Texture2D Add;
-        Texture2D AddHovered;
+        public Texture2D Texture;
+        public Texture2D TextureHovered;
         Texture2D _EmptyTraitLine;
         Texture2D _Template_Border;
         public BitmapFont Font;
@@ -40,8 +40,8 @@ namespace Kenedia.Modules.BuildsManager
         public Control_AddButton()
         {
             //BackgroundColor = Color.Red;
-            Add = BuildsManager.TextureManager.getControlTexture(_Controls.Add);
-            AddHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Add_Hovered);
+            Texture = BuildsManager.TextureManager.getControlTexture(_Controls.Add);
+            TextureHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Add_Hovered);
             _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
             _Template_Border = BuildsManager.TextureManager.getControlTexture(_Controls.Template_Border);
 
@@ -100,9 +100,9 @@ namespace Kenedia.Modules.BuildsManager
                                    );
 
             spriteBatch.DrawOnCtrl(this,
-                                   MouseOver ? AddHovered : Add,
+                                   MouseOver ? TextureHovered : Texture,
                                    new Rectangle(6, 6, Height - 12, Height - 12),
-                                   MouseOver ? AddHovered.Bounds : Add.Bounds,
+                                   MouseOver ? TextureHovered.Bounds : Texture.Bounds,
                                    Color.White,
                                    0f,
                                    Vector2.Zero

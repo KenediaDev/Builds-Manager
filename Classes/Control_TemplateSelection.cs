@@ -45,16 +45,18 @@ namespace Kenedia.Modules.BuildsManager
         public Template Template;
         public Control_Build Control_Build;
         private Texture2D _EmptyTraitLine;
+        private Texture2D _Lock;
         private Texture2D _Template_Border;
         private BitmapFont Font;
         private Control_TemplateTooltip TemplateTooltip;
 
-        public Control_TemplateEntry (Container parent, Template template)
+        public Control_TemplateEntry(Container parent, Template template)
         {
             Parent = parent;
             Template = template;
             _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
             _Template_Border = BuildsManager.TextureManager.getControlTexture(_Controls.Template_Border);
+            _Lock = BuildsManager.TextureManager.getIcon(_Icons.Lock_Locked);
 
             var cnt = new ContentService();
             Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
@@ -64,6 +66,23 @@ namespace Kenedia.Modules.BuildsManager
         public event EventHandler<TemplateChangedEvent> TemplateChanged;
         private void OnTemplateChangedEvent(Template template)
         {
+
+            var code = template.Build.ParseBuildCode();
+            if (code != null && code != "" && Input.Keyboard.ActiveModifiers.HasFlag(Microsoft.Xna.Framework.Input.ModifierKeys.Ctrl))
+            {
+                try
+                {
+                    ClipboardUtil.WindowsClipboardService.SetTextAsync(template.Build.ParseBuildCode());
+                }
+                catch (ArgumentException)
+                {
+                    ScreenNotification.ShowNotification("Failed to set the clipboard text!", ScreenNotification.NotificationType.Error);
+                }
+                catch
+                {
+
+                }
+            }
             this.TemplateChanged?.Invoke(this, new TemplateChangedEvent(template));
         }
 
@@ -80,7 +99,7 @@ namespace Kenedia.Modules.BuildsManager
         }
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if(TemplateTooltip != null) TemplateTooltip.Visible = MouseOver;
+            if (TemplateTooltip != null) TemplateTooltip.Visible = MouseOver;
 
             spriteBatch.DrawOnCtrl(this,
                                    _Template_Border,
@@ -113,12 +132,24 @@ namespace Kenedia.Modules.BuildsManager
 
             spriteBatch.DrawOnCtrl(this,
                                    texture,
-                                   new Rectangle(2,2,bounds.Height - 4, bounds.Height - 4),
+                                   new Rectangle(2, 2, bounds.Height - 4, bounds.Height - 4),
                                    texture.Bounds,
                                     Color.White,
                                    0f,
                                    Vector2.Zero
                                    );
+
+            if (Template.Path == null)
+            {
+                spriteBatch.DrawOnCtrl(this,
+                                       _Lock,
+                                       new Rectangle(bounds.Height - 14, bounds.Height - 14, 12, 12),
+                                       _Lock.Bounds,
+                                        new Color(168 + 15, 143 + 15, 102 + 15, 255),
+                                       0f,
+                                       Vector2.Zero
+                                       );
+            }
 
             var textBounds = new Rectangle(bounds.X + bounds.Height + 5, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
             var rect = Font.CalculateTextRectangle(Template.Name, textBounds);
@@ -229,9 +260,9 @@ namespace Kenedia.Modules.BuildsManager
 
         void UpdateLayout()
         {
-            foreach(ProfessionSelection profession in _Professions)
+            foreach (ProfessionSelection profession in _Professions)
             {
-                profession.Bounds = new Rectangle(2 + profession.Index * (IconSize + 2) , 2, IconSize, IconSize);
+                profession.Bounds = new Rectangle(2 + profession.Index * (IconSize + 2), 2, IconSize, IconSize);
             }
         }
 
@@ -315,7 +346,7 @@ namespace Kenedia.Modules.BuildsManager
             ControlPadding = new Vector2(0, 3);
             FilterBox = new TextBox()
             {
-                Location = new Point(5,0),
+                Location = new Point(5, 0),
                 Parent = this,
                 Width = Width - 5,
                 PlaceholderText = Strings.common.Search + " ..."
@@ -324,7 +355,7 @@ namespace Kenedia.Modules.BuildsManager
             _ProfessionSelector = new Control_ProfessionSelector()
             {
                 Parent = this,
-                Size = new Point(Width- 5, FilterBox.Height),
+                Size = new Point(Width - 5, FilterBox.Height),
                 Location = new Point(5, FilterBox.Bottom + 5),
             };
             ContentPanel = new FlowPanel()
@@ -417,7 +448,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public void Refresh()
         {
-            foreach(Control_TemplateEntry template in Templates)
+            foreach (Control_TemplateEntry template in Templates)
             {
                 template.Dispose();
             }
@@ -426,7 +457,8 @@ namespace Kenedia.Modules.BuildsManager
 
             Templates = new List<Control_TemplateEntry>();
 
-            foreach( Template template in BuildsManager.ModuleInstance.Templates)
+            BuildsManager.ModuleInstance.Templates = BuildsManager.ModuleInstance.Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
+            foreach (Template template in BuildsManager.ModuleInstance.Templates)
             {
                 var ctrl = new Control_TemplateEntry(ContentPanel, template) { Size = new Point(Width - 20, 38) };
                 ctrl.TemplateChanged += OnTemplateChangedEvent;
@@ -443,6 +475,8 @@ namespace Kenedia.Modules.BuildsManager
             {
                 template.Dispose();
             }
+
+            Templates.Clear();
 
             FilterBox.Dispose();
             _ProfessionSelector.Dispose();

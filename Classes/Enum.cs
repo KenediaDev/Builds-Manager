@@ -290,6 +290,8 @@
         Add_Hovered,
         Copy,
         Copy_Hovered,
+        Import,
+        Import_Hovered,
     }
     public enum _Icons
     {
@@ -315,6 +317,7 @@
         Edit_Feather_Highlight,
         Edit_Feather_Pressed,
         Mouse,
+        Lock_Locked,
     }
     public enum _RevenantLegends
     {

@@ -306,6 +306,8 @@ namespace Kenedia.Modules.BuildsManager
         TextBox NameBox;
         Label NameLabel;
         Control_AddButton Add_Button;
+        public Control_AddButton Import_Button;
+
         private BitmapFont Font;
 
         private void _TemplateSelection_TemplateChanged(object sender, TemplateChangedEvent e)
@@ -369,11 +371,26 @@ namespace Kenedia.Modules.BuildsManager
                     BuildsManager.ModuleInstance.Selected_Template = new Template();
                     BuildsManager.ModuleInstance.Selected_Template.Profession = ProfessionSelection.SelectedProfession;
                     BuildsManager.ModuleInstance.Selected_Template.Build.Profession = ProfessionSelection.SelectedProfession;
+                    BuildsManager.ModuleInstance.Templates.Add(BuildsManager.ModuleInstance.Selected_Template);
+
                     BuildsManager.ModuleInstance.Selected_Template.SetChanged();
+                    _TemplateSelection.Refresh();
                     ProfessionSelection.SelectedProfession = null;
                 }
             };
 
+            Import_Button = new Control_AddButton()
+            {
+                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.Import),
+                TextureHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Import_Hovered),
+                Parent = Templates_Panel,
+                Text = "",
+                Location = new Point(Templates_Panel.Width - 130 - 40, 0),
+                Size = new Point(35, 35),
+                BasicTooltipText = string.Format("Import 'BuildPad' builds from '{0}config.ini'", BuildsManager.Paths.builds),
+                Visible = false,
+            };
+            Import_Button.Click += Import_Button_Click;
 
 
             Add_Button = new Control_AddButton()
@@ -465,9 +482,23 @@ namespace Kenedia.Modules.BuildsManager
             Input.Mouse.LeftMouseButtonPressed += GlobalClick;
         }
 
+        private void ImportFileDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ScreenNotification.ShowNotification("IMPORT FILE", ScreenNotification.NotificationType.Warning);
+
+        }
+
+        private void Import_Button_Click(object sender, MouseEventArgs e)
+        {
+            BuildsManager.ModuleInstance.LoadTemplates();
+            _TemplateSelection.Refresh();
+            Import_Button.Hide();
+        }
+
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
             Add_Button.Text = Strings.common.Create;
+            Import_Button.Text = Strings.common.Create;
             Detail_Panel.Tabs[0].Name = Strings.common.Build;
             Detail_Panel.Tabs[1].Name = Strings.common.Gear;
         }
@@ -531,17 +562,21 @@ namespace Kenedia.Modules.BuildsManager
 
             NameLabel.Visible = true;
             NameBox.Visible = false;
-            NameLabel.Text = NameBox.Text;
+            NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
+            _TemplateSelection.Refresh();
         }
 
         private void NameLabel_Click(object sender, MouseEventArgs e)
         {
-            NameLabel.Visible = false;
-            NameBox.Visible = true;
-            NameBox.Text = NameLabel.Text;
-            NameBox.SelectionStart = 0;
-            NameBox.SelectionEnd = NameBox.Text.Length;
-            NameBox.Focused = true;
+            if (BuildsManager.ModuleInstance.Selected_Template?.Path != null)
+            {
+                NameLabel.Visible = false;
+                NameBox.Visible = true;
+                NameBox.Text = NameLabel.Text;
+                NameBox.SelectionStart = 0;
+                NameBox.SelectionEnd = NameBox.Text.Length;
+                NameBox.Focused = true;
+            }
         }
 
         private void Button_Click(object sender, MouseEventArgs e)
@@ -596,6 +631,7 @@ namespace Kenedia.Modules.BuildsManager
 
             Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.ParseBuildCode();
             Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
+            _TemplateSelection.Refresh();
         }
 
         protected override void OnClick(MouseEventArgs e)
@@ -603,10 +639,12 @@ namespace Kenedia.Modules.BuildsManager
             base.OnClick(e);
 
             var rect = new Rectangle(Detail_Panel.LocalBounds.Right - 35, 44, 35, 35);
-            if (rect.Contains(RelativeMousePosition))
+            if (rect.Contains(RelativeMousePosition) && BuildsManager.ModuleInstance.Selected_Template.Path != null)
             {
                 BuildsManager.ModuleInstance.Selected_Template.Delete();
                 BuildsManager.ModuleInstance.Selected_Template = new Template();
+
+                _TemplateSelection.Refresh();
             }
 
             ProfessionSelection.Hide();
@@ -735,6 +773,9 @@ namespace Kenedia.Modules.BuildsManager
             _TemplateSelection.Dispose();
             NameBox.Dispose();
             NameLabel.Dispose();
+
+            Import_Button.Dispose();
+            Add_Button.Dispose();
 
             base.DisposeControl();
         }

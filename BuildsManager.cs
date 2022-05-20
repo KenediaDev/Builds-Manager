@@ -56,6 +56,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public SettingEntry<bool> PasteOnCopy;
         public SettingEntry<bool> ShowCornerIcon;
+        public SettingEntry<bool> IncludeDefaultBuilds;
         public SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
         public SettingEntry<Blish_HUD.Input.KeyBinding> ToggleWindow;
         public SettingEntry<int> GameVersion;
@@ -99,6 +100,7 @@ namespace Kenedia.Modules.BuildsManager
         public event EventHandler Selected_Template_Edit;
         public void OnSelected_Template_Edit(object sender, EventArgs e)
         {
+            Templates = Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
             this.Selected_Template_Edit?.Invoke(this, EventArgs.Empty);
         }
 
@@ -168,6 +170,11 @@ namespace Kenedia.Modules.BuildsManager
                                                       true,
                                                       () => "Show Corner Icon",
                                                       () => "Show / Hide the Corner Icon of this module.");
+
+            IncludeDefaultBuilds = settings.DefineSetting(nameof(IncludeDefaultBuilds),
+                                                      true,
+                                                      () => "Incl. Default Builds",
+                                                      () => "Load the default builds from within the module.");
 
             var internal_settings = settings.AddSubCollection("Internal Settings", false);
             GameVersion = internal_settings.DefineSetting(nameof(GameVersion), 0);
@@ -260,22 +267,121 @@ namespace Kenedia.Modules.BuildsManager
         protected override async Task LoadAsync()
         {
         }
-        public void LoadTemplates()
+
+        public void ImportTemplates()
         {
-            var currentTemplate = _Selected_Template?.Name;
+            Template saveTemplate = null;
+            if (System.IO.File.Exists(Paths.builds + "config.ini"))
+            {
+                var iniContent = System.IO.File.ReadAllText(Paths.builds + "config.ini");
+                bool started = false;
+                foreach (string s in iniContent.Split('\n'))
+                {
+                    if (s.Trim() != "")
+                    {
+                        if (started && s.StartsWith("["))
+                        {
+                            break;
+                        }
 
-            Templates = new List<Template>();
-            var files = Directory.GetFiles(BuildsManager.Paths.builds, "*.json", SearchOption.AllDirectories).ToList();
+                        if (started)
+                        {
+                            BuildsManager.Logger.Debug("BuildPadBuild: " + s.Trim());
+                            var buildpadBuild = s.Trim().Split('|');
 
-            files.Sort((a, b) => a.CompareTo(b));
+                            var template = new Template();
+                            template.Build = new BuildTemplate(buildpadBuild[1]);
+                            template.Name = buildpadBuild[5];
+
+                            BuildsManager.Logger.Debug("Name: " + template.Name);
+                            BuildsManager.Logger.Debug("Path: " + template.Path);
+                            Templates.Add(template);
+                            saveTemplate = template;
+                        }
+
+                        if (!started && s.StartsWith("[Builds]")) started = true;
+                    }
+                }
+                System.IO.File.Delete(Paths.builds + "config.ini");
+            }
+
+
+            var files = Directory.GetFiles(Paths.builds, "*.json", SearchOption.TopDirectoryOnly).ToList();
+            if (files.Contains(Paths.builds + "Builds.json")) files.Remove(Paths.builds + "Builds.json");
 
             foreach (string path in files)
             {
                 var template = new Template(path);
+                System.IO.File.Delete(path);
                 Templates.Add(template);
+                saveTemplate = template;
 
-                if (template.Name == currentTemplate) _Selected_Template = template;
+                if (path == files[files.Count - 1]) template.Save();
             }
+
+            BuildsManager.Logger.Debug("Saving {0} Templates.", Templates.Count);
+            if (saveTemplate != null) saveTemplate.Save();
+        }
+
+        public void LoadTemplates()
+        {
+            var currentTemplate = _Selected_Template?.Name;
+            
+            ImportTemplates();
+
+            Templates = new List<Template>();
+            var paths = new List<string>() 
+            {
+                Paths.builds + "Builds.json",
+                //Paths.builds + "Default Builds.json",
+            };
+
+            foreach (string path in paths)
+            {
+                string content = "";
+                try
+                {
+                    if (System.IO.File.Exists(path)) content = System.IO.File.ReadAllText(path);
+                    if(content != null && content != "")
+                    {
+                        var templates = JsonConvert.DeserializeObject<List<Template_json>>(content);
+
+                        foreach (Template_json jsonTemplate in templates)
+                        {
+                            var template = new Template(jsonTemplate.Name, jsonTemplate.BuildCode, jsonTemplate.GearCode);
+                            template.Path = path;
+
+                            Templates.Add(template);
+
+                            if (template.Name == currentTemplate) _Selected_Template = template;
+                        }
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+
+            if (IncludeDefaultBuilds.Value)
+            {
+                var defaultTemps = JsonConvert.DeserializeObject<List<Template_json>>(new StreamReader(ContentsManager.GetFileStream(@"data\builds.json")).ReadToEnd());
+
+                if (defaultTemps != null)
+                {
+                    foreach (Template_json jsonTemplate in defaultTemps)
+                    {
+                        var template = new Template(jsonTemplate.Name, jsonTemplate.BuildCode, jsonTemplate.GearCode);
+                        template.Path = null;
+
+                        Templates.Add(template);
+
+                        if (template.Name == currentTemplate) _Selected_Template = template;
+                    }
+                }
+            }
+
+            Templates = Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
 
             _Selected_Template?.SetChanged();
             OnSelected_Template_Changed();
@@ -344,10 +450,14 @@ namespace Kenedia.Modules.BuildsManager
         {
             Ticks.global += gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            if (Ticks.global > 250)
+            if (Ticks.global > 1250)
             {
-                Ticks.global -= 250;
+                Ticks.global -= 1250;
 
+                if (MainWindow?.Visible == true)
+                {
+                    MainWindow.Import_Button.Visible = System.IO.File.Exists(Paths.builds + "config.ini");
+                }
             }
         }
 
@@ -475,7 +585,8 @@ namespace Kenedia.Modules.BuildsManager
                 }
                 Logger.Debug(string.Format("Fetching a total of {0} Skills", Skill_Ids.Count));
 
-                var skills = await Gw2ApiManager.Gw2ApiClient.V2.Skills.ManyAsync(Skill_Ids);
+                //var skills = await Gw2ApiManager.Gw2ApiClient.V2.Skills.ManyAsync(Skill_Ids);
+                var skills = await Gw2ApiManager.Gw2ApiClient.V2.Skills.AllAsync();
                 completed++;
                 downloadBar.Progress = completed / totalFetches;
                 downloadBar.Text = string.Format("{0} / {1}", completed, totalFetches);
@@ -1046,8 +1157,8 @@ namespace Kenedia.Modules.BuildsManager
 
         async Task LoadData()
         {
-            await Fetch_APIData();
-
+            var culture = BuildsManager.getCultureString();
+            await Fetch_APIData(!System.IO.File.Exists(Paths.professions + @"professions [" + culture + "].json"));
 
             if (Data == null)
             {

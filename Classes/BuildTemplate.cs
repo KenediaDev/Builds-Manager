@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
@@ -83,6 +84,7 @@ namespace Kenedia.Modules.BuildsManager
             }
             else
             {
+                Name = "Empty Build";
                 GearCode = "[0][0][0][0][0][0][0|0][0|0][0|0][0|0][0|0][0|0][0|0|0][0|0|0][0|0|0][0|0|0][0|0|0|0][0|0|0|0]";
                 BuildCode = "[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]";
             }
@@ -314,13 +316,42 @@ namespace Kenedia.Modules.BuildsManager
 
         public Template_json Template_json;
 
-        public string Name;
+        private string _Name;
+        public string Name
+        {
+            get => _Name;
+            set
+            {
+                if (_Name != null && Path == null) return;
+                _Name = value;
+            }
+        }
         public API.Profession Profession;
         public API.Specialization Specialization;
 
         public string Path;
         public GearTemplate Gear = new GearTemplate();
         public BuildTemplate Build;
+
+        public Template(string name, string build, string gear)
+        {
+            Template_json = new Template_json()
+            {
+                Name = name,
+                BuildCode = build,
+                GearCode = gear,
+            };
+
+            Name = name;
+
+            Path = BuildsManager.Paths.builds + "Builds.json";
+
+            Build = new BuildTemplate(Template_json.BuildCode);
+            Gear = new GearTemplate(Template_json.GearCode);
+
+            Profession = BuildsManager.Data.Professions.Find(e => e.Id == Build?.Profession.Id);
+            Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization?.Elite == true)?.Specialization : null;
+        }
 
         public Template(string path = default)
         {
@@ -332,7 +363,7 @@ namespace Kenedia.Modules.BuildsManager
                     Template_json = template;
                     Name = template.Name;
 
-                    Path = path.Replace(Name + ".json", "");
+                    Path = BuildsManager.Paths.builds + "Builds.json";
 
                     Build = new BuildTemplate(Template_json.BuildCode);
                     Gear = new GearTemplate(Template_json.GearCode);
@@ -346,6 +377,7 @@ namespace Kenedia.Modules.BuildsManager
                 Gear = new GearTemplate();
                 Build = new BuildTemplate();
                 Name = "[No Name Set]";
+
                 Template_json = new Template_json();
 
                 var player = GameService.Gw2Mumble.PlayerCharacter;
@@ -353,8 +385,9 @@ namespace Kenedia.Modules.BuildsManager
                 if (player != null)
                 {
                     Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
-                    Path = BuildsManager.Paths.builds;
                 }
+
+                Path = BuildsManager.Paths.builds + "Builds.json";
 
                 SetChanged();
             }
@@ -410,38 +443,25 @@ namespace Kenedia.Modules.BuildsManager
         public void Delete()
         {
             if (Path == null) return;
+            BuildsManager.ModuleInstance.Templates.Remove(this);
+            BuildsManager.ModuleInstance.Templates = BuildsManager.ModuleInstance.Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
+
+            if (Path == null || Name == null) return;
             if (Name == "[No Name Set]") return;
-            var path = Path + Name + ".json";
 
-            FileInfo fi = null;
-            try
-            {
-                fi = new FileInfo(path);
-            }
-            catch (ArgumentException) { }
-            catch (PathTooLongException) { }
-            catch (NotSupportedException) { }
+            Save();
 
-            if (Name.Contains("/") || Name.Contains(@"\") || ReferenceEquals(fi, null))
-            {
-                // file name is not valid
-                ScreenNotification.ShowNotification(Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
-            }
-            else
-            {
-                File.Delete(Path + Name + ".json");
-                BuildsManager.ModuleInstance.OnTemplate_Deleted();
-            }
+            BuildsManager.ModuleInstance.OnTemplate_Deleted();
         }
 
         public void Save()
         {
-            if (Path == null) return;
+            if (Path == null || Name == null) return;
             if (Name == "[No Name Set]") return;
 
-            var path = Path + Name + ".json";
+            var path = Path;
 
-            BuildsManager.Logger.Debug("Saving: " + path);
+            BuildsManager.Logger.Debug("Saving: {0} in {1}.", Name, Path);
 
             FileInfo fi = null;
             try
@@ -459,23 +479,38 @@ namespace Kenedia.Modules.BuildsManager
             }
             else
             {
-                // file name is valid... May check for existence by calling fi.Exists.
-
-                var existsAlready = File.Exists(Path + Name + ".json") || File.Exists(Path + Template_json.Name + ".json");
-
-                if (Template_json.Name != Name) File.Delete(Path + Template_json.Name + ".json");
-
                 Template_json.Name = Name;
-
                 Template_json.BuildCode = Build?.ParseBuildCode();
                 Template_json.GearCode = Gear?.TemplateCode;
 
-
-                File.WriteAllText(Path + Name + ".json", JsonConvert.SerializeObject(Template_json));
-                if (!existsAlready)
+                StringBuilder sb = new StringBuilder();
+                bool first = true;
+                foreach (Template_json template in BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList())
                 {
-                    BuildsManager.ModuleInstance.OnTemplates_Loaded();
+                    StringWriter sw = new StringWriter(sb);
+                    if(!first) sb.Append("," + Environment.NewLine);
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                        writer.Formatting = Formatting.Indented;
+
+                        writer.WriteStartObject();
+
+                        writer.WritePropertyName("Name");
+                        writer.WriteValue(template.Name);
+
+                        writer.WritePropertyName("BuildCode");
+                        writer.WriteValue(template.BuildCode);
+
+                        writer.WritePropertyName("GearCode");
+                        writer.WriteValue(template.GearCode);
+                        
+                        writer.WriteEndObject();
+                    }
+                    first = false;
                 }
+                File.WriteAllText(Path, "[" + sb.ToString() + "]");
+
+                // File.WriteAllText(Path, JsonConvert.SerializeObject(BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList(), Formatting.Indented));
             }
         }
 
