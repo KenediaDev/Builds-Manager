@@ -732,6 +732,10 @@ private void UpdateLayout()
         Utility2,
         Utility3,
         Elite,
+        AquaticLegend1,
+        AquaticLegend2,
+        TerrestrialLegend1,
+        TerrestrialLegend2,
     }
     public class Skill_Control : Control
     {
@@ -766,7 +770,7 @@ private void UpdateLayout()
             set
             {
                 _Scale = value;
-                //Size = new Point(_SkillSize, _SkillSize + 15).Scale(value);
+                Size = new Point(_SkillSize, _SkillSize + 15).Scale(value);
                 Location = Location.Scale(value);
             }
         }
@@ -1018,6 +1022,13 @@ private void UpdateLayout()
                         text = "Elite Skills";
                         break;
 
+                    case SkillSlots.AquaticLegend1:
+                    case SkillSlots.AquaticLegend2:
+                    case SkillSlots.TerrestrialLegend1:
+                    case SkillSlots.TerrestrialLegend2:
+                        text = "Legends";
+                        break;
+
                     default:
                         text = "Utility Skills";
                         break;
@@ -1100,13 +1111,22 @@ private void UpdateLayout()
             get => BuildsManager.ModuleInstance.Selected_Template;
         }
 
+        private List<Skill_Control> _Legends_Aquatic;
+        private List<Skill_Control> _Legends_Terrestrial;
+
         private List<Skill_Control> _Skills_Aquatic;
-        private List<Skill_Control> _Skills_Terrestial;
+        private List<Skill_Control> _Skills_Terrestrial;
 
         private Texture2D _AquaTexture;
-        private Texture2D _TerrestialTexture;
+        private Texture2D _TerrestrialTexture;
+        private Texture2D _SwapTexture;
 
         public SkillSelector_Control SkillSelector;
+        public SkillSelector_Control LegendSelector;
+        public SkillSelector_Control PetSelector;
+
+        private bool CanClick = true;
+        private bool ShowProfessionSkills = false;
 
         private double _Scale = 1;
         public double Scale
@@ -1119,7 +1139,7 @@ private void UpdateLayout()
                 {
                     skill.Scale = value;
                 }
-                foreach(Skill_Control skill in _Skills_Terrestial)
+                foreach(Skill_Control skill in _Skills_Terrestrial)
                 {
                     skill.Scale = value;
                 }
@@ -1139,122 +1159,43 @@ private void UpdateLayout()
                 HeaderColor = new Color(255, 204, 119, 255),
         };
 
-            _TerrestialTexture = BuildsManager.TextureManager.getControlTexture(_Controls.Land);
+            _TerrestrialTexture = BuildsManager.TextureManager.getControlTexture(_Controls.Land);
             _AquaTexture = BuildsManager.TextureManager.getControlTexture(_Controls.Water);
+            _SwapTexture = BuildsManager.TextureManager.getIcon(_Icons.Refresh);
 
             var slots = Enum.GetValues(typeof(SkillSlots));
             //BackgroundColor = Color.Magenta;
+
             _Skills_Aquatic = new List<Skill_Control>();
             foreach (API.Skill skill in Template.Build.Skills_Aquatic)
             {
                 _Skills_Aquatic.Add(new Skill_Control(Parent)
                 {
-                    Location = new Point(27 + _Skills_Aquatic.Count * (_SkillSize + 1), 0),
+                    Location = new Point(27 + _Skills_Aquatic.Count * (_SkillSize + 1), 51),
                     Skill = Template.Build.Skills_Aquatic[_Skills_Aquatic.Count],
                     Slot = (SkillSlots)_Skills_Aquatic.Count,
                     Aquatic = true,
                 });
 
                 var control = _Skills_Aquatic[_Skills_Aquatic.Count - 1];
-                control.Click += delegate
-                {
-                    if (!SkillSelector.Visible || SkillSelector.currentObject != control)
-                    {
-                        SkillSelector.Visible = true;
-                        SkillSelector.Skill_Control = control;
-                        SkillSelector.Location = control.Location.Add(new Point(2, control.Height));
-                        List<API.Skill> Skills = new List<API.Skill>();
-
-                        if (Template.Build.Profession != null) { 
-                            foreach (API.Skill iSkill in Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
-                            {
-                                if (iSkill.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
-                                {
-                                    switch (control.Slot)
-                                    {
-                                        case SkillSlots.Heal:
-                                            if (iSkill.Slot == API.skillSlot.Heal) Skills.Add(iSkill);
-                                            break;
-
-                                        case SkillSlots.Elite:
-                                            if (iSkill.Slot == API.skillSlot.Elite) Skills.Add(iSkill);
-                                            break;
-
-                                        default:
-                                            if (iSkill.Slot == API.skillSlot.Utility) Skills.Add(iSkill);
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-
-                        SkillSelector.Skills = Skills;
-                        SkillSelector.Aquatic = true;
-                        SkillSelector.currentObject = control;
-                    }
-                    else
-                    {
-                        SkillSelector.Visible = false;
-                    }
-                };
+                control.Click += Control_Click;
 
                 BuildsManager.ModuleInstance.Selected_Template_Changed += ApplyBuild;
             }
 
             var p = _Width - (_Skills_Aquatic.Count * (_SkillSize + 1));
-            _Skills_Terrestial = new List<Skill_Control>();
-            foreach (API.Skill skill in Template.Build.Skills_Terrestial)
+            _Skills_Terrestrial = new List<Skill_Control>();
+            foreach (API.Skill skill in Template.Build.Skills_Terrestrial)
             {
-                _Skills_Terrestial.Add(new Skill_Control(Parent)
+                _Skills_Terrestrial.Add(new Skill_Control(Parent)
                 {
-                    Location = new Point(p + _Skills_Terrestial.Count * (_SkillSize + 1), 0),
-                    Skill = Template.Build.Skills_Terrestial[_Skills_Terrestial.Count],
-                    Slot = (SkillSlots)_Skills_Terrestial.Count,
+                    Location = new Point(p + _Skills_Terrestrial.Count * (_SkillSize + 1), 51),
+                    Skill = Template.Build.Skills_Terrestrial[_Skills_Terrestrial.Count],
+                    Slot = (SkillSlots)_Skills_Terrestrial.Count,
                 });
 
-                var control = _Skills_Terrestial[_Skills_Terrestial.Count - 1];
-                control.Click += delegate
-                {
-                    if (!SkillSelector.Visible || SkillSelector.currentObject != control)
-                    {
-                        SkillSelector.Visible = true;
-                        SkillSelector.Skill_Control = control;
-                        SkillSelector.Location = control.Location.Add(new Point(-2, control.Height));
-
-                        List<API.Skill> Skills = new List<API.Skill>();
-                        if (Template.Build.Profession != null)
-                        {
-                            foreach (API.Skill iSkill in Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
-                            {
-                                if (iSkill.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
-                                {
-                                    switch (control.Slot)
-                                    {
-                                        case SkillSlots.Heal:
-                                            if (iSkill.Slot == API.skillSlot.Heal) Skills.Add(iSkill);
-                                            break;
-
-                                        case SkillSlots.Elite:
-                                            if (iSkill.Slot == API.skillSlot.Elite) Skills.Add(iSkill);
-                                            break;
-
-                                        default:
-                                            if (iSkill.Slot == API.skillSlot.Utility) Skills.Add(iSkill);
-                                            break;
-                                    }
-                                }
-                            }
-                        }
-
-                        SkillSelector.Skills = Skills;
-                        SkillSelector.Aquatic = false;
-                        SkillSelector.currentObject = control;
-                    }
-                    else
-                    {
-                        SkillSelector.Visible = false;
-                    }
-                };
+                var control = _Skills_Terrestrial[_Skills_Terrestrial.Count - 1];
+                control.Click += Control_Click;
             }
 
             SkillSelector = new SkillSelector_Control()
@@ -1264,8 +1205,244 @@ private void UpdateLayout()
                 Visible = false,
                 ZIndex = ZIndex + 3,
             };
+
+            _Legends_Aquatic = new List<Skill_Control>();
+            _Legends_Aquatic.Add(new Skill_Control(Parent)
+            {
+                Skill = Template.Build.Legends_Aquatic[0].Skill,
+                Slot = SkillSlots.AquaticLegend1,
+                Aquatic = true,
+                Scale = 0.8,
+                Location = new Point(0, 0),
+            });
+            _Legends_Aquatic.Add(new Skill_Control(Parent)
+            {
+                Skill = Template.Build.Legends_Aquatic[1].Skill,
+                Slot = SkillSlots.AquaticLegend1,
+                Aquatic = true,
+                Scale = 0.8,
+                Location = new Point(36 + 26, 0),
+            });
+
+            _Legends_Aquatic[0].Click += Legend;
+            _Legends_Aquatic[1].Click += Legend;
+
+            _Legends_Terrestrial = new List<Skill_Control>();
+            _Legends_Terrestrial.Add(new Skill_Control(Parent)
+            {
+                Skill = Template.Build.Legends_Terrestrial[0].Skill,
+                Slot = SkillSlots.TerrestrialLegend1,
+                Aquatic = false,
+                Scale = 0.8,
+                Location = new Point(p, 0),
+            });
+            _Legends_Terrestrial.Add(new Skill_Control(Parent)
+            {
+                Skill = Template.Build.Legends_Terrestrial[1].Skill,
+                Slot = SkillSlots.TerrestrialLegend1,
+                Aquatic = false,
+                Scale = 0.8,
+                Location = new Point(p + 36 + 26, 0),
+            });
+
+            _Legends_Terrestrial[0].Click += Legend;
+            _Legends_Terrestrial[1].Click += Legend;
+
+            LegendSelector = new SkillSelector_Control()
+            {
+                Parent = Parent,
+                //Size  =  new Point(100, 250),
+                Visible = false,
+                ZIndex = ZIndex + 3,
+            };
+            LegendSelector.SkillChanged += LegendSelector_SkillChanged;
             SkillSelector.SkillChanged += OnSkillChanged;
             Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
+        }
+
+        private void Control_Click(object sender, MouseEventArgs mouse)
+        {
+            var control = (Skill_Control)sender;
+
+            if (CanClick)
+            {
+                if (!SkillSelector.Visible || SkillSelector.currentObject != control)
+                {
+                    SkillSelector.Visible = true;
+                    SkillSelector.Skill_Control = control;
+                    SkillSelector.Location = control.Location.Add(new Point(-2, control.Height));
+
+                    List<API.Skill> Skills = new List<API.Skill>();
+                    if (Template.Build.Profession != null)
+                    {
+                        if(Template.Build.Profession.Id == "Revenant")
+                        {
+                            var legend = control.Aquatic ? Template.Build.Legends_Aquatic[0] : Template.Build.Legends_Terrestrial[0];
+
+                            switch (control.Slot)
+                            {
+                                case SkillSlots.Heal:
+                                    Skills.Add(legend?.Heal);
+                                    break;
+
+                                case SkillSlots.Elite:
+                                    Skills.Add(legend?.Elite);
+                                    break;
+
+                                default:
+                                    foreach (API.Skill iSkill in legend?.Utilities)
+                                    {
+                                        Skills.Add(iSkill);
+                                    }
+                                    break;
+                            }
+                        }
+                        else {
+                            foreach (API.Skill iSkill in Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
+                            {
+                                if (iSkill.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
+                                {
+                                    switch (control.Slot)
+                                    {
+                                        case SkillSlots.Heal:
+                                            if (iSkill.Slot == API.skillSlot.Heal) Skills.Add(iSkill);
+                                            break;
+
+                                        case SkillSlots.Elite:
+                                            if (iSkill.Slot == API.skillSlot.Elite) Skills.Add(iSkill);
+                                            break;
+
+                                        default:
+                                            if (iSkill.Slot == API.skillSlot.Utility) Skills.Add(iSkill);
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    SkillSelector.Skills = Skills;
+                    SkillSelector.Aquatic = false;
+                    SkillSelector.currentObject = control;
+                }
+                else
+                {
+                    SkillSelector.Visible = false;
+                }
+            }
+        }
+
+        protected override void OnClick(MouseEventArgs e)
+        {
+            base.OnClick(e);
+
+            var rect0 = new Rectangle(new Point(36, 15), new Point(25, 25)).Scale(Scale);
+            var rect1 = new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28) + 63, 15), new Point(25, 25)).Scale(Scale);
+
+            if(rect0.Contains(RelativeMousePosition) || rect1.Contains(RelativeMousePosition))
+            {
+                Template.Build?.SwapLegends();
+                SetTemplate();
+            }
+        }
+
+        public override void DoUpdate(GameTime gameTime)
+        {
+            base.DoUpdate(gameTime);
+            if (!CanClick) CanClick = true;
+        }
+        private void LegendSelector_SkillChanged(object sender, SkillChangedEvent e)
+        {
+            var ctrl = e.Skill_Control;
+            var legend = Template.Build.Legends_Terrestrial[0];
+
+            if (ctrl == _Legends_Terrestrial[0])
+            {
+                Template.Build.Legends_Terrestrial[0] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = Template.Build.Legends_Terrestrial[0];
+
+                if (legend != null)
+                {
+                    Template.Build.Skills_Terrestrial[0] = legend.Heal;
+                    Template.Build.Skills_Terrestrial[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Terrestrial[1]?.PaletteId);
+                    Template.Build.Skills_Terrestrial[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Terrestrial[2]?.PaletteId);
+                    Template.Build.Skills_Terrestrial[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Terrestrial[3]?.PaletteId);
+                    Template.Build.Skills_Terrestrial[4] = legend.Elite;
+                }
+            }
+            else if (ctrl == _Legends_Terrestrial[1])
+            {
+                Template.Build.Legends_Terrestrial[1] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = Template.Build.Legends_Terrestrial[1];
+
+                if (legend != null)
+                {
+                    Template.Build.InactiveSkills_Terrestrial[0] = legend.Heal;
+                    Template.Build.InactiveSkills_Terrestrial[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Terrestrial[1]?.PaletteId);
+                    Template.Build.InactiveSkills_Terrestrial[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Terrestrial[2]?.PaletteId);
+                    Template.Build.InactiveSkills_Terrestrial[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Terrestrial[3]?.PaletteId);
+                    Template.Build.InactiveSkills_Terrestrial[4] = legend.Elite;
+                }
+            }
+            else if (ctrl == _Legends_Aquatic[0])
+            {
+                Template.Build.Legends_Aquatic[0] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = Template.Build.Legends_Aquatic[0];
+
+                if (legend != null)
+                {
+                    Template.Build.Skills_Aquatic[0] = legend.Heal;
+                    Template.Build.Skills_Aquatic[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Aquatic[1]?.PaletteId);
+                    Template.Build.Skills_Aquatic[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Aquatic[2]?.PaletteId);
+                    Template.Build.Skills_Aquatic[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Aquatic[3]?.PaletteId);
+                    Template.Build.Skills_Aquatic[4] = legend.Elite;
+                }
+            }
+            else if (ctrl == _Legends_Aquatic[1])
+            {
+                Template.Build.Legends_Aquatic[1] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = Template.Build.Legends_Aquatic[1];
+
+                if (legend != null)
+                {
+                    Template.Build.InactiveSkills_Aquatic[0] = legend.Heal;
+                    Template.Build.InactiveSkills_Aquatic[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Aquatic[1]?.PaletteId);
+                    Template.Build.InactiveSkills_Aquatic[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Aquatic[2]?.PaletteId);
+                    Template.Build.InactiveSkills_Aquatic[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Aquatic[3]?.PaletteId);
+                    Template.Build.InactiveSkills_Aquatic[4] = legend.Elite;
+                }
+            } 
+
+            ctrl.Skill = e.Skill;
+            SetTemplate();
+            Template.SetChanged();
+            LegendSelector.Visible = false;
+            CanClick = false;
+        }
+
+        private void Legend(object sender, MouseEventArgs e)
+        {
+            var ctrl = (Skill_Control)sender;
+            if (Template.Profession?.Id == "Revenant")
+            {
+                List<API.Skill> legends = new List<API.Skill>();
+                foreach(API.Legend legend in Template.Profession.Legends)
+                {
+                    if(legend.Specialization == 0 || Template.Specialization?.Id == legend.Specialization)
+                    {
+                        legends.Add(legend.Skill);
+                    }
+                }
+
+                LegendSelector.Skills = legends;
+                LegendSelector.Visible = true;
+                LegendSelector.Aquatic = false;
+                LegendSelector.currentObject = ctrl;
+
+                LegendSelector.Skill_Control = ctrl;
+                LegendSelector.Location = ctrl.Location.Add(new Point(-2, (int) (ctrl.Height * ctrl.Scale)));
+                CanClick = false;
+            }
         }
 
         public void ApplyBuild(object sender, EventArgs e)
@@ -1292,17 +1469,17 @@ private void UpdateLayout()
             }
             else
             {
-                foreach (Skill_Control skill_Control in _Skills_Terrestial)
+                foreach (Skill_Control skill_Control in _Skills_Terrestrial)
                 {
                     if (skill_Control.Skill == e.Skill) skill_Control.Skill = null;
                 }
 
-                for (int i = 0; i < Template.Build.Skills_Terrestial.Count; i++)
+                for (int i = 0; i < Template.Build.Skills_Terrestrial.Count; i++)
                 {
-                    if (Template.Build.Skills_Terrestial[i] == e.Skill) Template.Build.Skills_Terrestial[i] = null;
+                    if (Template.Build.Skills_Terrestrial[i] == e.Skill) Template.Build.Skills_Terrestrial[i] = null;
                 }
 
-                Template.Build.Skills_Terrestial[(int)e.Skill_Control.Slot] = e.Skill;
+                Template.Build.Skills_Terrestrial[(int)e.Skill_Control.Slot] = e.Skill;
                 e.Skill_Control.Skill = e.Skill;
             }
 
@@ -1310,7 +1487,8 @@ private void UpdateLayout()
         }
         private void OnGlobalClick(object sender, MouseEventArgs m)
         {
-            if (!MouseOver && !SkillSelector.MouseOver) SkillSelector.Hide();
+            if (!SkillSelector.MouseOver) SkillSelector.Hide();
+            if (!LegendSelector.MouseOver) LegendSelector.Hide();
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
@@ -1318,19 +1496,41 @@ private void UpdateLayout()
 
             spriteBatch.DrawOnCtrl(this,
                                     _AquaTexture,
-                                    new Rectangle(new Point(0, 0), new Point(25, 25)).Scale(Scale),
+                                    new Rectangle(new Point(0, 50), new Point(25, 25)).Scale(Scale),
                                     _AquaTexture.Bounds,
                                     Color.White,
                                     0f,
                                     default);
 
+            if (ShowProfessionSkills)
+            {
+                spriteBatch.DrawOnCtrl(this,
+                                        _SwapTexture,
+                                        new Rectangle(new Point(36, 15), new Point(25, 25)).Scale(Scale),
+                                        _SwapTexture.Bounds,
+                                        Color.White,
+                                        0f,
+                                        default);
+            }
+
             spriteBatch.DrawOnCtrl(this,
-                                    _TerrestialTexture,
-                                    new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28), 0), new Point(25, 25)).Scale(Scale),
-                                    _TerrestialTexture.Bounds,
+                                    _TerrestrialTexture,
+                                    new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28), 50), new Point(25, 25)).Scale(Scale),
+                                    _TerrestrialTexture.Bounds,
                                     Color.White,
                                     0f,
                                     default);
+
+            if (ShowProfessionSkills)
+            {
+                spriteBatch.DrawOnCtrl(this,
+                                    _SwapTexture,
+                                    new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28) + 63, 15), new Point(25, 25)).Scale(Scale),
+                                    _SwapTexture.Bounds,
+                                    Color.White,
+                                    0f,
+                                    default);
+            }
         }
         protected override void DisposeControl()
         {
@@ -1350,11 +1550,24 @@ private void UpdateLayout()
             }
 
             i = 0;
-            foreach(Skill_Control sCtrl in _Skills_Terrestial)
+            foreach(Skill_Control sCtrl in _Skills_Terrestrial)
             {
-                sCtrl.Skill = Template.Build.Skills_Terrestial[i];
+                sCtrl.Skill = Template.Build.Skills_Terrestrial[i];
                 i++;
             }
+
+            _Legends_Terrestrial[0].Skill = Template.Build.Legends_Terrestrial[0]?.Skill;
+            _Legends_Terrestrial[1].Skill = Template.Build.Legends_Terrestrial[1]?.Skill;
+
+            _Legends_Aquatic[0].Skill = Template.Build.Legends_Aquatic[0]?.Skill;
+            _Legends_Aquatic[1].Skill = Template.Build.Legends_Aquatic[1]?.Skill;
+
+            ShowProfessionSkills = Template.Profession?.Id == "Revenant";
+            _Legends_Terrestrial[0].Visible = ShowProfessionSkills;
+            _Legends_Terrestrial[1].Visible = ShowProfessionSkills;
+
+            _Legends_Aquatic[0].Visible = ShowProfessionSkills;
+            _Legends_Aquatic[1].Visible = ShowProfessionSkills;
         }
     }
 
@@ -1387,7 +1600,7 @@ private void UpdateLayout()
         private int FrameThickness = 1;
         private int Gap = 5;
         private int Build_Width = 900;
-        private int Skillbar_Height = 75;
+        private int Skillbar_Height = 130;
         private int Build_Height = 125 + (150 * 3);
 
         private double _Scale = 1;

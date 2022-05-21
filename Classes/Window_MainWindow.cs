@@ -292,7 +292,7 @@ namespace Kenedia.Modules.BuildsManager
 
         Control_Equipment Gear;
         Control_Build Build;
-        Control_TemplateSelection _TemplateSelection;
+        public Control_TemplateSelection _TemplateSelection;
 
         Texture2D _EmptyTraitLine;
         Texture2D _Delete;
@@ -374,7 +374,7 @@ namespace Kenedia.Modules.BuildsManager
                     BuildsManager.ModuleInstance.Templates.Add(BuildsManager.ModuleInstance.Selected_Template);
 
                     BuildsManager.ModuleInstance.Selected_Template.SetChanged();
-                    _TemplateSelection.Refresh();
+                    _TemplateSelection.RefreshList();
                     ProfessionSelection.SelectedProfession = null;
                 }
             };
@@ -480,6 +480,16 @@ namespace Kenedia.Modules.BuildsManager
             Detail_Panel.GearBox.EnterPressed += GearBox_EnterPressed;
 
             Input.Mouse.LeftMouseButtonPressed += GlobalClick;
+
+            GameService.Gw2Mumble.PlayerCharacter.NameChanged += PlayerCharacter_NameChanged;
+        }
+
+        public void PlayerCharacter_NameChanged(object sender, ValueEventArgs<string> e)
+        {
+            if (BuildsManager.ModuleInstance.ShowCurrentProfession.Value)
+            {
+                _TemplateSelection.SetSelection();
+            }
         }
 
         private void ImportFileDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
@@ -490,7 +500,7 @@ namespace Kenedia.Modules.BuildsManager
 
         private void Import_Button_Click(object sender, MouseEventArgs e)
         {
-            BuildsManager.ModuleInstance.LoadTemplates();
+            BuildsManager.ModuleInstance.ImportTemplates();
             _TemplateSelection.Refresh();
             Import_Button.Hide();
         }
@@ -563,7 +573,7 @@ namespace Kenedia.Modules.BuildsManager
             NameLabel.Visible = true;
             NameBox.Visible = false;
             NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
-            _TemplateSelection.Refresh();
+            _TemplateSelection.RefreshList();
         }
 
         private void NameLabel_Click(object sender, MouseEventArgs e)
@@ -643,8 +653,6 @@ namespace Kenedia.Modules.BuildsManager
             {
                 BuildsManager.ModuleInstance.Selected_Template.Delete();
                 BuildsManager.ModuleInstance.Selected_Template = new Template();
-
-                _TemplateSelection.Refresh();
             }
 
             ProfessionSelection.Hide();
@@ -655,7 +663,7 @@ namespace Kenedia.Modules.BuildsManager
 
             var template = BuildsManager.ModuleInstance.Selected_Template;
 
-            if (template != null && template.Profession != null && template.Profession.Id == "Revenant")
+            if (false && template != null && template.Profession != null && template.Profession.Id == "Revenant")
             {
                 var texture = Disclaimer_Background;
                 var rect = new Rectangle(Detail_Panel.LocalBounds.X + 5, Detail_Panel.LocalBounds.Y + Detail_Panel.LocalBounds.Height / 2 - 50, Detail_Panel.LocalBounds.Width - 10, Font.LineHeight + 100);
@@ -777,7 +785,19 @@ namespace Kenedia.Modules.BuildsManager
             Import_Button.Dispose();
             Add_Button.Dispose();
 
+
+            GameService.Gw2Mumble.PlayerCharacter.NameChanged -= PlayerCharacter_NameChanged;
             base.DisposeControl();
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            if (BuildsManager.ModuleInstance.ShowCurrentProfession.Value)
+            {
+                _TemplateSelection.SetSelection();
+            }
         }
     }
 }

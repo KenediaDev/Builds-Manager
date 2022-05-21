@@ -48,7 +48,33 @@ namespace Kenedia.Modules.BuildsManager
         private Texture2D _Lock;
         private Texture2D _Template_Border;
         private BitmapFont Font;
+        private BitmapFont FontItalic;
         private Control_TemplateTooltip TemplateTooltip;
+        private double Tick = 0;
+        private float Transparency = 255;
+        private string FeedbackPopup;
+        public override void DoUpdate(GameTime gameTime)
+        {
+            base.DoUpdate(gameTime);
+
+            if (FeedbackPopup != null)
+            {
+                Tick += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+                if (Tick < 350)
+                {
+                    //Fadeout
+                    Transparency -= 25;
+                }
+                else
+                {
+                    //Hide
+                    Tick = 0;
+                    FeedbackPopup = null;
+                    Transparency = 255;
+                }
+            }
+        }
 
         public Control_TemplateEntry(Container parent, Template template)
         {
@@ -60,6 +86,7 @@ namespace Kenedia.Modules.BuildsManager
 
             var cnt = new ContentService();
             Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
+            FontItalic = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Italic);
             //TemplateTooltip = new Control_TemplateTooltip();
         }
 
@@ -73,6 +100,7 @@ namespace Kenedia.Modules.BuildsManager
                 try
                 {
                     ClipboardUtil.WindowsClipboardService.SetTextAsync(template.Build.ParseBuildCode());
+                    FeedbackPopup = "Copied Build Code!";
                 }
                 catch (ArgumentException)
                 {
@@ -82,7 +110,10 @@ namespace Kenedia.Modules.BuildsManager
                 {
 
                 }
+
+                return;
             }
+
             this.TemplateChanged?.Invoke(this, new TemplateChangedEvent(template));
         }
 
@@ -120,6 +151,7 @@ namespace Kenedia.Modules.BuildsManager
                                    );
 
             Texture2D texture = _EmptyTraitLine;
+            var player = GameService.Gw2Mumble.PlayerCharacter;
 
             if (Template.Specialization != null)
             {
@@ -134,7 +166,7 @@ namespace Kenedia.Modules.BuildsManager
                                    texture,
                                    new Rectangle(2, 2, bounds.Height - 4, bounds.Height - 4),
                                    texture.Bounds,
-                                    Color.White,
+                                     Template.Profession?.Id == player.Profession.ToString() ? Color.White : Color.LightGray,
                                    0f,
                                    Vector2.Zero
                                    );
@@ -152,17 +184,35 @@ namespace Kenedia.Modules.BuildsManager
             }
 
             var textBounds = new Rectangle(bounds.X + bounds.Height + 5, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
+            var popupBounds = new Rectangle(bounds.X + bounds.Height - 10, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
             var rect = Font.CalculateTextRectangle(Template.Name, textBounds);
 
-            spriteBatch.DrawStringOnCtrl(this,
-                                    Template.Name,
-                                    Font,
-                                    textBounds,
-                                    BuildsManager.ModuleInstance.Selected_Template == Template ? Color.LimeGreen : MouseOver ? Color.White : Color.LightGray,
-                                    true,
-                                    HorizontalAlignment.Left,
-                                    rect.Height > textBounds.Height ? VerticalAlignment.Top : VerticalAlignment.Middle
-                                    );
+
+            if (FeedbackPopup != null)
+            {
+                spriteBatch.DrawStringOnCtrl(this,
+                                        FeedbackPopup,
+                                        FontItalic,
+                                        popupBounds,
+                                        new Color(175,175,175,125),
+                                        false,
+                                        HorizontalAlignment.Center,
+                                        VerticalAlignment.Middle
+                                        );
+            }
+            else
+            {
+
+                spriteBatch.DrawStringOnCtrl(this,
+                                        Template.Name,
+                                        Font,
+                                        textBounds,
+                                        BuildsManager.ModuleInstance.Selected_Template == Template ? Color.LimeGreen : MouseOver ? Color.White : Template.Profession?.Id == player.Profession.ToString() ? Color.LightGray : Color.Gray,
+                                        true,
+                                        HorizontalAlignment.Left,
+                                        rect.Height > textBounds.Height ? VerticalAlignment.Top : VerticalAlignment.Middle
+                                        );
+            }
 
             //var color = MouseOver ? Color.Honeydew : Color.Black;
             var color = MouseOver ? Color.Honeydew : Color.Transparent;
@@ -182,21 +232,23 @@ namespace Kenedia.Modules.BuildsManager
             //Right
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
+
         }
+    }
+
+    public class ProfessionSelection
+    {
+        public API.Profession Profession;
+        public Rectangle Bounds;
+        public bool Hovered;
+        public int Index;
     }
 
     public class Control_ProfessionSelector : Control
     {
-        class ProfessionSelection
-        {
-            public API.Profession Profession;
-            public Rectangle Bounds;
-            public bool Hovered;
-            public int Index;
-        }
 
         public List<API.Profession> Professions = new List<API.Profession>();
-        private List<ProfessionSelection> _Professions;
+        public List<ProfessionSelection> _Professions;
         public Texture2D ClearTexture;
         public int IconSize;
         public Control_ProfessionSelector()
@@ -335,6 +387,7 @@ namespace Kenedia.Modules.BuildsManager
     }
     public class Control_TemplateSelection : FlowPanel
     {
+        bool ResizeChilds = false;
         public TextBox FilterBox;
         public FlowPanel ContentPanel;
         private Control_ProfessionSelector _ProfessionSelector;
@@ -368,7 +421,7 @@ namespace Kenedia.Modules.BuildsManager
             };
 
             Location = new Point(FilterBox.LocalBounds.Left, _ProfessionSelector.LocalBounds.Bottom + 5);
-            Size = new Point(255, parent.Height - AbsoluteBounds.Y - 5);
+            Size = new Point(255, parent.Height - (AbsoluteBounds.Y - 5));
 
             //BackgroundColor = Color.Magenta;
             Refresh();
@@ -380,9 +433,24 @@ namespace Kenedia.Modules.BuildsManager
             };
 
             BuildsManager.ModuleInstance.Templates_Loaded += ModuleInstance_Templates_Loaded;
-            BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Templates_Loaded;
+            BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Template_Deleted; 
             ContentPanel.ChildAdded += ContentPanel_ChildsChanged;
-            ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;
+            ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;     
+        }
+
+        private void ModuleInstance_Template_Deleted(object sender, EventArgs e)
+        {
+            foreach(Control_TemplateEntry c in Templates) { c.Dispose(); }
+            Templates = new List<Control_TemplateEntry>();
+            Refresh();
+        }
+
+        public void SetSelection()
+        {
+            var player = GameService.Gw2Mumble.PlayerCharacter;
+            _ProfessionSelector.Professions.Clear();
+            _ProfessionSelector.Professions.Add(BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString()));
+            RefreshList();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
@@ -392,11 +460,22 @@ namespace Kenedia.Modules.BuildsManager
 
         private void ContentPanel_ChildsChanged(object sender, ChildChangedEventArgs e)
         {
-            var not_fitting = ContentPanel.Height < (Templates.Count * 38);
+            ResizeChilds = true;
+        }
 
-            foreach (Control_TemplateEntry template in Templates)
+        public override void UpdateContainer(GameTime gameTime)
+        {
+            base.UpdateContainer(gameTime);
+
+            if (ResizeChilds)
             {
-                template.Width = not_fitting ? Width - 20 : Width - 5;
+                var not_fitting = ContentPanel.Height < (Templates.Where(e => e.Visible).ToList().Count * 38);
+                foreach (Control_TemplateEntry template in Templates)
+                {
+                    template.Width = not_fitting ? Width - 20 : Width - 5;
+                }
+
+                ResizeChilds = false;
             }
         }
 
@@ -411,14 +490,22 @@ namespace Kenedia.Modules.BuildsManager
 
         }
 
-        private void RefreshList()
+        public void RefreshList()
         {
             var filter = FilterBox.Text.ToLower();
+            var prof = BuildsManager.ModuleInstance.CurrentProfession;
+
+            ContentPanel.SortChildren<Control_TemplateEntry>((a, b) => {
+                var ret = (b.Template.Build.Profession == prof).CompareTo(a.Template.Build.Profession == prof);
+                if (ret == 0) ret = (a.Template.Build.Profession.Id).CompareTo(b.Template.Build.Profession.Id);
+                if (ret == 0 && a.Template.Specialization != null) ret = (a.Template.Specialization.Id).CompareTo(b.Template.Specialization?.Id);
+                if (ret == 0) ret = (a.Template.Name).CompareTo(b.Template.Name);
+                return ret;
+                });
 
             foreach (Control_TemplateEntry template in Templates)
             {
                 var name = template.Template.Name.ToLower();
-
 
                 if ((_ProfessionSelector.Professions.Count == 0 || _ProfessionSelector.Professions.Contains(template.Template.Profession)) && name.Contains(filter))
                 {
@@ -430,6 +517,7 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
+            ResizeChilds = true;
             ContentPanel.Invalidate();
         }
 
@@ -443,30 +531,37 @@ namespace Kenedia.Modules.BuildsManager
             base.OnResized(e);
             FilterBox.Width = Width - 5;
             _ProfessionSelector.Width = Width - 5;
-            ContentPanel.Size = new Point(Width, Height - AbsoluteBounds.Y - 5);
+            ContentPanel.Size = new Point(Width, Height - LocalBounds.Y);
         }
 
         public void Refresh()
         {
-            foreach (Control_TemplateEntry template in Templates)
+            foreach (Template template in BuildsManager.ModuleInstance.Templates)
             {
-                template.Dispose();
+                if (Templates.Find(e => e.Template == template) == null)
+                {
+                    var ctrl = new Control_TemplateEntry(ContentPanel, template) { Size = new Point(Width - 20, 38) };
+                    ctrl.TemplateChanged += OnTemplateChangedEvent;
+                    Templates.Add(ctrl);
+
+                    template.Deleted += delegate
+                    {
+                        ctrl.Dispose();
+                        Templates.Remove(ctrl);
+                    };
+                }
+            }
+
+            RefreshList();
+        }
+        public void Clear()
+        {
+            foreach (Control_TemplateEntry ctrl in Templates)
+            {
+                ctrl.Dispose();
             }
 
             Templates.Clear();
-
-            Templates = new List<Control_TemplateEntry>();
-
-            BuildsManager.ModuleInstance.Templates = BuildsManager.ModuleInstance.Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
-            foreach (Template template in BuildsManager.ModuleInstance.Templates)
-            {
-                var ctrl = new Control_TemplateEntry(ContentPanel, template) { Size = new Point(Width - 20, 38) };
-                ctrl.TemplateChanged += OnTemplateChangedEvent;
-
-                Templates.Add(ctrl);
-            }
-
-            ContentPanel_ChildsChanged(null, null);
         }
 
         protected override void DisposeControl()

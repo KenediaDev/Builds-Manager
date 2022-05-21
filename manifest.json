@@ -1,6 +1,6 @@
 {
   "name": "Builds Manager",
-  "version": "0.0.9",
+  "version": "0.0.12",
   "namespace": "Kenedia.Modules.BuildsManager",
   "package": "BuildsManager.dll",
   "manifest_version": 1,
@@ -19,22 +19,7 @@
   "enabled_without_gw2": false,
 
   "api_permissions": {
-    "account": {
-      "optional": true,
-      "details": "General Account Informations to store files in a specific account folder."
-    },
-    "characters": {
-      "optional": true,
-      "details": "Needed to get your characters."
-    },
-    "unlocks": {
-      "optional": true,
-      "details": "Needed to get your armory items."
-    },
-    "inventories": {
-      "optional": true,
-      "details": "Needed to get your armory items."
-    }
+
   },
   "directories": [ "builds-manager"]
 }

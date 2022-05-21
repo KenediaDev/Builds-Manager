@@ -85,7 +85,7 @@ namespace Kenedia.Modules.BuildsManager
             else
             {
                 Name = "Empty Build";
-                GearCode = "[0][0][0][0][0][0][0|0][0|0][0|0][0|0][0|0][0|0][0|0|0][0|0|0][0|0|0][0|0|0][0|0|0|0][0|0|0|0]";
+                GearCode = "[0][0][0][0][0][0][0|0][0|0][0|0][0|0][0|0][0|0][0|-1|0][0|-1|0][0|-1|0][0|-1|0][0|-1|0|0][0|-1|0|0]";
                 BuildCode = "[&DQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=]";
             }
         }
@@ -349,7 +349,7 @@ namespace Kenedia.Modules.BuildsManager
             Build = new BuildTemplate(Template_json.BuildCode);
             Gear = new GearTemplate(Template_json.GearCode);
 
-            Profession = BuildsManager.Data.Professions.Find(e => e.Id == Build?.Profession.Id);
+            Profession = BuildsManager.Data.Professions.Find(e => e.Id == Build?.Profession?.Id);
             Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization?.Elite == true)?.Specialization : null;
         }
 
@@ -379,13 +379,7 @@ namespace Kenedia.Modules.BuildsManager
                 Name = "[No Name Set]";
 
                 Template_json = new Template_json();
-
-                var player = GameService.Gw2Mumble.PlayerCharacter;
-
-                if (player != null)
-                {
-                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
-                }
+                Profession = BuildsManager.ModuleInstance.CurrentProfession;
 
                 Path = BuildsManager.Paths.builds + "Builds.json";
 
@@ -429,31 +423,65 @@ namespace Kenedia.Modules.BuildsManager
 
             Build = new BuildTemplate();
 
-            var player = GameService.Gw2Mumble.PlayerCharacter;
-
-            if (player != null)
-            {
-                Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
-                Path = BuildsManager.Paths.builds;
-            }
+            Profession = BuildsManager.ModuleInstance.CurrentProfession;
+            Path = BuildsManager.Paths.builds;
 
             SetChanged();
         }
 
         public void Delete()
         {
+            if (Name == "[No Name Set]") {
+                BuildsManager.ModuleInstance.Templates.Remove(this);
+                BuildsManager.ModuleInstance.OnTemplate_Deleted();
+                return;
+            }
+
             if (Path == null) return;
             BuildsManager.ModuleInstance.Templates.Remove(this);
-            BuildsManager.ModuleInstance.Templates = BuildsManager.ModuleInstance.Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
 
+            if (Path == null || Name == null) return;
+
+            Save();
+            BuildsManager.ModuleInstance.OnTemplate_Deleted();
+            this.Deleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void Save_Unformatted()
+        {
             if (Path == null || Name == null) return;
             if (Name == "[No Name Set]") return;
 
-            Save();
+            var path = Path;
 
-            BuildsManager.ModuleInstance.OnTemplate_Deleted();
+            BuildsManager.Logger.Debug("Saving: {0} in {1}.", Name, Path);
+
+            FileInfo fi = null;
+            try
+            {
+                fi = new FileInfo(path);
+            }
+            catch (ArgumentException) { }
+            catch (PathTooLongException) { }
+            catch (NotSupportedException) { }
+
+            if (Name.Contains("/") || Name.Contains(@"\") || ReferenceEquals(fi, null))
+            {
+                // file name is not valid
+                ScreenNotification.ShowNotification(Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
+            }
+            else
+            {
+                Template_json.Name = Name;
+                Template_json.BuildCode = Build?.ParseBuildCode();
+                Template_json.GearCode = Gear?.TemplateCode;
+
+
+                var culture = BuildsManager.getCultureString();
+                File.WriteAllText(Path, JsonConvert.SerializeObject(BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList()));
+                // File.WriteAllText(Path, JsonConvert.SerializeObject(BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList(), Formatting.Indented));
+            }
         }
-
         public void Save()
         {
             if (Path == null || Name == null) return;
@@ -515,6 +543,7 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         public event EventHandler Edit;
+        public event EventHandler Deleted;
 
         private void OnEdit(object sender, EventArgs e)
         {
@@ -570,23 +599,39 @@ namespace Kenedia.Modules.BuildsManager
             new SpecLine(){ Index = 1},
             new SpecLine(){ Index = 2}
         };
-        public List<API.Skill> Skills_Terrestial = new List<API.Skill>
+        public List<API.Skill> Skills_Terrestrial = new List<API.Skill>
         {
-            new API.Skill(),
-            new API.Skill(),
-            new API.Skill(),
-            new API.Skill(),
-            new API.Skill()
+            new API.Skill(){ PaletteId = 4572},
+            new API.Skill(){ PaletteId = 4614},
+            new API.Skill(){ PaletteId = 4651},
+            new API.Skill(){ PaletteId = 4564},
+            new API.Skill(){ PaletteId = 4554},
+        };
+        public List<API.Skill> InactiveSkills_Terrestrial = new List<API.Skill>
+        {
+            new API.Skill(){ PaletteId = 4572},
+            new API.Skill(){ PaletteId = 4614},
+            new API.Skill(){ PaletteId = 4651},
+            new API.Skill(){ PaletteId = 4564},
+            new API.Skill(){ PaletteId = 4554},
         };
         public List<API.Skill> Skills_Aquatic = new List<API.Skill>
         {
-            new API.Skill(),
-            new API.Skill(),
-            new API.Skill(),
-            new API.Skill(),
-            new API.Skill()
+            new API.Skill(){ PaletteId = 4572},
+            new API.Skill(){ PaletteId = 4614},
+            new API.Skill(){ PaletteId = 4651},
+            new API.Skill(){ PaletteId = 4564},
+            new API.Skill(){ PaletteId = 4554},
         };
-        public List<API.Legend> Legends_Terrestial = new List<API.Legend>()
+        public List<API.Skill> InactiveSkills_Aquatic = new List<API.Skill>
+        {
+            new API.Skill(){ PaletteId = 4572},
+            new API.Skill(){ PaletteId = 4614},
+            new API.Skill(){ PaletteId = 4651},
+            new API.Skill(){ PaletteId = 4564},
+            new API.Skill(){ PaletteId = 4554},
+        };
+        public List<API.Legend> Legends_Terrestrial = new List<API.Legend>()
         {
             new API.Legend(),
             new API.Legend(),
@@ -605,17 +650,47 @@ namespace Kenedia.Modules.BuildsManager
                 BuildChatLink build = new BuildChatLink();
                 build.Profession = (Gw2Sharp.Models.ProfessionType)Enum.Parse(typeof(Gw2Sharp.Models.ProfessionType), Profession.Id);
 
+                if(Profession.Id == "Revenant")
+                {
+                    build.RevenantActiveTerrestrialLegend = (byte)(Legends_Terrestrial[0]?.Id != null ? Legends_Terrestrial[0]?.Id : 0);
+                    build.RevenantInactiveTerrestrialLegend = (byte)(Legends_Terrestrial[1]?.Id != null ? Legends_Terrestrial[1]?.Id : 0);
+
+                    build.TerrestrialUtility1SkillPaletteId = (ushort)(Skills_Terrestrial[1]?.PaletteId != null ? Skills_Terrestrial[1]?.PaletteId : 0);
+                    build.TerrestrialUtility2SkillPaletteId = (ushort)(Skills_Terrestrial[2]?.PaletteId != null ? Skills_Terrestrial[2]?.PaletteId : 0);
+                    build.TerrestrialUtility3SkillPaletteId = (ushort)(Skills_Terrestrial[3]?.PaletteId != null ? Skills_Terrestrial[3]?.PaletteId : 0);
+
+                    build.RevenantInactiveTerrestrialUtility1SkillPaletteId = (ushort)(InactiveSkills_Terrestrial[1]?.PaletteId != null ? InactiveSkills_Terrestrial[1]?.PaletteId : 0);
+                    build.RevenantInactiveTerrestrialUtility2SkillPaletteId = (ushort)(InactiveSkills_Terrestrial[2]?.PaletteId != null ? InactiveSkills_Terrestrial[2]?.PaletteId : 0);
+                    build.RevenantInactiveTerrestrialUtility3SkillPaletteId = (ushort)(InactiveSkills_Terrestrial[3]?.PaletteId != null ? InactiveSkills_Terrestrial[3]?.PaletteId : 0);
+
+
+                    build.RevenantActiveAquaticLegend = (byte) (Legends_Aquatic[0]?.Id != null ? Legends_Aquatic[0]?.Id : 0);
+                    build.RevenantInactiveAquaticLegend = (byte) (Legends_Aquatic[1]?.Id != null ? Legends_Aquatic[1]?.Id : 0);
+
+                    build.AquaticUtility1SkillPaletteId = (ushort) (Skills_Aquatic[1]?.PaletteId != null ? Skills_Aquatic[1]?.PaletteId : 0);
+                    build.AquaticUtility2SkillPaletteId = (ushort) (Skills_Aquatic[2]?.PaletteId != null ? Skills_Aquatic[2]?.PaletteId : 0);
+                    build.AquaticUtility3SkillPaletteId = (ushort) (Skills_Aquatic[3]?.PaletteId != null ? Skills_Aquatic[3]?.PaletteId : 0);
+
+                    build.RevenantInactiveAquaticUtility1SkillPaletteId = (ushort)(InactiveSkills_Aquatic[1]?.PaletteId != null ? InactiveSkills_Aquatic[1]?.PaletteId : 0);
+                    build.RevenantInactiveAquaticUtility2SkillPaletteId = (ushort)(InactiveSkills_Aquatic[2]?.PaletteId != null ? InactiveSkills_Aquatic[2]?.PaletteId : 0);
+                    build.RevenantInactiveAquaticUtility3SkillPaletteId = (ushort)(InactiveSkills_Aquatic[3]?.PaletteId != null ? InactiveSkills_Aquatic[3]?.PaletteId : 0);
+                }
+                else
+                {
+                    build.AquaticUtility1SkillPaletteId = Skills_Aquatic[1] != null && Skills_Aquatic[1].PaletteId != 0 ? (ushort)Skills_Aquatic[1].PaletteId : (ushort)0;
+                    build.AquaticUtility2SkillPaletteId = Skills_Aquatic[2] != null && Skills_Aquatic[2].PaletteId != 0 ? (ushort)Skills_Aquatic[2].PaletteId : (ushort)0;
+                    build.AquaticUtility3SkillPaletteId = Skills_Aquatic[3] != null && Skills_Aquatic[3].PaletteId != 0 ? (ushort)Skills_Aquatic[3].PaletteId : (ushort)0;
+
+                    build.TerrestrialUtility1SkillPaletteId = Skills_Terrestrial[1] != null && Skills_Terrestrial[1].PaletteId != 0 ? (ushort)Skills_Terrestrial[1].PaletteId : (ushort)0;
+                    build.TerrestrialUtility2SkillPaletteId = Skills_Terrestrial[2] != null && Skills_Terrestrial[2].PaletteId != 0 ? (ushort)Skills_Terrestrial[2].PaletteId : (ushort)0;
+                    build.TerrestrialUtility3SkillPaletteId = Skills_Terrestrial[3] != null && Skills_Terrestrial[3].PaletteId != 0 ? (ushort)Skills_Terrestrial[3].PaletteId : (ushort)0;
+                }
+
                 build.AquaticHealingSkillPaletteId = Skills_Aquatic[0] != null && Skills_Aquatic[0].PaletteId != 0 ? (ushort)Skills_Aquatic[0].PaletteId : (ushort)0;
-                build.AquaticUtility1SkillPaletteId = Skills_Aquatic[1] != null && Skills_Aquatic[1].PaletteId != 0 ? (ushort)Skills_Aquatic[1].PaletteId : (ushort)0;
-                build.AquaticUtility2SkillPaletteId = Skills_Aquatic[2] != null && Skills_Aquatic[2].PaletteId != 0 ? (ushort)Skills_Aquatic[2].PaletteId : (ushort)0;
-                build.AquaticUtility3SkillPaletteId = Skills_Aquatic[3] != null && Skills_Aquatic[3].PaletteId != 0 ? (ushort)Skills_Aquatic[3].PaletteId : (ushort)0;
                 build.AquaticEliteSkillPaletteId = Skills_Aquatic[4] != null && Skills_Aquatic[4].PaletteId != 0 ? (ushort)Skills_Aquatic[4].PaletteId : (ushort)0;
 
-                build.TerrestrialHealingSkillPaletteId = Skills_Terrestial[0] != null && Skills_Terrestial[0].PaletteId != 0 ? (ushort)Skills_Terrestial[0].PaletteId : (ushort)0;
-                build.TerrestrialUtility1SkillPaletteId = Skills_Terrestial[1] != null && Skills_Terrestial[1].PaletteId != 0 ? (ushort)Skills_Terrestial[1].PaletteId : (ushort)0;
-                build.TerrestrialUtility2SkillPaletteId = Skills_Terrestial[2] != null && Skills_Terrestial[2].PaletteId != 0 ? (ushort)Skills_Terrestial[2].PaletteId : (ushort)0;
-                build.TerrestrialUtility3SkillPaletteId = Skills_Terrestial[3] != null && Skills_Terrestial[3].PaletteId != 0 ? (ushort)Skills_Terrestial[3].PaletteId : (ushort)0;
-                build.TerrestrialEliteSkillPaletteId = Skills_Terrestial[4] != null && Skills_Terrestial[4].PaletteId != 0 ? (ushort)Skills_Terrestial[4].PaletteId : (ushort)0;
+                build.TerrestrialHealingSkillPaletteId = Skills_Terrestrial[0] != null && Skills_Terrestrial[0].PaletteId != 0 ? (ushort)Skills_Terrestrial[0].PaletteId : (ushort)0;
+                build.TerrestrialEliteSkillPaletteId = Skills_Terrestrial[4] != null && Skills_Terrestrial[4].PaletteId != 0 ? (ushort)Skills_Terrestrial[4].PaletteId : (ushort)0;
 
 
                 SpecLine specLine;
@@ -745,32 +820,50 @@ namespace Kenedia.Modules.BuildsManager
                         //[&DQkDJg8mPz3cEQAABhIAACsSAADUEQAAyhEAAAUCAADUESsSBhIAAAAAAAA=]
                         if (Profession.Id == "Revenant")
                         {
-                            Legends_Terrestial[0] = Profession.Legends.Find(e => e.Id == (int)build.RevenantActiveTerrestrialLegend);
-                            Legends_Terrestial[1] = Profession.Legends.Find(e => e.Id == (int)build.RevenantInactiveTerrestrialLegend);
+                            Legends_Terrestrial[0] = Profession.Legends.Find(e => e.Id == (int)build.RevenantActiveTerrestrialLegend);
+                            Legends_Terrestrial[1] = Profession.Legends.Find(e => e.Id == (int)build.RevenantInactiveTerrestrialLegend);
 
-                            var legend = Legends_Terrestial[0] != null ? Legends_Terrestial[0] : Legends_Terrestial[1];
-
-                            if (legend != null)
+                            if (Legends_Terrestrial[0] != null)
                             {
-                                Skills_Terrestial[0] = legend.Heal;
-                                Skills_Terrestial[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility1SkillPaletteId);
-                                Skills_Terrestial[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility2SkillPaletteId);
-                                Skills_Terrestial[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility3SkillPaletteId);
-                                Skills_Terrestial[4] = legend.Elite;
+                                var legend = Legends_Terrestrial[0];
+                                Skills_Terrestrial[0] = legend.Heal;
+                                Skills_Terrestrial[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility1SkillPaletteId);
+                                Skills_Terrestrial[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility2SkillPaletteId);
+                                Skills_Terrestrial[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.TerrestrialUtility3SkillPaletteId);
+                                Skills_Terrestrial[4] = legend.Elite;
+                            }
+
+                            if (Legends_Terrestrial[1] != null)
+                            {
+                                var legend = Legends_Terrestrial[1];
+                                InactiveSkills_Terrestrial[0] = legend.Heal;
+                                InactiveSkills_Terrestrial[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.RevenantInactiveTerrestrialUtility1SkillPaletteId);
+                                InactiveSkills_Terrestrial[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.RevenantInactiveTerrestrialUtility2SkillPaletteId);
+                                InactiveSkills_Terrestrial[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.RevenantInactiveTerrestrialUtility3SkillPaletteId);
+                                InactiveSkills_Terrestrial[4] = legend.Elite;
                             }
 
                             Legends_Aquatic[0] = Profession.Legends.Find(e => e.Id == (int)build.RevenantActiveAquaticLegend);
                             Legends_Aquatic[1] = Profession.Legends.Find(e => e.Id == (int)build.RevenantInactiveAquaticLegend);
 
-                            legend = Legends_Aquatic[0] != null ? Legends_Aquatic[0] : Legends_Aquatic[1];
-                             
-                            if (legend != null)
+                            if (Legends_Aquatic[0] != null)
                             {
+                                var legend = Legends_Aquatic[0];
                                 Skills_Aquatic[0] = legend.Heal;
                                 Skills_Aquatic[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.AquaticUtility1SkillPaletteId);
                                 Skills_Aquatic[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.AquaticUtility2SkillPaletteId);
                                 Skills_Aquatic[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.AquaticUtility3SkillPaletteId);
                                 Skills_Aquatic[4] = legend.Elite;
+                            }
+
+                            if (Legends_Aquatic[1] != null)
+                            {
+                                var legend = Legends_Aquatic[1];
+                                InactiveSkills_Aquatic[0] = legend.Heal;
+                                InactiveSkills_Aquatic[1] = legend.Utilities.Find(e => e.PaletteId == (int)build.RevenantInactiveAquaticUtility1SkillPaletteId);
+                                InactiveSkills_Aquatic[2] = legend.Utilities.Find(e => e.PaletteId == (int)build.RevenantInactiveAquaticUtility2SkillPaletteId);
+                                InactiveSkills_Aquatic[3] = legend.Utilities.Find(e => e.PaletteId == (int)build.RevenantInactiveAquaticUtility3SkillPaletteId);
+                                InactiveSkills_Aquatic[4] = legend.Elite;
                             }
                         }
                         else
@@ -787,7 +880,7 @@ namespace Kenedia.Modules.BuildsManager
                             foreach (ushort pid in Terrestrial_PaletteIds)
                             {
                                 API.Skill skill = Profession.Skills.Find(e => e.PaletteId == pid);
-                                if (skill != null) Skills_Terrestial[skillindex] = skill;
+                                if (skill != null) Skills_Terrestrial[skillindex] = skill;
                                 skillindex++;
                             }
 
@@ -816,19 +909,57 @@ namespace Kenedia.Modules.BuildsManager
             }
             else
             {
-                var player = GameService.Gw2Mumble.PlayerCharacter;
+                Profession = BuildsManager.ModuleInstance.CurrentProfession;
+            }
+        }
+        public void SwapLegends()
+        {
+            if (Profession.Id == "Revenant")
+            {
+                var tLegend = Legends_Terrestrial[0];
+                Legends_Terrestrial[0] = Legends_Terrestrial[1];
+                Legends_Terrestrial[1] = tLegend;
 
-                if (player != null)
-                {
-                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString());
-                }
+
+                var tSkill1 = Skills_Terrestrial[1];
+                var tSkill2 = Skills_Terrestrial[2];
+                var tSkill3 = Skills_Terrestrial[3];
+
+                Skills_Terrestrial[0] = Legends_Terrestrial[0]?.Heal;
+                Skills_Terrestrial[1] = InactiveSkills_Terrestrial[1];
+                Skills_Terrestrial[2] = InactiveSkills_Terrestrial[2];
+                Skills_Terrestrial[3] = InactiveSkills_Terrestrial[3];
+                Skills_Terrestrial[4] = Legends_Terrestrial[0]?.Elite;
+
+                InactiveSkills_Terrestrial[1] = tSkill1;
+                InactiveSkills_Terrestrial[2] = tSkill2;
+                InactiveSkills_Terrestrial[3] = tSkill3;
+
+
+                tLegend = Legends_Aquatic[0];
+                Legends_Aquatic[0] = Legends_Aquatic[1];
+                Legends_Aquatic[1] = tLegend;
+
+                tSkill1 = Skills_Aquatic[1];
+                tSkill2 = Skills_Aquatic[2];
+                tSkill3 = Skills_Aquatic[3];
+
+                Skills_Aquatic[0] = Legends_Aquatic[0]?.Heal;
+                Skills_Aquatic[1] = InactiveSkills_Aquatic[1];
+                Skills_Aquatic[2] = InactiveSkills_Aquatic[2];
+                Skills_Aquatic[3] = InactiveSkills_Aquatic[3];
+                Skills_Aquatic[4] = Legends_Aquatic[0]?.Elite;
+
+                InactiveSkills_Aquatic[1] = tSkill1;
+                InactiveSkills_Aquatic[2] = tSkill2;
+                InactiveSkills_Aquatic[3] = tSkill3;
+                if (BuildsManager.ModuleInstance.Selected_Template.Build == this) BuildsManager.ModuleInstance.OnSelected_Template_Edit(null, null);
             }
         }
 
         public EventHandler Changed;
         private void OnChanged(object sender, EventArgs e)
         {
-            BuildsManager.Logger.Debug("Template Changed: ");
             this.Changed?.Invoke(this, EventArgs.Empty);
         }
     }

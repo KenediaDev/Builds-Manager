@@ -57,6 +57,7 @@ namespace Kenedia.Modules.BuildsManager
         public SettingEntry<bool> PasteOnCopy;
         public SettingEntry<bool> ShowCornerIcon;
         public SettingEntry<bool> IncludeDefaultBuilds;
+        public SettingEntry<bool> ShowCurrentProfession;
         public SettingEntry<Blish_HUD.Input.KeyBinding> ReloadKey;
         public SettingEntry<Blish_HUD.Input.KeyBinding> ToggleWindow;
         public SettingEntry<int> GameVersion;
@@ -100,7 +101,7 @@ namespace Kenedia.Modules.BuildsManager
         public event EventHandler Selected_Template_Edit;
         public void OnSelected_Template_Edit(object sender, EventArgs e)
         {
-            Templates = Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
+            MainWindow._TemplateSelection.RefreshList();
             this.Selected_Template_Edit?.Invoke(this, EventArgs.Empty);
         }
 
@@ -113,9 +114,7 @@ namespace Kenedia.Modules.BuildsManager
         public event EventHandler Template_Deleted;
         public void OnTemplate_Deleted()
         {
-
             Selected_Template = new Template();
-            LoadTemplates();
             this.Template_Deleted?.Invoke(this, EventArgs.Empty);
         }
 
@@ -175,6 +174,11 @@ namespace Kenedia.Modules.BuildsManager
                                                       true,
                                                       () => "Incl. Default Builds",
                                                       () => "Load the default builds from within the module.");
+
+            ShowCurrentProfession = settings.DefineSetting(nameof(ShowCurrentProfession),
+                                                      true,
+                                                      () => "Filter Current Profession",
+                                                      () => "Always set the current Profession as an active filter.");
 
             var internal_settings = settings.AddSubCollection("Internal Settings", false);
             GameVersion = internal_settings.DefineSetting(nameof(GameVersion), 0);
@@ -242,13 +246,36 @@ namespace Kenedia.Modules.BuildsManager
                   30689, //Eternity
                 });
 
-            //ReloadKey.Value.Enabled = true;
-            //ReloadKey.Value.Activated += ReloadKey_Activated;
+            ReloadKey.Value.Enabled = true;
+            ReloadKey.Value.Activated += ReloadKey_Activated;
 
             ToggleWindow.Value.Enabled = true;
             ToggleWindow.Value.Activated += ToggleWindow_Activated;
 
             DataLoaded = false;
+
+
+            GameService.Gw2Mumble.PlayerCharacter.SpecializationChanged += PlayerCharacter_SpecializationChanged;
+        }
+
+        public API.Profession CurrentProfession;
+        public API.Specialization CurrentSpecialization;
+
+        private void PlayerCharacter_SpecializationChanged(object sender, ValueEventArgs<int> eventArgs)
+        {
+            var player = GameService.Gw2Mumble.PlayerCharacter;
+
+            if (player != null && player.Profession > 0 && Data != null && MainWindow != null)
+            {
+                CurrentProfession = Data.Professions.Find(e => e.Id == player.Profession.ToString());
+                CurrentSpecialization = CurrentProfession?.Specializations.Find(e => e.Id == player.Specialization);
+
+                MainWindow.PlayerCharacter_NameChanged(null, null);
+
+
+                Templates = Templates.OrderBy(a => a.Build?.Profession != BuildsManager.ModuleInstance.CurrentProfession).ThenBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
+                MainWindow._TemplateSelection.RefreshList();
+            }
         }
 
         private void ToggleWindow_Activated(object sender, EventArgs e)
@@ -286,17 +313,27 @@ namespace Kenedia.Modules.BuildsManager
 
                         if (started)
                         {
-                            BuildsManager.Logger.Debug("BuildPadBuild: " + s.Trim());
                             var buildpadBuild = s.Trim().Split('|');
 
                             var template = new Template();
-                            template.Build = new BuildTemplate(buildpadBuild[1]);
-                            template.Name = buildpadBuild[5];
+                            template.Template_json = new Template_json()
+                            {
+                                Name = buildpadBuild[5],
+                                BuildCode = buildpadBuild[1],
+                            };
 
-                            BuildsManager.Logger.Debug("Name: " + template.Name);
-                            BuildsManager.Logger.Debug("Path: " + template.Path);
-                            Templates.Add(template);
-                            saveTemplate = template;
+                            if (Templates.Find(e => e.Template_json.Name == template.Template_json.Name && e.Template_json.BuildCode == template.Template_json.BuildCode) == null)
+                            {
+                                template.Build = new BuildTemplate(buildpadBuild[1]);
+                                template.Name = buildpadBuild[5];
+
+                                template.Profession = template.Build.Profession;
+                                template.Specialization = template.Build.SpecLines.Find(e => e.Specialization?.Elite == true)?.Specialization;
+
+                                Logger.Debug("Adding new template: '{0}'", template.Template_json.Name);
+                                Templates.Add(template);
+                                saveTemplate = template;
+                            }
                         }
 
                         if (!started && s.StartsWith("[Builds]")) started = true;
@@ -326,11 +363,11 @@ namespace Kenedia.Modules.BuildsManager
         public void LoadTemplates()
         {
             var currentTemplate = _Selected_Template?.Name;
-            
+
             ImportTemplates();
 
             Templates = new List<Template>();
-            var paths = new List<string>() 
+            var paths = new List<string>()
             {
                 Paths.builds + "Builds.json",
                 //Paths.builds + "Default Builds.json",
@@ -342,7 +379,7 @@ namespace Kenedia.Modules.BuildsManager
                 try
                 {
                     if (System.IO.File.Exists(path)) content = System.IO.File.ReadAllText(path);
-                    if(content != null && content != "")
+                    if (content != null && content != "")
                     {
                         var templates = JsonConvert.DeserializeObject<List<Template_json>>(content);
 
@@ -381,7 +418,7 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
-            Templates = Templates.OrderBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
+            //Templates = Templates.OrderBy(a => a.Build?.Profession != BuildsManager.ModuleInstance.CurrentProfession).ThenBy(a => a.Profession.Id).ThenBy(b => b.Specialization?.Id).ThenBy(b => b.Name).ToList();
 
             _Selected_Template?.SetChanged();
             OnSelected_Template_Changed();
@@ -453,6 +490,8 @@ namespace Kenedia.Modules.BuildsManager
             if (Ticks.global > 1250)
             {
                 Ticks.global -= 1250;
+
+                if (CurrentProfession == null || CurrentSpecialization == null) PlayerCharacter_SpecializationChanged(null, null);
 
                 if (MainWindow?.Visible == true)
                 {
