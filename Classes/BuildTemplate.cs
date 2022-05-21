@@ -649,48 +649,31 @@ namespace Kenedia.Modules.BuildsManager
             {
                 BuildChatLink build = new BuildChatLink();
                 build.Profession = (Gw2Sharp.Models.ProfessionType)Enum.Parse(typeof(Gw2Sharp.Models.ProfessionType), Profession.Id);
+                var rev = build.Profession == Gw2Sharp.Models.ProfessionType.Revenant;
 
-                if(Profession.Id == "Revenant")
-                {
-                    build.RevenantActiveTerrestrialLegend = (byte)(Legends_Terrestrial[0]?.Id != null ? Legends_Terrestrial[0]?.Id : 0);
-                    build.RevenantInactiveTerrestrialLegend = (byte)(Legends_Terrestrial[1]?.Id != null ? Legends_Terrestrial[1]?.Id : 0);
+                build.RevenantActiveTerrestrialLegend = (byte)(rev && Legends_Terrestrial[0]?.Id != null ? Legends_Terrestrial[0]?.Id : 0);
+                build.RevenantInactiveTerrestrialLegend = (byte)(rev && Legends_Terrestrial[1]?.Id != null ? Legends_Terrestrial[1]?.Id : 0);
+                build.RevenantInactiveTerrestrialUtility1SkillPaletteId = (ushort)(rev && InactiveSkills_Terrestrial[1]?.PaletteId != null ? InactiveSkills_Terrestrial[1]?.PaletteId : 0);
+                build.RevenantInactiveTerrestrialUtility2SkillPaletteId = (ushort)(rev && InactiveSkills_Terrestrial[2]?.PaletteId != null ? InactiveSkills_Terrestrial[2]?.PaletteId : 0);
+                build.RevenantInactiveTerrestrialUtility3SkillPaletteId = (ushort)(rev && InactiveSkills_Terrestrial[3]?.PaletteId != null ? InactiveSkills_Terrestrial[3]?.PaletteId : 0);
 
-                    build.TerrestrialUtility1SkillPaletteId = (ushort)(Skills_Terrestrial[1]?.PaletteId != null ? Skills_Terrestrial[1]?.PaletteId : 0);
-                    build.TerrestrialUtility2SkillPaletteId = (ushort)(Skills_Terrestrial[2]?.PaletteId != null ? Skills_Terrestrial[2]?.PaletteId : 0);
-                    build.TerrestrialUtility3SkillPaletteId = (ushort)(Skills_Terrestrial[3]?.PaletteId != null ? Skills_Terrestrial[3]?.PaletteId : 0);
+                build.RevenantActiveAquaticLegend = (byte) (rev && Legends_Aquatic[0]?.Id != null ? Legends_Aquatic[0]?.Id : 0);
+                build.RevenantInactiveAquaticLegend = (byte) (rev && Legends_Aquatic[1]?.Id != null ? Legends_Aquatic[1]?.Id : 0);
+                build.RevenantInactiveAquaticUtility1SkillPaletteId = (ushort)(rev && InactiveSkills_Aquatic[1]?.PaletteId != null ? InactiveSkills_Aquatic[1]?.PaletteId : 0);
+                build.RevenantInactiveAquaticUtility2SkillPaletteId = (ushort)(rev && InactiveSkills_Aquatic[2]?.PaletteId != null ? InactiveSkills_Aquatic[2]?.PaletteId : 0);
+                build.RevenantInactiveAquaticUtility3SkillPaletteId = (ushort)(rev && InactiveSkills_Aquatic[3]?.PaletteId != null ? InactiveSkills_Aquatic[3]?.PaletteId : 0);
 
-                    build.RevenantInactiveTerrestrialUtility1SkillPaletteId = (ushort)(InactiveSkills_Terrestrial[1]?.PaletteId != null ? InactiveSkills_Terrestrial[1]?.PaletteId : 0);
-                    build.RevenantInactiveTerrestrialUtility2SkillPaletteId = (ushort)(InactiveSkills_Terrestrial[2]?.PaletteId != null ? InactiveSkills_Terrestrial[2]?.PaletteId : 0);
-                    build.RevenantInactiveTerrestrialUtility3SkillPaletteId = (ushort)(InactiveSkills_Terrestrial[3]?.PaletteId != null ? InactiveSkills_Terrestrial[3]?.PaletteId : 0);
+                build.TerrestrialHealingSkillPaletteId = (ushort)(Skills_Terrestrial[0]?.Id > 0? Skills_Terrestrial[0]?.PaletteId : 0);
+                build.TerrestrialUtility1SkillPaletteId = (ushort)(Skills_Terrestrial[1]?.Id > 0 ? Skills_Terrestrial[1]?.PaletteId : 0);
+                build.TerrestrialUtility2SkillPaletteId = (ushort)(Skills_Terrestrial[2]?.Id > 0 ? Skills_Terrestrial[2]?.PaletteId : 0);
+                build.TerrestrialUtility3SkillPaletteId = (ushort)(Skills_Terrestrial[3]?.Id > 0 ? Skills_Terrestrial[3]?.PaletteId : 0);
+                build.TerrestrialEliteSkillPaletteId = (ushort)(Skills_Terrestrial[4]?.Id > 0 ? Skills_Terrestrial[4]?.PaletteId : 0);
 
-
-                    build.RevenantActiveAquaticLegend = (byte) (Legends_Aquatic[0]?.Id != null ? Legends_Aquatic[0]?.Id : 0);
-                    build.RevenantInactiveAquaticLegend = (byte) (Legends_Aquatic[1]?.Id != null ? Legends_Aquatic[1]?.Id : 0);
-
-                    build.AquaticUtility1SkillPaletteId = (ushort) (Skills_Aquatic[1]?.PaletteId != null ? Skills_Aquatic[1]?.PaletteId : 0);
-                    build.AquaticUtility2SkillPaletteId = (ushort) (Skills_Aquatic[2]?.PaletteId != null ? Skills_Aquatic[2]?.PaletteId : 0);
-                    build.AquaticUtility3SkillPaletteId = (ushort) (Skills_Aquatic[3]?.PaletteId != null ? Skills_Aquatic[3]?.PaletteId : 0);
-
-                    build.RevenantInactiveAquaticUtility1SkillPaletteId = (ushort)(InactiveSkills_Aquatic[1]?.PaletteId != null ? InactiveSkills_Aquatic[1]?.PaletteId : 0);
-                    build.RevenantInactiveAquaticUtility2SkillPaletteId = (ushort)(InactiveSkills_Aquatic[2]?.PaletteId != null ? InactiveSkills_Aquatic[2]?.PaletteId : 0);
-                    build.RevenantInactiveAquaticUtility3SkillPaletteId = (ushort)(InactiveSkills_Aquatic[3]?.PaletteId != null ? InactiveSkills_Aquatic[3]?.PaletteId : 0);
-                }
-                else
-                {
-                    build.AquaticUtility1SkillPaletteId = Skills_Aquatic[1] != null && Skills_Aquatic[1].PaletteId != 0 ? (ushort)Skills_Aquatic[1].PaletteId : (ushort)0;
-                    build.AquaticUtility2SkillPaletteId = Skills_Aquatic[2] != null && Skills_Aquatic[2].PaletteId != 0 ? (ushort)Skills_Aquatic[2].PaletteId : (ushort)0;
-                    build.AquaticUtility3SkillPaletteId = Skills_Aquatic[3] != null && Skills_Aquatic[3].PaletteId != 0 ? (ushort)Skills_Aquatic[3].PaletteId : (ushort)0;
-
-                    build.TerrestrialUtility1SkillPaletteId = Skills_Terrestrial[1] != null && Skills_Terrestrial[1].PaletteId != 0 ? (ushort)Skills_Terrestrial[1].PaletteId : (ushort)0;
-                    build.TerrestrialUtility2SkillPaletteId = Skills_Terrestrial[2] != null && Skills_Terrestrial[2].PaletteId != 0 ? (ushort)Skills_Terrestrial[2].PaletteId : (ushort)0;
-                    build.TerrestrialUtility3SkillPaletteId = Skills_Terrestrial[3] != null && Skills_Terrestrial[3].PaletteId != 0 ? (ushort)Skills_Terrestrial[3].PaletteId : (ushort)0;
-                }
-
-                build.AquaticHealingSkillPaletteId = Skills_Aquatic[0] != null && Skills_Aquatic[0].PaletteId != 0 ? (ushort)Skills_Aquatic[0].PaletteId : (ushort)0;
-                build.AquaticEliteSkillPaletteId = Skills_Aquatic[4] != null && Skills_Aquatic[4].PaletteId != 0 ? (ushort)Skills_Aquatic[4].PaletteId : (ushort)0;
-
-                build.TerrestrialHealingSkillPaletteId = Skills_Terrestrial[0] != null && Skills_Terrestrial[0].PaletteId != 0 ? (ushort)Skills_Terrestrial[0].PaletteId : (ushort)0;
-                build.TerrestrialEliteSkillPaletteId = Skills_Terrestrial[4] != null && Skills_Terrestrial[4].PaletteId != 0 ? (ushort)Skills_Terrestrial[4].PaletteId : (ushort)0;
+                build.AquaticHealingSkillPaletteId = (ushort) (Skills_Aquatic[0]?.Id > 0 ? Skills_Aquatic[0]?.PaletteId : 0);
+                build.AquaticUtility1SkillPaletteId = (ushort)(Skills_Aquatic[1]?.Id > 0 ? Skills_Aquatic[1]?.PaletteId : 0);
+                build.AquaticUtility2SkillPaletteId = (ushort)(Skills_Aquatic[2]?.Id > 0 ? Skills_Aquatic[2]?.PaletteId : 0);
+                build.AquaticUtility3SkillPaletteId = (ushort)(Skills_Aquatic[3]?.Id > 0 ? Skills_Aquatic[3]?.PaletteId : 0);
+                build.AquaticEliteSkillPaletteId = (ushort)(Skills_Aquatic[4]?.Id > 0 ? Skills_Aquatic[4]?.PaletteId : 0);
 
 
                 SpecLine specLine;
