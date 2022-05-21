@@ -150,10 +150,6 @@ namespace Kenedia.Modules.BuildsManager
         protected override void DefineSettings(SettingCollection settings)
         {
 
-            ReloadKey = settings.DefineSetting(nameof(ReloadKey),
-                                                      new Blish_HUD.Input.KeyBinding(Keys.None),
-                                                      () => "Reload Button",
-                                                      () => "");
 
             ToggleWindow = settings.DefineSetting(nameof(ToggleWindow),
                                                       new Blish_HUD.Input.KeyBinding(ModifierKeys.Ctrl, Keys.B),
@@ -183,6 +179,11 @@ namespace Kenedia.Modules.BuildsManager
             var internal_settings = settings.AddSubCollection("Internal Settings", false);
             GameVersion = internal_settings.DefineSetting(nameof(GameVersion), 0);
             ModuleVersion = internal_settings.DefineSetting(nameof(ModuleVersion), "0.0.0");
+
+            ReloadKey = internal_settings.DefineSetting(nameof(ReloadKey),
+                                                      new Blish_HUD.Input.KeyBinding(Keys.None),
+                                                      () => "Reload Button",
+                                                      () => "");
         }
 
         protected override void Initialize()
@@ -507,11 +508,11 @@ namespace Kenedia.Modules.BuildsManager
             TextureManager = null;
             cornerIcon.Dispose();
 
-            //ReloadKey.Value.Enabled = false;
-            //ReloadKey.Value.Activated -= ReloadKey_Activated;
-
             ToggleWindow.Value.Enabled = false;
             ToggleWindow.Value.Activated -= ToggleWindow_Activated;
+
+            ReloadKey.Value.Enabled = false;
+            ReloadKey.Value.Activated -= ReloadKey_Activated;
 
             ModuleInstance = null;
         }

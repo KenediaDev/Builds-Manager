@@ -308,7 +308,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public API.Profession SelectedProfession;
 
-        public EventHandler Changed;
+        public event EventHandler Changed;
         private void OnChanged()
         {
             if (List == null || List.Count == 0 || !Visible) return;

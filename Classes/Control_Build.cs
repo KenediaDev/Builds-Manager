@@ -1048,50 +1048,53 @@ private void UpdateLayout()
                 CustomTooltip.Visible = false;
                 foreach (SelectionSkill entry in _SelectionSkills)
                 {
-                    var noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
-                    spriteBatch.DrawOnCtrl(this,
-                                            entry.Skill.Icon.Texture,
-                                            entry.Bounds,
-                                            entry.Skill.Icon.Texture.Bounds,
-                                            noUnderwater ? Color.Gray : Color.White,
-                                            0f,
-                                            default);
-
-                    if (noUnderwater)
+                    if (entry.Skill != null)
                     {
+                        var noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
                         spriteBatch.DrawOnCtrl(this,
-                                                _NoWaterTexture,
+                                                entry.Skill.Icon.Texture,
                                                 entry.Bounds,
-                                                _NoWaterTexture.Bounds,
-                                                Color.White,
+                                                entry.Skill.Icon.Texture.Bounds,
+                                                noUnderwater ? Color.Gray : Color.White,
                                                 0f,
                                                 default);
-                    }
 
-                    if (!noUnderwater && entry.Hovered)
-                    {
-                        color = Color.Honeydew;
-                        //Top
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, entry.Bounds.Width, 2), Rectangle.Empty, color * 0.5f);
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, entry.Bounds.Width, 1), Rectangle.Empty, color * 0.6f);
+                        if (noUnderwater)
+                        {
+                            spriteBatch.DrawOnCtrl(this,
+                                                    _NoWaterTexture,
+                                                    entry.Bounds,
+                                                    _NoWaterTexture.Bounds,
+                                                    Color.White,
+                                                    0f,
+                                                    default);
+                        }
 
-                        //Bottom
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Bottom - 2, entry.Bounds.Width, 2), Rectangle.Empty, color * 0.5f);
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Bottom - 1, entry.Bounds.Width, 1), Rectangle.Empty, color * 0.6f);
+                        if (!noUnderwater && entry.Hovered)
+                        {
+                            color = Color.Honeydew;
+                            //Top
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, entry.Bounds.Width, 2), Rectangle.Empty, color * 0.5f);
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, entry.Bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                        //Left
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
+                            //Bottom
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Bottom - 2, entry.Bounds.Width, 2), Rectangle.Empty, color * 0.5f);
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Bottom - 1, entry.Bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                        //Right
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 2, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
-                        spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 1, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
+                            //Left
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
 
-                        CustomTooltip.CurrentObject = entry.Skill;
-                        CustomTooltip.Header = entry.Skill.Name;
-                        CustomTooltip.Content = new List<string>() { entry.Skill.Description };
-                        CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
-                        CustomTooltip.Visible = true;
+                            //Right
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 2, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
+                            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 1, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
+
+                            CustomTooltip.CurrentObject = entry.Skill;
+                            CustomTooltip.Header = entry.Skill.Name;
+                            CustomTooltip.Content = new List<string>() { entry.Skill.Description };
+                            CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
+                            CustomTooltip.Visible = true;
+                        }
                     }
                 }
             }
@@ -1149,6 +1152,17 @@ private void UpdateLayout()
 
         private int _SkillSize = 55;
         public int _Width = 643;
+        private Point _OGLocation;
+
+        public Point _Location
+        {
+            get => Location;
+            set
+            {
+                if (Location == null || Location == Point.Zero) _OGLocation = value;
+                Location = value;
+            }
+        }
 
         public SkillBar_Control(Container parent)
         {
@@ -1179,8 +1193,6 @@ private void UpdateLayout()
 
                 var control = _Skills_Aquatic[_Skills_Aquatic.Count - 1];
                 control.Click += Control_Click;
-
-                BuildsManager.ModuleInstance.Selected_Template_Changed += ApplyBuild;
             }
 
             var p = _Width - (_Skills_Aquatic.Count * (_SkillSize + 1));
@@ -1213,7 +1225,7 @@ private void UpdateLayout()
                 Slot = SkillSlots.AquaticLegend1,
                 Aquatic = true,
                 Scale = 0.8,
-                Location = new Point(0, 0),
+                Location = new Point(27, 0),
             });
             _Legends_Aquatic.Add(new Skill_Control(Parent)
             {
@@ -1221,7 +1233,7 @@ private void UpdateLayout()
                 Slot = SkillSlots.AquaticLegend1,
                 Aquatic = true,
                 Scale = 0.8,
-                Location = new Point(36 + 26, 0),
+                Location = new Point(36 + 26 + 27, 0),
             });
 
             _Legends_Aquatic[0].Click += Legend;
@@ -1258,6 +1270,7 @@ private void UpdateLayout()
             LegendSelector.SkillChanged += LegendSelector_SkillChanged;
             SkillSelector.SkillChanged += OnSkillChanged;
             Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
+            BuildsManager.ModuleInstance.Selected_Template_Changed += ApplyBuild;
         }
 
         private void Control_Click(object sender, MouseEventArgs mouse)
@@ -1279,22 +1292,25 @@ private void UpdateLayout()
                         {
                             var legend = control.Aquatic ? Template.Build.Legends_Aquatic[0] : Template.Build.Legends_Terrestrial[0];
 
-                            switch (control.Slot)
+                            if (legend != null && legend.Utilities != null)
                             {
-                                case SkillSlots.Heal:
-                                    Skills.Add(legend?.Heal);
-                                    break;
+                                switch (control.Slot)
+                                {
+                                    case SkillSlots.Heal:
+                                        Skills.Add(legend?.Heal);
+                                        break;
 
-                                case SkillSlots.Elite:
-                                    Skills.Add(legend?.Elite);
-                                    break;
+                                    case SkillSlots.Elite:
+                                        Skills.Add(legend?.Elite);
+                                        break;
 
-                                default:
-                                    foreach (API.Skill iSkill in legend?.Utilities)
-                                    {
-                                        Skills.Add(iSkill);
-                                    }
-                                    break;
+                                    default:
+                                        foreach (API.Skill iSkill in legend?.Utilities)
+                                        {
+                                            Skills.Add(iSkill);
+                                        }
+                                        break;
+                                }
                             }
                         }
                         else {
@@ -1322,7 +1338,7 @@ private void UpdateLayout()
                     }
 
                     SkillSelector.Skills = Skills;
-                    SkillSelector.Aquatic = false;
+                    SkillSelector.Aquatic = control.Aquatic;
                     SkillSelector.currentObject = control;
                 }
                 else
@@ -1506,7 +1522,7 @@ private void UpdateLayout()
             {
                 spriteBatch.DrawOnCtrl(this,
                                         _SwapTexture,
-                                        new Rectangle(new Point(36, 15), new Point(25, 25)).Scale(Scale),
+                                        new Rectangle(new Point(36 + 27, 15), new Point(25, 25)).Scale(Scale),
                                         _SwapTexture.Bounds,
                                         Color.White,
                                         0f,
@@ -1535,17 +1551,40 @@ private void UpdateLayout()
         protected override void DisposeControl()
         {
             BuildsManager.ModuleInstance.Selected_Template_Changed -= ApplyBuild;
+            LegendSelector.SkillChanged -= LegendSelector_SkillChanged;
+            SkillSelector.SkillChanged -= OnSkillChanged;
+            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
+
+            _Legends_Terrestrial[0].Click -= Legend;
+            _Legends_Terrestrial[1].Click -= Legend;
+            _Legends_Aquatic[0].Click -= Legend;
+            _Legends_Aquatic[1].Click -= Legend;
+
+            foreach(Skill_Control skill in _Skills_Terrestrial) { skill.Click -= Control_Click; skill.Dispose(); }
+            foreach(Skill_Control skill in _Skills_Aquatic) { skill.Click -= Control_Click; skill.Dispose(); }
+            CustomTooltip.Dispose();
+
             base.DisposeControl();
         }
         public void SetTemplate()
         {
-            var template = BuildsManager.ModuleInstance.Selected_Template;
             var i = 0;
+            ShowProfessionSkills = Template.Profession?.Id == "Revenant";
+
+            if (!ShowProfessionSkills)
+            {
+                Location = _OGLocation.Add(new Point(0, -16));
+            }
+            else
+            {
+                Location = _OGLocation;
+            }
 
             i = 0;
             foreach(Skill_Control sCtrl in _Skills_Aquatic)
             {
                 sCtrl.Skill = Template.Build.Skills_Aquatic[i];
+                sCtrl.Location = new Point(sCtrl.Location.X, ShowProfessionSkills ? 51 : 51 / 2 + 5);
                 i++;
             }
 
@@ -1553,6 +1592,7 @@ private void UpdateLayout()
             foreach(Skill_Control sCtrl in _Skills_Terrestrial)
             {
                 sCtrl.Skill = Template.Build.Skills_Terrestrial[i];
+                sCtrl.Location = new Point(sCtrl.Location.X, ShowProfessionSkills ? 51 : 51 / 2 + 5);
                 i++;
             }
 
@@ -1562,12 +1602,12 @@ private void UpdateLayout()
             _Legends_Aquatic[0].Skill = Template.Build.Legends_Aquatic[0]?.Skill;
             _Legends_Aquatic[1].Skill = Template.Build.Legends_Aquatic[1]?.Skill;
 
-            ShowProfessionSkills = Template.Profession?.Id == "Revenant";
             _Legends_Terrestrial[0].Visible = ShowProfessionSkills;
             _Legends_Terrestrial[1].Visible = ShowProfessionSkills;
 
             _Legends_Aquatic[0].Visible = ShowProfessionSkills;
             _Legends_Aquatic[1].Visible = ShowProfessionSkills;
+
         }
     }
 
@@ -1661,7 +1701,7 @@ private void UpdateLayout()
 
             SkillBar = new SkillBar_Control(Parent)
             {
-                Location = new Point(0, 0),
+                _Location = new Point(0, 0),
                 Size = new Point(_Width, Skillbar_Height),
             };
 

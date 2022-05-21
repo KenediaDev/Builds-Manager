@@ -364,20 +364,7 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
             ProfessionSelection.List = _Professions;
-            ProfessionSelection.Changed += delegate
-            {
-                if (ProfessionSelection.SelectedProfession != null)
-                {
-                    BuildsManager.ModuleInstance.Selected_Template = new Template();
-                    BuildsManager.ModuleInstance.Selected_Template.Profession = ProfessionSelection.SelectedProfession;
-                    BuildsManager.ModuleInstance.Selected_Template.Build.Profession = ProfessionSelection.SelectedProfession;
-                    BuildsManager.ModuleInstance.Templates.Add(BuildsManager.ModuleInstance.Selected_Template);
-
-                    BuildsManager.ModuleInstance.Selected_Template.SetChanged();
-                    _TemplateSelection.RefreshList();
-                    ProfessionSelection.SelectedProfession = null;
-                }
-            };
+            ProfessionSelection.Changed += ProfessionSelection_Changed;
 
             Import_Button = new Control_AddButton()
             {
@@ -484,18 +471,29 @@ namespace Kenedia.Modules.BuildsManager
             GameService.Gw2Mumble.PlayerCharacter.NameChanged += PlayerCharacter_NameChanged;
         }
 
+        private void ProfessionSelection_Changed(object sender, EventArgs e)
+        {
+            if (ProfessionSelection.SelectedProfession != null)
+            {
+                var template = new Template();
+                template.Profession = ProfessionSelection.SelectedProfession;
+                template.Build.Profession = ProfessionSelection.SelectedProfession;
+                BuildsManager.ModuleInstance.Selected_Template = template;
+
+                BuildsManager.ModuleInstance.Templates.Add(BuildsManager.ModuleInstance.Selected_Template);
+                BuildsManager.ModuleInstance.Selected_Template.SetChanged();
+
+                _TemplateSelection.RefreshList();
+                ProfessionSelection.SelectedProfession = null;
+            }
+        }
+
         public void PlayerCharacter_NameChanged(object sender, ValueEventArgs<string> e)
         {
             if (BuildsManager.ModuleInstance.ShowCurrentProfession.Value)
             {
                 _TemplateSelection.SetSelection();
             }
-        }
-
-        private void ImportFileDialog_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            ScreenNotification.ShowNotification("IMPORT FILE", ScreenNotification.NotificationType.Warning);
-
         }
 
         private void Import_Button_Click(object sender, MouseEventArgs e)
@@ -785,6 +783,7 @@ namespace Kenedia.Modules.BuildsManager
             Import_Button.Dispose();
             Add_Button.Dispose();
 
+            ProfessionSelection.Changed -= ProfessionSelection_Changed;
 
             GameService.Gw2Mumble.PlayerCharacter.NameChanged -= PlayerCharacter_NameChanged;
             base.DisposeControl();
