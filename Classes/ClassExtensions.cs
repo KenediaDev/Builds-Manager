@@ -12,7 +12,7 @@ namespace Kenedia.Modules.BuildsManager
         public static void DisposeAll(this IEnumerable<IDisposable> disposables)
         {
             foreach (var d in disposables)
-                d.Dispose();
+                d?.Dispose();
         }
     }
 
