@@ -17,7 +17,6 @@ namespace Kenedia.Modules.BuildsManager
 {
     public class _UpgradeIDs : IDisposable
     {
-        void IDisposable.Dispose() { }
         private bool disposed = false;
         public void Dispose()
         {
@@ -36,18 +35,22 @@ namespace Kenedia.Modules.BuildsManager
 
     public class TextureManager : IDisposable
     {        
-        void IDisposable.Dispose() { }
         private bool disposed = false;
         public void Dispose()
         {
-            _Backgrounds.Clear();
-            _Icons.Clear();
-            _Emblems.Clear();
-            _Controls.Clear();
-            _EquipmentTextures.Clear();
-            _Stats.Clear();
-            _StatIcons.Clear();
-            _EquipSlotTextures.Clear();
+            if (!disposed)
+            {
+                disposed = true;
+
+                foreach (Texture2D img in _Backgrounds) { img?.Dispose(); }
+                foreach (Texture2D img in _Icons) { img?.Dispose(); }
+                foreach (Texture2D img in _Emblems) { img?.Dispose(); }
+                foreach (Texture2D img in _Controls) { img?.Dispose(); }
+                foreach (Texture2D img in _EquipmentTextures) { img?.Dispose(); }
+                foreach (Texture2D img in _Stats) { img?.Dispose(); }
+                foreach (Texture2D img in _StatIcons) { img?.Dispose(); }
+                foreach (Texture2D img in _EquipSlotTextures) { img?.Dispose(); }
+            }
         }
 
         public _UpgradeIDs _UpgradeIDs;

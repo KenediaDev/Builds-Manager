@@ -72,11 +72,13 @@ namespace Kenedia.Modules.BuildsManager
                 TextColor = Color.Black,
                 ShowShadow = false,
             };
+        }
 
-            Resized += delegate
-            {
-                UpdateLayout();
-            };
+        protected override void OnResized(ResizedEventArgs e)
+        {
+            base.OnResized(e);
+
+            UpdateLayout(); 
         }
 
         void UpdateLayout()

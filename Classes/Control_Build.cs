@@ -62,49 +62,55 @@ namespace Kenedia.Modules.BuildsManager
             _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
 
             ClipsBounds = false;
-
-            Click += delegate
-            {
-                if (this.Trait != null && Trait.Type == API.traitType.Major && Template != null && MouseOver)
-                {
-                    if (Template.Build.SpecLines[Specialization_Control.Index].Traits.Contains(Trait))
-                    {
-                        Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(Trait);
-                    }
-                    else
-                    {
-                        foreach (API.Trait t in Template.Build.SpecLines[Specialization_Control.Index].Traits.Where(e => e.Tier == Trait.Tier).ToList())
-                        {
-                            Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(t);
-                        }
-
-                        Template.Build.SpecLines[Specialization_Control.Index].Traits.Add(Trait);
-                    }
-
-                    Template.SetChanged();
-                }
-            };
-
             UpdateLayout();
-            MouseEntered += delegate
-            {
-                if (this.Trait != null)
-                {
-                    CustomTooltip.Visible = true;
+        }
 
-                    if (CustomTooltip.CurrentObject != this)
-                    {
-                        CustomTooltip.CurrentObject = this;
-                        CustomTooltip.Header = this.Trait.Name;
-                        CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
-                        CustomTooltip.Content = new List<string>() { this.Trait.Description == "" ? "No Description in API" : this.Trait.Description };
-                    }
-                }
-            };
-            MouseLeft += delegate
+        protected override void OnMouseEntered(MouseEventArgs e)
+        {
+            base.OnMouseEntered(e);
+
+            if (this.Trait != null)
             {
-                if (CustomTooltip.CurrentObject == this) CustomTooltip.Visible = false;
-            };
+                CustomTooltip.Visible = true;
+
+                if (CustomTooltip.CurrentObject != this)
+                {
+                    CustomTooltip.CurrentObject = this;
+                    CustomTooltip.Header = this.Trait.Name;
+                    CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
+                    CustomTooltip.Content = new List<string>() { this.Trait.Description == "" ? "No Description in API" : this.Trait.Description };
+                }
+            }
+        }
+
+        protected override void OnMouseLeft(MouseEventArgs e)
+        {
+            base.OnMouseLeft(e);
+
+            if (CustomTooltip.CurrentObject == this) CustomTooltip.Visible = false;
+        }
+        protected override void OnClick(MouseEventArgs mouse)
+        {
+            base.OnClick(mouse);
+
+            if (this.Trait != null && Trait.Type == API.traitType.Major && Template != null && MouseOver)
+            {
+                if (Template.Build.SpecLines[Specialization_Control.Index].Traits.Contains(Trait))
+                {
+                    Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(Trait);
+                }
+                else
+                {
+                    foreach (API.Trait t in Template.Build.SpecLines[Specialization_Control.Index].Traits.Where(e => e.Tier == Trait.Tier).ToList())
+                    {
+                        Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(t);
+                    }
+
+                    Template.Build.SpecLines[Specialization_Control.Index].Traits.Add(Trait);
+                }
+
+                Template.SetChanged();
+            }
         }
 
         private API.Trait _Trait;
@@ -442,16 +448,7 @@ private void UpdateLayout()
 
             foreach (Trait_Control trait in _MajorTraits)
             {
-                //trait.Selected = Template.Build.SpecLines.Find(a => a.Traits.Contains(trait.Trait)) != null;
-                trait.Click += delegate
-                {
-                    UpdateLayout();
-
-                    foreach (API.Trait t in Template.Build.SpecLines[Index].Traits)
-                    {
-                        BuildsManager.Logger.Debug(t.Name);
-                    }
-                };
+                trait.Click += Trait_Click;
             }
 
             Selector = new SpecializationSelector_Control()
@@ -464,16 +461,29 @@ private void UpdateLayout()
                 Elite = Elite,
             };
 
-            UpdateLayout();
-
-            Moved += delegate { UpdateLayout(); };
-            Resized += delegate { UpdateLayout(); };
-            Click += Control_Click;
             _Created = true;
+            UpdateLayout();
         }
 
-        private void Control_Click(object sender, MouseEventArgs e)
+        protected override void OnMoved(MovedEventArgs e)
         {
+            base.OnMoved(e);
+            UpdateLayout();
+        }
+        protected override void OnResized(ResizedEventArgs e)
+        {
+            base.OnResized(e);
+            UpdateLayout();
+        }
+        private void Trait_Click(object sender, MouseEventArgs e)
+        {
+            UpdateLayout();
+        }
+
+        protected override void OnClick(MouseEventArgs e)
+        {
+            base.OnClick(e);
+
             if (MouseOver)
             {
                 var highlight = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
@@ -501,66 +511,69 @@ private void UpdateLayout()
 
         public void UpdateLayout()
         {
-            AbsoluteBounds = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2)).Scale(Scale).Add(Location);
-
-            ContentBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(Scale).Add(Location);
-            SelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, 15, _Height).Scale(Scale).Add(Location);
-
-            HighlightBounds = new Rectangle(_Width - _HighlightLeft, (_Height - _SpecHighlightFrame.Height) / 2, _SpecHighlightFrame.Width, _SpecHighlightFrame.Height).Scale(Scale).Add(Location);
-            SpecSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(Scale).Add(Location);
-
-            FirstLine.Bounds = new Rectangle(HighlightBounds.Right - 5.Scale(_Scale), HighlightBounds.Center.Y, 225 - HighlightBounds.Right, _LineThickness.Scale(_Scale));
-            WeaponTraitBounds = new Rectangle(HighlightBounds.Right - _TraitSize - 6, (_Height + HighlightBounds.Height - 165), _TraitSize, _TraitSize).Scale(Scale).Add(Location);
-
-            SpecHovered = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
-            if (SpecHovered)
+            if (_Created)
             {
-                BasicTooltipText = Specialization?.Name;
-            }
-            else
-            {
-                BasicTooltipText = null;
-            }
+                AbsoluteBounds = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2)).Scale(Scale).Add(Location);
 
-            foreach (Trait_Control trait in _MajorTraits)
-            {
-                if (trait.Selected)
+                ContentBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(Scale).Add(Location);
+                SelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, 15, _Height).Scale(Scale).Add(Location);
+
+                HighlightBounds = new Rectangle(_Width - _HighlightLeft, (_Height - _SpecHighlightFrame.Height) / 2, _SpecHighlightFrame.Width, _SpecHighlightFrame.Height).Scale(Scale).Add(Location);
+                SpecSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(Scale).Add(Location);
+
+                FirstLine.Bounds = new Rectangle(HighlightBounds.Right - 5.Scale(_Scale), HighlightBounds.Center.Y, 225 - HighlightBounds.Right, _LineThickness.Scale(_Scale));
+                WeaponTraitBounds = new Rectangle(HighlightBounds.Right - _TraitSize - 6, (_Height + HighlightBounds.Height - 165), _TraitSize, _TraitSize).Scale(Scale).Add(Location);
+
+                SpecHovered = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
+                if (SpecHovered)
                 {
-
-                    var minor = _MinorTraits[trait.Trait.Tier - 1];
-                    float rotation = 0f;
-                    switch (trait.Trait.Order)
-                    {
-                        case 0:
-                            rotation = -(float)(Math.PI / 5.65);
-                            break;
-
-                        case 1:
-                            rotation = 0f;
-                            break;
-
-                        case 2:
-                            rotation = (float)(Math.PI / 5.65);
-                            break;
-                    }
-
-                    trait.PreLine.Rotation = rotation;
-                    trait.PostLine.Rotation = -rotation;
-
-                    var minor_Pos = minor.LocalBounds.Center;
-                    var majorPos = trait.LocalBounds.Center;
-                    trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor.AbsoluteBounds.Center.Distance2D(trait.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
-
-                    if (trait.Selected && trait.Trait.Tier != 3)
-                    {
-                        minor = _MinorTraits[trait.Trait.Tier];
-                        trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, trait.AbsoluteBounds.Center.Distance2D(minor.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
-                    }
+                    BasicTooltipText = Specialization?.Name;
                 }
                 else
                 {
-                    trait.PreLine = new ConnectorLine();
-                    trait.PostLine = new ConnectorLine();
+                    BasicTooltipText = null;
+                }
+
+                foreach (Trait_Control trait in _MajorTraits)
+                {
+                    if (trait.Selected)
+                    {
+
+                        var minor = _MinorTraits[trait.Trait.Tier - 1];
+                        float rotation = 0f;
+                        switch (trait.Trait.Order)
+                        {
+                            case 0:
+                                rotation = -(float)(Math.PI / 5.65);
+                                break;
+
+                            case 1:
+                                rotation = 0f;
+                                break;
+
+                            case 2:
+                                rotation = (float)(Math.PI / 5.65);
+                                break;
+                        }
+
+                        trait.PreLine.Rotation = rotation;
+                        trait.PostLine.Rotation = -rotation;
+
+                        var minor_Pos = minor.LocalBounds.Center;
+                        var majorPos = trait.LocalBounds.Center;
+                        trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor.AbsoluteBounds.Center.Distance2D(trait.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
+
+                        if (trait.Selected && trait.Trait.Tier != 3)
+                        {
+                            minor = _MinorTraits[trait.Trait.Tier];
+                            trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, trait.AbsoluteBounds.Center.Distance2D(minor.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
+                        }
+                    }
+                    else
+                    {
+                        trait.PreLine = new ConnectorLine();
+                        trait.PostLine = new ConnectorLine();
+                    }
                 }
             }
         }
@@ -712,16 +725,24 @@ private void UpdateLayout()
                                     );
         }
 
-        public void PaintAfterChilds(SpriteBatch spriteBatch, Rectangle bounds)
+        protected override void DisposeControl()
         {
-        }
+            base.DisposeControl();
 
-        public void SetTemplate()
-        {
-            var template = BuildsManager.ModuleInstance.Selected_Template;
+            foreach (Trait_Control trait in _MajorTraits)
+            {
+                trait.Click -= Trait_Click;
+                trait.Dispose();
+            }
+            _MajorTraits.Clear();
 
-            BuildsManager.Logger.Debug("Set Spec No. {0}", Index);
+            foreach (Trait_Control trait in _MinorTraits)
+            {
+                trait.Dispose();
+            }
+            _MinorTraits.Clear();
 
+            Selector?.Dispose();
         }
     }
 
@@ -790,21 +811,26 @@ private void UpdateLayout()
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
-            MouseEntered += delegate
-            {
-                if (Skill != null && Skill.Id > 0)
-                {
-                    CustomTooltip.Visible = true;
-                    CustomTooltip.Header = Skill.Name;
-                    CustomTooltip.Content = new List<string>() { Skill.Description };
-                    CustomTooltip.CurrentObject = Skill;
-                }
-            };
-            MouseLeft += delegate
-            {
-                CustomTooltip.Visible = false;
-            };
             //BackgroundColor = Color.OldLace;
+        }
+        protected override void OnMouseEntered(MouseEventArgs e)
+        {
+            base.OnMouseEntered(e);
+
+            if (Skill != null && Skill.Id > 0)
+            {
+                CustomTooltip.Visible = true;
+                CustomTooltip.Header = Skill.Name;
+                CustomTooltip.Content = new List<string>() { Skill.Description };
+                CustomTooltip.CurrentObject = Skill;
+            }
+        }
+
+        protected override void OnMouseLeft(MouseEventArgs e)
+        {
+            base.OnMouseLeft(e);
+
+            CustomTooltip.Visible = false;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
@@ -848,9 +874,12 @@ private void UpdateLayout()
             }
         }
 
-        public void SetTemplate()
+        protected override void DisposeControl()
         {
-
+            base.DisposeControl();
+            _SelectorTexture = null;
+            _SelectorTextureHovered = null;
+            _SkillPlaceHolder = null;
         }
     }
 
@@ -1714,18 +1743,14 @@ private void UpdateLayout()
                 });
             }
 
-
-            Disposed += delegate
-            {
-                CustomTooltip.Dispose();
-            };
-
             UpdateTemplate();
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
+
+            CustomTooltip?.Dispose();
         }
         public EventHandler Changed;
         private void OnChanged()

@@ -545,8 +545,19 @@ namespace Kenedia.Modules.BuildsManager
             public string Url;
         }
 
-        public class Icon
+        public class Icon : IDisposable
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    _Texture?.Dispose();
+                    //_AsyncTexture?.Dispose();
+                }
+            }
+
             public string Path;
             public string Url;
 
@@ -600,6 +611,16 @@ namespace Kenedia.Modules.BuildsManager
         #region Items
         public class Item
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon?.Dispose();
+                }
+            }
+
             public string Name;
             public int Id;
             public Icon Icon;
@@ -638,6 +659,16 @@ namespace Kenedia.Modules.BuildsManager
 
         public class Skill
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon?.Dispose();
+                }
+            }
+
             public string Name;
             public int Id;
             public int Specialization;
@@ -651,6 +682,21 @@ namespace Kenedia.Modules.BuildsManager
         }
         public class Legend
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Heal?.Dispose();
+                    Elite?.Dispose();
+                    Swap?.Dispose();
+                    Skill?.Dispose();
+
+                    foreach (Skill e in Utilities) { e.Dispose(); }
+                }
+            }
+
             public string Name; 
             public int Id;
             public List<Skill> Utilities;
@@ -663,6 +709,16 @@ namespace Kenedia.Modules.BuildsManager
 
         public class Trait
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon?.Dispose();
+                }
+            }
+
             public string Name;
             public int Id;
             public Icon Icon;
@@ -675,6 +731,23 @@ namespace Kenedia.Modules.BuildsManager
 
         public class Specialization
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon?.Dispose();
+                    Background?.Dispose();
+                    ProfessionIcon?.Dispose();
+                    ProfessionIconBig?.Dispose();
+                    WeaponTrait?.Dispose();
+
+                    foreach (Trait e in MinorTraits) { e.Dispose(); }
+                    foreach (Trait e in MajorTraits) { e.Dispose(); }
+                }
+            }
+
             public string Name;
             public int Id;
             public Icon Icon;
@@ -696,6 +769,21 @@ namespace Kenedia.Modules.BuildsManager
         }
         public class Profession
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon?.Dispose();
+                    IconBig?.Dispose();
+
+                    foreach(Specialization e in Specializations) { e.Dispose(); }
+                    foreach(Skill e in Skills) { e.Dispose(); }
+                    foreach(Legend e in Legends) { e.Dispose(); }
+                }
+            }
+
             public string Name;
             public string Id;
             public Icon Icon;
@@ -754,8 +842,18 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
         }
-        public class Stat
+        public class Stat : IDisposable
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon.Dispose();
+                }
+            }
+
             public int Id;
             public string Name;
             public List<StatAttribute> Attributes = new List<StatAttribute>();

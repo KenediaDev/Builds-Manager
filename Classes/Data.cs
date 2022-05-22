@@ -18,13 +18,20 @@ namespace Kenedia.Modules.BuildsManager
 {
     public class iData : IDisposable
     {
-        void IDisposable.Dispose() { }
         private bool disposed = false;
         public void Dispose()
         {
             if (!disposed)
             {
                 disposed = true;
+                foreach(API.Stat e in Stats) { e.Dispose(); }
+                foreach(API.Profession e in Professions) { e.Dispose(); }
+                foreach(API.RuneItem e in Runes) { e.Dispose(); }
+                foreach(API.SigilItem e in Sigils) { e.Dispose(); }
+                foreach(API.ArmorItem e in Armors) { e.Dispose(); }
+                foreach(API.WeaponItem e in Weapons) { e.Dispose(); }
+                foreach(API.TrinketItem e in Trinkets) { e.Dispose(); }
+                foreach(API.Legend e in Legends) { e.Dispose(); }
 
                 Stats.Clear();
                 Professions.Clear();
@@ -33,8 +40,9 @@ namespace Kenedia.Modules.BuildsManager
                 Armors.Clear();
                 Weapons.Clear();
                 Trinkets.Clear();
-                SkillID_Pairs.Clear();
                 Legends.Clear();
+
+                SkillID_Pairs.Clear();
 
                 PlaceHolder?.Dispose();
             }
@@ -244,7 +252,6 @@ namespace Kenedia.Modules.BuildsManager
                     if (System.IO.File.Exists(path)) filesToDelete.Add(path);
                     texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     BuildsManager.Logger.Debug("InvalidOperationException: Failed to load {0}. Fetching the API again.", path);
-                    fetchAPI = true;
                     return texture;
                 }
                 catch (UnauthorizedAccessException)
@@ -256,14 +263,12 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     BuildsManager.Logger.Debug("FileNotFoundException: Failed to load {0}. Fetching the API again.", path);
-                    fetchAPI = true;
                     return texture;
                 }
                 catch (FileLoadException)
                 {
                     texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     BuildsManager.Logger.Debug("FileLoadException: Failed to load {0}. Fetching the API again.", path);
-                    fetchAPI = true;
                     return texture;
                 }
             }
@@ -283,7 +288,6 @@ namespace Kenedia.Modules.BuildsManager
                 catch (InvalidOperationException)
                 {
                     if (System.IO.File.Exists(path)) filesToDelete.Add(path);
-                    fetchAPI = true;
                 }
                 catch (UnauthorizedAccessException)
                 {
@@ -291,11 +295,9 @@ namespace Kenedia.Modules.BuildsManager
                 }
                 catch (FileNotFoundException)
                 {
-                    fetchAPI = true;
                 }
                 catch (FileLoadException)
                 {
-                    fetchAPI = true;
                 }
             }
 

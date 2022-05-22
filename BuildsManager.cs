@@ -460,18 +460,9 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = GameService.Graphics.SpriteScreen,
                 Visible = ShowCornerIcon.Value,
             };
-            cornerIcon.MouseEntered += delegate
-            {
-                cornerIcon.Icon = TextureManager.getIcon(_Icons.Template_White);
-            };
-            cornerIcon.MouseLeft += delegate
-            {
-                cornerIcon.Icon = TextureManager.getIcon(_Icons.Template);
-            };
-            cornerIcon.Click += delegate
-            {
-                if (MainWindow != null) MainWindow.ToggleWindow();
-            };
+            cornerIcon.MouseEntered += CornerIcon_MouseEntered;
+            cornerIcon.MouseLeft += CornerIcon_MouseLeft;
+            cornerIcon.Click += CornerIcon_Click;
 
             loadingSpinner = new LoadingSpinner()
             {
@@ -488,19 +479,41 @@ namespace Kenedia.Modules.BuildsManager
                 Progress = 0.66,
                 Visible = false,
             };
-            cornerIcon.Moved += delegate
-            {
-                loadingSpinner.Location = new Point(cornerIcon.Location.X - cornerIcon.Width, cornerIcon.Location.Y + cornerIcon.Height + 5);
-                downloadBar.Location = new Point(cornerIcon.Location.X, cornerIcon.Location.Y + cornerIcon.Height + 5 + 3);
-            };
+            cornerIcon.Moved += CornerIcon_Moved;
 
             ShowCornerIcon.SettingChanged += ShowCornerIcon_SettingChanged;
 
             // Base handler must be called
             base.OnModuleLoaded(e);
 
-            DataLoaded_Event += delegate { CreateUI(); };
+            DataLoaded_Event += BuildsManager_DataLoaded_Event;
             LoadData();
+        }
+
+        private void CornerIcon_Moved(object sender, MovedEventArgs e)
+        {
+            loadingSpinner.Location = new Point(cornerIcon.Location.X - cornerIcon.Width, cornerIcon.Location.Y + cornerIcon.Height + 5);
+            downloadBar.Location = new Point(cornerIcon.Location.X, cornerIcon.Location.Y + cornerIcon.Height + 5 + 3);
+        }
+
+        private void BuildsManager_DataLoaded_Event(object sender, EventArgs e)
+        {
+            CreateUI();
+        }
+
+        private void CornerIcon_Click(object sender, Blish_HUD.Input.MouseEventArgs e)
+        {
+            if (MainWindow != null) MainWindow.ToggleWindow();
+        }
+
+        private void CornerIcon_MouseLeft(object sender, Blish_HUD.Input.MouseEventArgs e)
+        {
+            cornerIcon.Icon = TextureManager.getIcon(_Icons.Template);
+        }
+
+        private void CornerIcon_MouseEntered(object sender, Blish_HUD.Input.MouseEventArgs e)
+        {
+            cornerIcon.Icon = TextureManager.getIcon(_Icons.Template_White);
         }
 
         private void ShowCornerIcon_SettingChanged(object sender, ValueChangedEventArgs<bool> e)
@@ -550,6 +563,13 @@ namespace Kenedia.Modules.BuildsManager
 
             ReloadKey.Value.Enabled = false;
             ReloadKey.Value.Activated -= ReloadKey_Activated;
+
+            cornerIcon.MouseEntered -= CornerIcon_MouseEntered;
+            cornerIcon.MouseLeft -= CornerIcon_MouseLeft;
+            cornerIcon.Click -= CornerIcon_Click;
+            cornerIcon.Moved -= CornerIcon_Moved;
+
+            DataLoaded_Event -= BuildsManager_DataLoaded_Event;
 
             ModuleInstance = null;
         }

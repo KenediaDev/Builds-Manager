@@ -73,7 +73,6 @@
     <Compile Include="Classes\Data.cs" />
     <Compile Include="Classes\Control_Equipment.cs" />
     <Compile Include="Classes\GW2API.cs" />
-    <Compile Include="Classes\ItemImage.cs" />
     <Compile Include="Classes\LocalTexture.cs" />
     <Compile Include="Classes\Paths.cs" />
     <Compile Include="Classes\ProgressBar.cs" />

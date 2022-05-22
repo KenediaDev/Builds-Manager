@@ -66,12 +66,14 @@ namespace Kenedia.Modules.BuildsManager
             ZIndex = 1000;
             Visible = false;
 
-
-            Input.Mouse.MouseMoved += delegate
-            {
-                Location = Input.Mouse.Position.Add(new Point(20, -10));
-            };
+            Input.Mouse.MouseMoved += Mouse_MouseMoved;
         }
+
+        private void Mouse_MouseMoved(object sender, MouseEventArgs e)
+        {
+            Location = Input.Mouse.Position.Add(new Point(20, -10));
+        }
+
         void UpdateLayout()
         {
             if (Header == null || Content == null) return;
@@ -180,6 +182,13 @@ namespace Kenedia.Modules.BuildsManager
                                    VerticalAlignment.Top
                                    );
         }
+
+        protected override void DisposeControl()
+        {
+            base.DisposeControl();
+
+            Input.Mouse.MouseMoved -= Mouse_MouseMoved;
+        }
     }
 
     public class SelectionPopUp : Control
@@ -275,32 +284,41 @@ namespace Kenedia.Modules.BuildsManager
             Font = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
             HeaderFont = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
 
-            Input.Mouse.LeftMouseButtonPressed += delegate { OnChanged(); };
+            Input.Mouse.LeftMouseButtonPressed += Mouse_LeftMouseButtonPressed;            
+        }
 
-            Moved += delegate
-            {
-                FilterBox.Location = Location.Add(new Point(3, 4));
-            };
-            Resized += delegate
-            {
-                FilterBox.Width = Width - 6;
-            };
-            Hidden += delegate
-            {
-                FilterBox.Hide();
-                Clicked = false;
-            };
-            Shown += delegate
-            {
-                FilterBox.Show();
-                FilterBox.Focused = true;
-                UpdateLayout();
-                Clicked = false;
-            };
-            Disposed += delegate
-            {
-                FilterBox.Dispose();
-            };
+        protected override void DisposeControl()
+        {
+            base.DisposeControl();
+
+            FilterBox?.Dispose();
+            if (FilterBox != null) FilterBox.TextChanged -= FilterBox_TextChanged;
+            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
+            Input.Mouse.LeftMouseButtonPressed -= Mouse_LeftMouseButtonPressed;
+        }
+
+        protected override void OnHidden(EventArgs e)
+        {
+            base.OnHidden(e);
+            FilterBox?.Hide();
+            Clicked = false;
+        }
+
+        protected override void OnResized(ResizedEventArgs e)
+        {
+            base.OnResized(e);
+            if(FilterBox!=null) FilterBox.Width = Width - 6;
+        }
+        protected override void OnMoved(MovedEventArgs e)
+        {
+            base.OnMoved(e);
+
+            if (FilterBox != null) FilterBox.Location = Location.Add(new Point(3, 4));
+        }
+
+        private void Mouse_LeftMouseButtonPressed(object sender, MouseEventArgs e)
+        {
+            OnChanged();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
@@ -535,6 +553,10 @@ namespace Kenedia.Modules.BuildsManager
         {
             base.OnShown(e);
 
+            UpdateLayout();
+            FilterBox.Show();
+            Clicked = false;
+
             FilterBox.Focused = true;
             FilterBox.SelectionStart = 0;
             FilterBox.SelectionEnd = FilterBox.Length;
@@ -727,16 +749,7 @@ namespace Kenedia.Modules.BuildsManager
                 CustomTooltip = CustomTooltip,
                 //Template = Template,
             };
-            SelectionPopUp.Changed += delegate
-            {
-                OnChanged();
-            };
-
-            Disposed += delegate
-            {
-                CustomTooltip.Dispose();
-                SelectionPopUp.Dispose();
-            };
+            SelectionPopUp.Changed += SelectionPopUp_Changed;
 
             foreach (API.RuneItem item in BuildsManager.ModuleInstance.Data.Runes)
             {
@@ -786,15 +799,31 @@ namespace Kenedia.Modules.BuildsManager
             Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
             BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
 
-            Shown += delegate
-            {
-                UpdateLayout();
-            };
-
             ProfessionChanged();
             UpdateLayout();
 
             BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+        }
+
+        protected override void DisposeControl()
+        {
+            base.DisposeControl();
+
+            CustomTooltip?.Dispose();
+            SelectionPopUp?.Dispose();
+
+            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            UpdateLayout();
+        }
+
+        private void SelectionPopUp_Changed(object sender, EventArgs e)
+        {
+            OnChanged();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)

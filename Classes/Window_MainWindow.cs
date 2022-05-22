@@ -413,10 +413,7 @@ namespace Kenedia.Modules.BuildsManager
             };
 
             Detail_Panel.SelectedTab = Detail_Panel.Tabs[0];
-            Detail_Panel.Tabs[0].Panel.Resized += delegate
-            {
-                Gear.Size = Detail_Panel.Tabs[0].Panel.Size.Add(new Point(0, - Detail_Panel.GearBox.Bottom + 30));
-            };
+            Detail_Panel.Tabs[0].Panel.Resized += Panel_Resized;
 
             Build = new Control_Build(Detail_Panel.Tabs[0].Panel)
             {
@@ -468,6 +465,11 @@ namespace Kenedia.Modules.BuildsManager
             Input.Mouse.LeftMouseButtonPressed += GlobalClick;
 
             GameService.Gw2Mumble.PlayerCharacter.NameChanged += PlayerCharacter_NameChanged;
+        }
+
+        private void Panel_Resized(object sender, ResizedEventArgs e)
+        {
+            Gear.Size = Detail_Panel.Tabs[0].Panel.Size.Add(new Point(0, -Detail_Panel.GearBox.Bottom + 30));
         }
 
         private void ProfessionSelection_Changed(object sender, EventArgs e)

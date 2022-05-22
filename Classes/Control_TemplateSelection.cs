@@ -123,6 +123,10 @@ namespace Kenedia.Modules.BuildsManager
             base.DisposeControl();
 
             TemplateTooltip?.Dispose();
+            Template = null;
+            _EmptyTraitLine = null;
+            _Lock = null;
+            _Template_Border = null;
         }
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
@@ -190,7 +194,7 @@ namespace Kenedia.Modules.BuildsManager
                                         FeedbackPopup,
                                         FontItalic,
                                         popupBounds,
-                                        new Color(175,175,175,125),
+                                        new Color(175, 175, 175, 125),
                                         false,
                                         HorizontalAlignment.Center,
                                         VerticalAlignment.Middle
@@ -232,8 +236,18 @@ namespace Kenedia.Modules.BuildsManager
         }
     }
 
-    public class ProfessionSelection
+    public class ProfessionSelection : IDisposable
     {
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+                Profession = null;
+            }
+        }
+
         public API.Profession Profession;
         public Rectangle Bounds;
         public bool Hovered;
@@ -314,7 +328,7 @@ namespace Kenedia.Modules.BuildsManager
             }
         }
 
-        public EventHandler Changed;
+        public event EventHandler Changed;
         private void OnChanged(object sender, EventArgs e)
         {
             this.Changed?.Invoke(this, EventArgs.Empty);
@@ -380,6 +394,15 @@ namespace Kenedia.Modules.BuildsManager
             }
 
         }
+
+        protected override void DisposeControl()
+        {
+            base.DisposeControl();
+            Professions?.Clear();
+            foreach (ProfessionSelection p in _Professions) { p.Dispose(); }
+            _Professions?.Clear();
+            ClearTexture = null;
+        }
     }
     public class Control_TemplateSelection : FlowPanel
     {
@@ -400,7 +423,7 @@ namespace Kenedia.Modules.BuildsManager
                 Width = Width - 5,
                 PlaceholderText = Strings.common.Search + " ..."
             };
-            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
+
             _ProfessionSelector = new Control_ProfessionSelector()
             {
                 Parent = this,
@@ -422,16 +445,18 @@ namespace Kenedia.Modules.BuildsManager
             //BackgroundColor = Color.Magenta;
             Refresh();
             FilterBox.TextChanged += FilterBox_TextChanged;
+            _ProfessionSelector.Changed += _ProfessionSelector_Changed;
 
-            _ProfessionSelector.Changed += delegate
-            {
-                RefreshList();
-            };
-
+            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
             BuildsManager.ModuleInstance.Templates_Loaded += ModuleInstance_Templates_Loaded;
-            BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Template_Deleted; 
+            BuildsManager.ModuleInstance.Template_Deleted += ModuleInstance_Template_Deleted;
             ContentPanel.ChildAdded += ContentPanel_ChildsChanged;
-            ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;     
+            ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;
+        }
+
+        private void _ProfessionSelector_Changed(object sender, EventArgs e)
+        {
+            RefreshList();
         }
 
         private void ModuleInstance_Template_Deleted(object sender, EventArgs e)
@@ -490,13 +515,14 @@ namespace Kenedia.Modules.BuildsManager
             var filter = FilterBox.Text.ToLower();
             var prof = BuildsManager.ModuleInstance.CurrentProfession;
 
-            ContentPanel.SortChildren<Control_TemplateEntry>((a, b) => {
+            ContentPanel.SortChildren<Control_TemplateEntry>((a, b) =>
+            {
                 var ret = (b.Template.Build.Profession == prof).CompareTo(a.Template.Build.Profession == prof);
                 if (ret == 0) ret = (a.Template.Build.Profession.Id).CompareTo(b.Template.Build.Profession.Id);
                 if (ret == 0 && a.Template.Specialization != null) ret = (a.Template.Specialization.Id).CompareTo(b.Template.Specialization?.Id);
                 if (ret == 0) ret = (a.Template.Name).CompareTo(b.Template.Name);
                 return ret;
-                });
+            });
 
             foreach (Control_TemplateEntry template in Templates)
             {
@@ -552,11 +578,7 @@ namespace Kenedia.Modules.BuildsManager
                     ctrl.TemplateChanged += OnTemplateChangedEvent;
                     Templates.Add(ctrl);
 
-                    template.Deleted += delegate
-                    {
-                        ctrl.Dispose();
-                        Templates.Remove(ctrl);
-                    };
+                    template.Deleted += Template_Deleted;
                 }
             }
             ResumeLayout();
@@ -564,6 +586,14 @@ namespace Kenedia.Modules.BuildsManager
 
             RefreshList();
         }
+
+        private void Template_Deleted(object sender, EventArgs e)
+        {
+            var ctrl = (Control_TemplateEntry)sender;
+            ctrl.Dispose();
+            Templates.Remove(ctrl);
+        }
+
         public void Clear()
         {
             foreach (Control_TemplateEntry ctrl in Templates)
@@ -576,15 +606,31 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void DisposeControl()
         {
+            foreach (Template template in BuildsManager.ModuleInstance.Templates)
+            {
+                template.Deleted -= Template_Deleted;
+            }
+
             foreach (Control_TemplateEntry template in Templates)
             {
+                template.TemplateChanged += OnTemplateChangedEvent;
                 template.Dispose();
             }
 
             Templates.Clear();
 
-            FilterBox.Dispose();
-            _ProfessionSelector.Dispose();
+            ContentPanel?.Dispose();
+            FilterBox?.Dispose();
+            _ProfessionSelector?.Dispose();
+
+            FilterBox.TextChanged -= FilterBox_TextChanged;
+            _ProfessionSelector.Changed -= _ProfessionSelector_Changed;
+
+            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
+            BuildsManager.ModuleInstance.Templates_Loaded -= ModuleInstance_Templates_Loaded;
+            BuildsManager.ModuleInstance.Template_Deleted -= ModuleInstance_Template_Deleted;
+            ContentPanel.ChildAdded -= ContentPanel_ChildsChanged;
+            ContentPanel.ChildRemoved -= ContentPanel_ChildsChanged;
 
             base.DisposeControl();
         }
