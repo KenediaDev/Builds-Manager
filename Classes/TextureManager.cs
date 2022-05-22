@@ -42,14 +42,14 @@ namespace Kenedia.Modules.BuildsManager
             {
                 disposed = true;
 
-                foreach (Texture2D img in _Backgrounds) { img?.Dispose(); }
-                foreach (Texture2D img in _Icons) { img?.Dispose(); }
-                foreach (Texture2D img in _Emblems) { img?.Dispose(); }
-                foreach (Texture2D img in _Controls) { img?.Dispose(); }
-                foreach (Texture2D img in _EquipmentTextures) { img?.Dispose(); }
-                foreach (Texture2D img in _Stats) { img?.Dispose(); }
-                foreach (Texture2D img in _StatIcons) { img?.Dispose(); }
-                foreach (Texture2D img in _EquipSlotTextures) { img?.Dispose(); }
+                _Backgrounds?.DisposeAll();
+                _Icons?.DisposeAll();
+                _Emblems?.DisposeAll();
+                _Controls?.DisposeAll();
+                _EquipmentTextures?.DisposeAll();
+                _Stats?.DisposeAll();
+                _StatIcons?.DisposeAll();
+                _EquipSlotTextures?.DisposeAll();
             }
         }
 

@@ -24,14 +24,14 @@ namespace Kenedia.Modules.BuildsManager
             if (!disposed)
             {
                 disposed = true;
-                foreach(API.Stat e in Stats) { e.Dispose(); }
-                foreach(API.Profession e in Professions) { e.Dispose(); }
-                foreach(API.RuneItem e in Runes) { e.Dispose(); }
-                foreach(API.SigilItem e in Sigils) { e.Dispose(); }
-                foreach(API.ArmorItem e in Armors) { e.Dispose(); }
-                foreach(API.WeaponItem e in Weapons) { e.Dispose(); }
-                foreach(API.TrinketItem e in Trinkets) { e.Dispose(); }
-                foreach(API.Legend e in Legends) { e.Dispose(); }
+                Professions.DisposeAll();
+                Stats.DisposeAll();
+                Runes.DisposeAll();
+                Sigils.DisposeAll();
+                Armors.DisposeAll();
+                Weapons.DisposeAll();
+                Trinkets.DisposeAll();
+                Legends.DisposeAll();
 
                 Stats.Clear();
                 Professions.Clear();

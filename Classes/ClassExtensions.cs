@@ -3,11 +3,21 @@ using Rectangle = Microsoft.Xna.Framework.Rectangle;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended.BitmapFonts;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace Kenedia.Modules.BuildsManager
 {
+    internal static class DisposableExtensions
+    {
+        public static void DisposeAll(this IEnumerable<IDisposable> disposables)
+        {
+            foreach (var d in disposables)
+                d.Dispose();
+        }
+    }
+
     public static class ClassExtensions
-    {  
+    {
         public static Rectangle CalculateTextRectangle(this Rectangle rect, string text, BitmapFont font)
         {
             int rows = 1;

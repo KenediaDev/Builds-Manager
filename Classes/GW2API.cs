@@ -609,7 +609,7 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         #region Items
-        public class Item
+        public class Item : IDisposable
         {
             private bool disposed = false;
             public void Dispose()
@@ -657,7 +657,7 @@ namespace Kenedia.Modules.BuildsManager
         }
         #endregion
 
-        public class Skill
+        public class Skill : IDisposable
         {
             private bool disposed = false;
             public void Dispose()
@@ -680,7 +680,7 @@ namespace Kenedia.Modules.BuildsManager
             public List<string> Flags;
             public List<string> Categories;
         }
-        public class Legend
+        public class Legend : IDisposable
         {
             private bool disposed = false;
             public void Dispose()
@@ -693,7 +693,7 @@ namespace Kenedia.Modules.BuildsManager
                     Swap?.Dispose();
                     Skill?.Dispose();
 
-                    foreach (Skill e in Utilities) { e.Dispose(); }
+                    Utilities?.DisposeAll();
                 }
             }
 
@@ -707,7 +707,7 @@ namespace Kenedia.Modules.BuildsManager
             public int Specialization;
         }
 
-        public class Trait
+        public class Trait : IDisposable
         {
             private bool disposed = false;
             public void Dispose()
@@ -729,7 +729,7 @@ namespace Kenedia.Modules.BuildsManager
             public traitType Type;
         }
 
-        public class Specialization
+        public class Specialization : IDisposable
         {
             private bool disposed = false;
             public void Dispose()
@@ -742,9 +742,8 @@ namespace Kenedia.Modules.BuildsManager
                     ProfessionIcon?.Dispose();
                     ProfessionIconBig?.Dispose();
                     WeaponTrait?.Dispose();
-
-                    foreach (Trait e in MinorTraits) { e.Dispose(); }
-                    foreach (Trait e in MajorTraits) { e.Dispose(); }
+                    MinorTraits?.DisposeAll();
+                    MajorTraits?.DisposeAll();
                 }
             }
 
@@ -767,7 +766,7 @@ namespace Kenedia.Modules.BuildsManager
             public weaponType Weapon;
             public List<weaponHand> Wielded;
         }
-        public class Profession
+        public class Profession : IDisposable
         {
             private bool disposed = false;
             public void Dispose()
@@ -778,9 +777,9 @@ namespace Kenedia.Modules.BuildsManager
                     Icon?.Dispose();
                     IconBig?.Dispose();
 
-                    foreach(Specialization e in Specializations) { e.Dispose(); }
-                    foreach(Skill e in Skills) { e.Dispose(); }
-                    foreach(Legend e in Legends) { e.Dispose(); }
+                    Specializations?.DisposeAll();
+                    Skills?.DisposeAll();
+                    Legends?.DisposeAll();
                 }
             }
 
@@ -794,8 +793,18 @@ namespace Kenedia.Modules.BuildsManager
             public List<Legend> Legends = new List<Legend>();
         }
 
-        public class StatAttribute
+        public class StatAttribute : IDisposable
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Icon?.Dispose();
+                }
+            }
+
             public int Id;
             public string Name;
             public double Multiplier;
@@ -851,6 +860,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     disposed = true;
                     Icon.Dispose();
+                    Attributes?.DisposeAll();
                 }
             }
 
