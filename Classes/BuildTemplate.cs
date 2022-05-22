@@ -91,8 +91,18 @@ namespace Kenedia.Modules.BuildsManager
         }
     }
 
-    public class TemplateItem : TemplateItem_json
+    public class TemplateItem : TemplateItem_json, IDisposable
     {
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+                Stat?.Dispose();
+            }
+        }
+
         public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public API.Stat Stat;
 
@@ -125,8 +135,20 @@ namespace Kenedia.Modules.BuildsManager
         };
     }
 
-    public class GearTemplate
+    public class GearTemplate : IDisposable
     {
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                Trinkets?.DisposeAll();
+                Armor?.DisposeAll();
+                Weapons?.DisposeAll();
+                AquaticWeapons?.DisposeAll();
+            }
+        }
+
         public List<TemplateItem> Trinkets = new List<TemplateItem>()
         {
             new TemplateItem(){ _Slot = "Back"},
@@ -281,8 +303,20 @@ namespace Kenedia.Modules.BuildsManager
         }
     }
 
-    public class Template
+    public class Template : IDisposable
     {
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                Profession?.Dispose();
+                Specialization?.Dispose();
+                Gear?.Dispose();
+                Build?.Dispose();
+            }
+        }
+
         public enum _TrinketSlots
         {
             Back,
@@ -557,8 +591,20 @@ namespace Kenedia.Modules.BuildsManager
         }
     }
 
-    public class SpecLine
+    public class SpecLine : IDisposable
     {
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+                _Specialization?.Dispose();
+                //Specialization?.Dispose();
+                Traits?.DisposeAll();
+            }
+        }
+
         public int Index;
         private API.Specialization _Specialization;
         public API.Specialization Specialization
@@ -576,8 +622,24 @@ namespace Kenedia.Modules.BuildsManager
         public Specialization_Control Control;
     }
 
-    public class BuildTemplate
+    public class BuildTemplate : IDisposable
     {
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                Profession?.Dispose();
+                SpecLines?.DisposeAll();
+                Skills_Terrestrial?.DisposeAll();
+                InactiveSkills_Terrestrial?.DisposeAll();
+                Skills_Aquatic?.DisposeAll();
+                InactiveSkills_Aquatic?.DisposeAll();
+                Legends_Terrestrial?.DisposeAll();
+                Legends_Aquatic?.DisposeAll();
+            }
+        }
+
         private string _TemplateCode;
         public string TemplateCode
         {

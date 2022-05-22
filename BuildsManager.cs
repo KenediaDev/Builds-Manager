@@ -542,7 +542,10 @@ namespace Kenedia.Modules.BuildsManager
         {
             MainWindow.Dispose();
 
+            Templates.DisposeAll();
             Templates.Clear();
+
+            DefaultTemplates.DisposeAll();
             DefaultTemplates.Clear();
 
             TextureManager.Dispose();

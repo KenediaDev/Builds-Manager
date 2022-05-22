@@ -331,7 +331,7 @@ private void UpdateLayout()
     }
     public class Specialization_Control : Control
     {
-        private const int _FrameWidth = 1;
+    private const int _FrameWidth = 1;
         private const int _LineThickness = 5;
         public const int _Width = 643;
         public const int _Height = 133;
@@ -736,13 +736,20 @@ private void UpdateLayout()
             }
             _MajorTraits.Clear();
 
-            foreach (Trait_Control trait in _MinorTraits)
-            {
-                trait.Dispose();
-            }
+            _MinorTraits?.DisposeAll();
             _MinorTraits.Clear();
 
             Selector?.Dispose();
+            _Specialization?.Dispose();
+            //Specialization?.Dispose();
+
+            _SpecSideSelector_Hovered = null;
+            _SpecSideSelector = null;
+            _EliteFrame = null;
+            _SpecHighlightFrame = null;
+            _SpecFrame = null;
+            _EmptyTraitLine = null;
+            _Line = null;
         }
     }
 
