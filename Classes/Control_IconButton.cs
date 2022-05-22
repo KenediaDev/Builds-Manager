@@ -45,8 +45,7 @@ namespace Kenedia.Modules.BuildsManager
             _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
             _Template_Border = BuildsManager.TextureManager.getControlTexture(_Controls.Template_Border);
 
-            var cnt = new ContentService();
-            Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)16, ContentService.FontStyle.Regular);
+            Font = GameService.Content.DefaultFont16;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)

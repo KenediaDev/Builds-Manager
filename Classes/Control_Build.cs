@@ -159,9 +159,9 @@ private void UpdateLayout()
             if (trait != null)
             {
                 spriteBatch.DrawOnCtrl(this,
-                                        trait.Icon.Texture,
+                                        trait.Icon._AsyncTexture,
                                         Bounds,
-                                        trait.Icon.Texture.Bounds,
+                                        trait.Icon._AsyncTexture.Texture.Bounds,
                                         Selected ? Color.White : (MouseOver ? Color.LightGray : Color.Gray),
                                         0f,
                                         default);
@@ -294,9 +294,9 @@ private void UpdateLayout()
                         if (rect.Contains(RelativeMousePosition)) text = spec.Name;
 
                         spriteBatch.DrawOnCtrl(Parent,
-                                                spec.Icon.Texture,
+                                                spec.Icon._AsyncTexture,
                                                 rect.Add(Location),
-                                                spec.Icon.Texture.Bounds,
+                                                spec.Icon._AsyncTexture.Texture.Bounds,
                                                 Specialization == spec || rect.Contains(RelativeMousePosition) ? Color.White : Color.Gray,
                                                 0f,
                                                 Vector2.Zero
@@ -593,9 +593,9 @@ private void UpdateLayout()
 
                 //Background
                 spriteBatch.DrawOnCtrl(Parent,
-                                    Specialization.Background.Texture,
+                                    Specialization.Background._AsyncTexture,
                                     ContentBounds,
-                                    Specialization.Background.Texture.Bounds,
+                                    Specialization.Background._AsyncTexture.Texture.Bounds,
                                     Color.White,
                                     0f,
                                     Vector2.Zero
@@ -680,9 +680,9 @@ private void UpdateLayout()
                 if(Specialization != null && Specialization.WeaponTrait != null)
                 {
                     spriteBatch.DrawOnCtrl(Parent,
-                                           Specialization.WeaponTrait.Icon.Texture,
+                                           Specialization.WeaponTrait.Icon._AsyncTexture,
                                            WeaponTraitBounds,
-                                           Specialization.WeaponTrait.Icon.Texture.Bounds,
+                                           Specialization.WeaponTrait.Icon._AsyncTexture.Texture.Bounds,
                                             Color.White,
                                            0f,
                                            Vector2.Zero
@@ -819,10 +819,10 @@ private void UpdateLayout()
                                     default);
 
             spriteBatch.DrawOnCtrl(this,
-                                    (Skill != null && Skill.Icon != null && Skill.Icon.Texture != null) ? Skill.Icon.Texture : _SkillPlaceHolder,
+                                    (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Skill.Icon._AsyncTexture.Texture : _SkillPlaceHolder,
                                     skillRect,
-                                    (Skill != null && Skill.Icon != null && Skill.Icon.Texture != null) ? Skill.Icon.Texture.Bounds : _SkillPlaceHolder.Bounds,
-                                    (Skill != null && Skill.Icon != null && Skill.Icon.Texture != null) ? Color.White : new Color(0,0,0,155),
+                                    (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Skill.Icon._AsyncTexture.Texture.Bounds : _SkillPlaceHolder.Bounds,
+                                    (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Color.White : new Color(0,0,0,155),
                                     0f,
                                     default);
 
@@ -919,8 +919,7 @@ private void UpdateLayout()
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
-            var cnt = new ContentService();
-            Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
+            Font = GameService.Content.DefaultFont18; 
             Size = new Point(20 + 4 * _SkillSize, _SkillSize * (int)Math.Ceiling(Skills.Count / (double)4));
             ClipsBounds = false;
 
@@ -1052,9 +1051,9 @@ private void UpdateLayout()
                     {
                         var noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
                         spriteBatch.DrawOnCtrl(this,
-                                                entry.Skill.Icon.Texture,
+                                                entry.Skill.Icon._AsyncTexture,
                                                 entry.Bounds,
-                                                entry.Skill.Icon.Texture.Bounds,
+                                                entry.Skill.Icon._AsyncTexture.Texture.Bounds,
                                                 noUnderwater ? Color.Gray : Color.White,
                                                 0f,
                                                 default);

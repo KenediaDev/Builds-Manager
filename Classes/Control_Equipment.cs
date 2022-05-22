@@ -16,13 +16,13 @@ using System.Text.RegularExpressions;
 using MonoGame.Extended.BitmapFonts;
 using Blish_HUD.Controls.Extern;
 using System.Threading;
+using Blish_HUD.Content;
 
 namespace Kenedia.Modules.BuildsManager
 {
     public class CustomTooltip : Control
     {
         private Texture2D Background;
-        private Texture2D Icon;
         private int _Height;
         private object _CurrentObject;
         public object CurrentObject
@@ -76,9 +76,8 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (Header == null || Content == null) return;
 
-            var cnt = new ContentService();
-            var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
-            var headerFont = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
+            var font = GameService.Content.DefaultFont14;
+            var headerFont = GameService.Content.DefaultFont18;
 
             var ItemNameSize = headerFont.GetStringRectangle(Header);
 
@@ -121,9 +120,8 @@ namespace Kenedia.Modules.BuildsManager
             if (Header == null || Content == null) return;
             if (_Height == -1) UpdateLayout();
            // UpdateLayout();
-            var cnt = new ContentService();
-            var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
-            var headerFont = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
+            var font = GameService.Content.DefaultFont14;
+            var headerFont = GameService.Content.DefaultFont18;
 
             var hRect = headerFont.CalculateTextRectangle(Header, new Rectangle(0, 0, Width - 20, 0));
 
@@ -189,10 +187,10 @@ namespace Kenedia.Modules.BuildsManager
         public class SelectionEntry
         {
             public object Object;
-            public Texture2D Texture;
+            public AsyncTexture2D Texture;
             public string Header;
             public List<string> Content;
-            public List<Texture2D> ContentTextures;
+            public List<AsyncTexture2D> ContentTextures;
 
             public Rectangle TextureBounds;
             public Rectangle TextBounds;
@@ -214,7 +212,16 @@ namespace Kenedia.Modules.BuildsManager
 
         private Texture2D Background;
         private TextBox FilterBox;
-        public selectionType SelectionType;
+        private selectionType _SelectionType;
+        public selectionType SelectionType
+        {
+            get => _SelectionType;
+            set
+            {
+                if (_SelectionType != value && FilterBox != null) FilterBox.Text = "";
+                _SelectionType = value;
+            }
+        }
         public List<SelectionEntry> List = new List<SelectionEntry>();
         public List<SelectionEntry> FilteredList = new List<SelectionEntry>();
         private object _SelectionTarget;
@@ -313,7 +320,8 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (List == null || List.Count == 0 || !Visible) return;
 
-            foreach (SelectionEntry entry in FilteredList)
+            var list = new List<SelectionEntry>(FilteredList);
+            foreach (SelectionEntry entry in list)
             {
                 if (entry.Hovered)
                 {
@@ -494,7 +502,7 @@ namespace Kenedia.Modules.BuildsManager
                 int statSize = Font.LineHeight;
                 if (entry.ContentTextures != null && entry.ContentTextures.Count > 0)
                 {
-                    foreach (Texture2D texture in entry.ContentTextures)
+                    foreach (AsyncTexture2D texture in entry.ContentTextures)
                     {
                         entry.ContentBounds.Add(new Rectangle(size + j * statSize, FilterBox.Height + Font.LineHeight + 12 + i * (size + 5), statSize, statSize));
                         j++;
@@ -509,7 +517,8 @@ namespace Kenedia.Modules.BuildsManager
 
         private void UpdateStates()
         {
-            foreach (SelectionEntry entry in FilteredList)
+            var list = new List<SelectionEntry>(FilteredList);
+            foreach (SelectionEntry entry in list)
             {
                 entry.Hovered = entry.AbsolutBounds.Contains(RelativeMousePosition);
 
@@ -520,6 +529,15 @@ namespace Kenedia.Modules.BuildsManager
                     CustomTooltip.Content = entry.Content;
                 }
             }
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            FilterBox.Focused = true;
+            FilterBox.SelectionStart = 0;
+            FilterBox.SelectionEnd = FilterBox.Length;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
@@ -552,12 +570,13 @@ namespace Kenedia.Modules.BuildsManager
 
             int i = 0;
             int size = 42;
-            foreach (SelectionEntry entry in FilteredList)
+            var list = new List<SelectionEntry>(FilteredList);
+            foreach (SelectionEntry entry in list)
             {
                 spriteBatch.DrawOnCtrl(this,
                                         entry.Texture,
                                         entry.TextureBounds,
-                                        entry.Texture.Bounds,
+                                        entry.Texture.Texture.Bounds,
                                        entry.Hovered ? Color.Orange : Color.White,
                                         0f,
                                         default);
@@ -574,12 +593,12 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     int j = 0;
                     int statSize = Font.LineHeight;
-                    foreach (Texture2D texture in entry.ContentTextures)
+                    foreach (AsyncTexture2D texture in entry.ContentTextures)
                     {
                         spriteBatch.DrawOnCtrl(this,
                                                 texture,
                                                 entry.ContentBounds[j],
-                                                texture.Bounds,
+                                                texture.Texture.Bounds,
                                                 entry.Hovered ? Color.Orange : Color.White,
                                                 0f,
                                                 default);
@@ -724,7 +743,7 @@ namespace Kenedia.Modules.BuildsManager
                 Runes_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
-                    Texture = item.Icon.Texture,
+                    Texture = item.Icon._AsyncTexture,
                     Header = item.Name,
                     Content = item.Bonuses,
                 });
@@ -735,7 +754,7 @@ namespace Kenedia.Modules.BuildsManager
                 Sigils_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
-                    Texture = item.Icon.Texture,
+                    Texture = item.Icon._AsyncTexture,
                     Header = item.Name,
                     Content = new List<string>() { item.Description },
                 });
@@ -746,7 +765,7 @@ namespace Kenedia.Modules.BuildsManager
                 Weapons_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
-                    Texture = item.Icon.Texture,
+                    Texture = item.Icon._AsyncTexture,
                     Header = item.WeaponType.ToString(),
                     Content = new List<string>() { "" },
                 });
@@ -757,10 +776,10 @@ namespace Kenedia.Modules.BuildsManager
                 Stats_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
-                    Texture = item.Icon.Texture,
+                    Texture = item.Icon._AsyncTexture,
                     Header = item.Name,
                     Content = item.Attributes.Select(e => "+ " + e.Name).ToList(),
-                    ContentTextures = item.Attributes.Select(e => e.Icon.Texture).ToList(),
+                    ContentTextures = item.Attributes.Select(e => e.Icon._AsyncTexture).ToList(),
                 });
             }
 
@@ -1403,9 +1422,9 @@ namespace Kenedia.Modules.BuildsManager
                                         default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            Armors.Count > i ? Armors[i].Icon.Texture : BuildsManager.TextureManager._Icons[0],
+                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture : BuildsManager.TextureManager._Icons[0],
                                             item.Bounds,
-                                            Armors.Count > i ? Armors[i].Icon.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
+                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
                                             itemColor,
                                             0f,
                                             default);
@@ -1414,9 +1433,9 @@ namespace Kenedia.Modules.BuildsManager
                     if (item.Stat != null)
                     {
                         spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon.Texture,
+                                                item.Stat.Icon._AsyncTexture,
                                                 item.StatBounds,
-                                                item.Stat.Icon.Texture.Bounds,
+                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
                                                 Color.White,
                                                 0f,
                                                 default);
@@ -1432,9 +1451,9 @@ namespace Kenedia.Modules.BuildsManager
                                             default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            item.Rune == null ? _RuneTexture : item.Rune.Icon.Texture,
+                                            item.Rune == null ? _RuneTexture : item.Rune.Icon._AsyncTexture.Texture,
                                             item.UpgradeBounds,
-                                            item.Rune == null ? _RuneTexture.Bounds : item.Rune.Icon.Texture.Bounds,
+                                            item.Rune == null ? _RuneTexture.Bounds : item.Rune.Icon._AsyncTexture.Texture.Bounds,
                                             Color.White,
                                             0f,
                                             default);
@@ -1457,9 +1476,9 @@ namespace Kenedia.Modules.BuildsManager
                                         default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            Trinkets.Count > i ? Trinkets[i].Icon.Texture : BuildsManager.TextureManager._Icons[0],
+                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture : BuildsManager.TextureManager._Icons[0],
                                             item.Bounds,
-                                            Trinkets.Count > i ? Trinkets[i].Icon.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
+                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
                                             itemColor,
                                             0f,
                                             default);
@@ -1467,9 +1486,9 @@ namespace Kenedia.Modules.BuildsManager
                     if (item.Stat != null)
                     {
                         spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon.Texture,
+                                                item.Stat.Icon._AsyncTexture,
                                                 item.StatBounds,
-                                                item.Stat.Icon.Texture.Bounds,
+                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
                                                 Color.White,
                                                 0f,
                                                 default);
@@ -1493,9 +1512,9 @@ namespace Kenedia.Modules.BuildsManager
                                         default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture : WeaponSlots[i],
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture : WeaponSlots[i],
                                             item.Bounds,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture.Bounds : WeaponSlots[i].Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture.Bounds : WeaponSlots[i].Bounds,
                                             item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
                                             0f,
                                             default);
@@ -1504,9 +1523,9 @@ namespace Kenedia.Modules.BuildsManager
                     if (item.Stat != null)
                     {
                         spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon.Texture,
+                                                item.Stat.Icon._AsyncTexture,
                                                 item.StatBounds,
-                                                item.Stat.Icon.Texture.Bounds,
+                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
                                                 Color.White,
                                                 0f,
                                                 default);
@@ -1521,9 +1540,9 @@ namespace Kenedia.Modules.BuildsManager
                                             default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            item.Sigil == null ? _RuneTexture : item.Sigil.Icon.Texture,
+                                            item.Sigil == null ? _RuneTexture : item.Sigil.Icon._AsyncTexture.Texture,
                                             item.UpgradeBounds,
-                                            item.Sigil == null ? _RuneTexture.Bounds : item.Sigil.Icon.Texture.Bounds,
+                                            item.Sigil == null ? _RuneTexture.Bounds : item.Sigil.Icon._AsyncTexture.Texture.Bounds,
                                             Color.White,
                                             0f,
                                             default);
@@ -1546,9 +1565,9 @@ namespace Kenedia.Modules.BuildsManager
                                         default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture : AquaticWeaponSlots[i],
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture: AquaticWeaponSlots[i],
                                             item.Bounds,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon.Texture.Bounds : AquaticWeaponSlots[i].Bounds,
+                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture.Bounds : AquaticWeaponSlots[i].Bounds,
                                             item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
                                             0f,
                                             default);
@@ -1556,9 +1575,9 @@ namespace Kenedia.Modules.BuildsManager
                     if (item.Stat != null)
                     {
                         spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon.Texture,
+                                                item.Stat.Icon._AsyncTexture,
                                                 item.StatBounds,
-                                                item.Stat.Icon.Texture.Bounds,
+                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
                                                 Color.White,
                                                 0f,
                                                 default);
@@ -1577,9 +1596,9 @@ namespace Kenedia.Modules.BuildsManager
                                                 default);
 
                         spriteBatch.DrawOnCtrl(this,
-                                                sigil == null ? _RuneTexture : sigil.Icon.Texture,
+                                                sigil == null ? _RuneTexture : sigil.Icon._AsyncTexture.Texture,
                                                 item.SigilsBounds[j],
-                                                sigil == null ? _RuneTexture.Bounds : sigil.Icon.Texture.Bounds,
+                                                sigil == null ? _RuneTexture.Bounds : sigil.Icon._AsyncTexture.Texture.Bounds,
                                                 Color.White,
                                                 0f,
                                                 default);
@@ -1590,8 +1609,7 @@ namespace Kenedia.Modules.BuildsManager
             }
 
 
-            var cnt = new ContentService();
-            var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
+            var font = GameService.Content.DefaultFont14;
 
             var lastTrinket = Template.Gear.Trinkets[Template.Gear.Trinkets.Count - 1];
             var texture = BuildsManager.TextureManager.getEmblem(_Emblems.QuestionMark);

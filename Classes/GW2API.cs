@@ -11,6 +11,7 @@ using Blish_HUD.Controls;
 using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using Blish_HUD.Modules.Managers;
+using Blish_HUD.Content;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -538,13 +539,64 @@ namespace Kenedia.Modules.BuildsManager
             LongBow = 12,
         }
 
+        public class JsonIcon
+        {
+            public string Path;
+            public string Url;
+        }
+
         public class Icon
         {
             public string Path;
             public string Url;
-            public Texture2D Texture;
-            public bool Loaded;
+
+            public AsyncTexture2D _Texture;
+            public Microsoft.Xna.Framework.Rectangle ImageRegion;
+            public Microsoft.Xna.Framework.Rectangle DefaultBounds;
+
+            public AsyncTexture2D _AsyncTexture
+            {
+                get
+                {
+                    if (_Texture == null && !BuildsManager.ModuleInstance.FetchingAPI)
+                    {
+                        _Texture = new AsyncTexture2D(ContentService.Textures.TransparentPixel);
+
+                        Task.Run(() =>
+                        {
+                            var fs = new FileStream(BuildsManager.Paths.BasePath + Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
+                            {
+                                var texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, fs);
+
+                                if (ImageRegion != null)
+                                {
+                                    double factor = 1;
+
+                                    if (DefaultBounds != default)
+                                    {
+                                        factor = (double)texture.Width / (double)DefaultBounds.Width;
+                                    }
+
+                                    ImageRegion = ImageRegion.Scale(factor);
+
+                                    if (texture.Bounds.Width > 0 && ImageRegion.Width > 0 && texture.Bounds.Contains(ImageRegion))
+                                    {
+                                        texture = texture.GetRegion(ImageRegion);
+                                    }
+                                }
+
+                                _Texture.SwapTexture(texture);
+                                fs.Close();
+                            });
+                        });
+                    }
+
+                    return _Texture;
+                }
+            }
         }
+
         #region Items
         public class Item
         {

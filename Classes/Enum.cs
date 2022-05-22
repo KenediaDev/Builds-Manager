@@ -318,6 +318,7 @@
         Edit_Feather_Pressed,
         Mouse,
         Lock_Locked,
+        SingleSpinner,
     }
     public enum _RevenantLegends
     {

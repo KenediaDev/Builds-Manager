@@ -1,10 +1,12 @@
 ﻿using Blish_HUD;
+using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Modules;
 using Blish_HUD.Modules.Managers;
 using Blish_HUD.Settings;
 using Gw2Sharp.WebApi.V2.Models;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using System;
@@ -126,12 +128,14 @@ namespace Kenedia.Modules.BuildsManager
         }
 
         public Window_MainWindow MainWindow;
+        public Texture2D LoadingTexture;
         public LoadingSpinner loadingSpinner;
         public ProgressBar downloadBar;
         private CornerIcon cornerIcon;
 
         public event EventHandler DataLoaded_Event;
         private static bool _DataLoaded;
+        public bool FetchingAPI;
         public static bool DataLoaded
         {
             get => _DataLoaded;
@@ -254,7 +258,6 @@ namespace Kenedia.Modules.BuildsManager
             ToggleWindow.Value.Activated += ToggleWindow_Activated;
 
             DataLoaded = false;
-
 
             GameService.Gw2Mumble.PlayerCharacter.SpecializationChanged += PlayerCharacter_SpecializationChanged;
         }
@@ -545,6 +548,8 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (GameVersion.Value != Gw2MumbleService.Gw2Mumble.Info.Version || ModuleVersion.Value != Version.BaseVersion().ToString() || force == true || false)
             {
+                FetchingAPI = true;
+
                 var downloadList = new List<APIDownload_Image>();
                 var culture = getCultureString();
 
@@ -554,6 +559,12 @@ namespace Kenedia.Modules.BuildsManager
 
                 var _runes = JsonConvert.DeserializeObject<List<int>>(new StreamReader(ContentsManager.GetFileStream(@"data\runes.json")).ReadToEnd());
                 var _sigils = JsonConvert.DeserializeObject<List<int>>(new StreamReader(ContentsManager.GetFileStream(@"data\sigils.json")).ReadToEnd());
+
+                var settings = new JsonSerializerSettings()
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    Formatting = Formatting.Indented,
+                };
 
                 int totalFetches = 9;
 
@@ -600,7 +611,6 @@ namespace Kenedia.Modules.BuildsManager
                 Logger.Debug(string.Format("Fetched {0}", "Traits"));
 
                 List<int> Skill_Ids = new List<int>();
-
                 var legends = JsonConvert.DeserializeObject<List<iData._Legend>>(new StreamReader(ContentsManager.GetFileStream(@"data\legends.json")).ReadToEnd());
 
                 foreach (iData._Legend legend in legends)
@@ -669,7 +679,7 @@ namespace Kenedia.Modules.BuildsManager
                         }
                     }
                 }
-                System.IO.File.WriteAllText(Paths.runes + "runes [" + culture + "].json", JsonConvert.SerializeObject(Runes.ToArray()));
+                System.IO.File.WriteAllText(Paths.runes + "runes [" + culture + "].json", JsonConvert.SerializeObject(Runes.ToArray(), settings));
 
                 List<API.SigilItem> Sigils = new List<API.SigilItem>();
                 foreach (ItemUpgradeComponent sigil in sigils)
@@ -703,7 +713,7 @@ namespace Kenedia.Modules.BuildsManager
                         }
                     }
                 }
-                System.IO.File.WriteAllText(Paths.sigils + "sigils [" + culture + "].json", JsonConvert.SerializeObject(Sigils.ToArray()));
+                System.IO.File.WriteAllText(Paths.sigils + "sigils [" + culture + "].json", JsonConvert.SerializeObject(Sigils.ToArray(), settings));
 
                 List<API.Stat> Stats = new List<API.Stat>();
                 foreach (Itemstat stat in stats)
@@ -734,7 +744,7 @@ namespace Kenedia.Modules.BuildsManager
                         }
                     }
                 }
-                System.IO.File.WriteAllText(Paths.stats + "stats [" + culture + "].json", JsonConvert.SerializeObject(Stats.ToArray()));
+                System.IO.File.WriteAllText(Paths.stats + "stats [" + culture + "].json", JsonConvert.SerializeObject(Stats.ToArray(), settings));
 
                 List<API.ArmorItem> Armors = new List<API.ArmorItem>();
                 List<API.WeaponItem> Weapons = new List<API.WeaponItem>();
@@ -834,9 +844,9 @@ namespace Kenedia.Modules.BuildsManager
                         }
                     }
                 }
-                System.IO.File.WriteAllText(Paths.armory + "armors [" + culture + "].json", JsonConvert.SerializeObject(Armors.ToArray()));
-                System.IO.File.WriteAllText(Paths.armory + "weapons [" + culture + "].json", JsonConvert.SerializeObject(Weapons.ToArray()));
-                System.IO.File.WriteAllText(Paths.armory + "trinkets [" + culture + "].json", JsonConvert.SerializeObject(Trinkets.ToArray()));
+                System.IO.File.WriteAllText(Paths.armory + "armors [" + culture + "].json", JsonConvert.SerializeObject(Armors.ToArray(), settings));
+                System.IO.File.WriteAllText(Paths.armory + "weapons [" + culture + "].json", JsonConvert.SerializeObject(Weapons.ToArray(), settings));
+                System.IO.File.WriteAllText(Paths.armory + "trinkets [" + culture + "].json", JsonConvert.SerializeObject(Trinkets.ToArray(), settings));
 
                 Logger.Debug("Preparing Traits ....");
                 List<API.Trait> Traits = new List<API.Trait>();
@@ -1162,7 +1172,7 @@ namespace Kenedia.Modules.BuildsManager
                 }
 
                 Logger.Debug("Saving Professions ....");
-                System.IO.File.WriteAllText(Paths.professions + "professions [" + culture + "].json", JsonConvert.SerializeObject(Professions.ToArray()));
+                System.IO.File.WriteAllText(Paths.professions + "professions [" + culture + "].json", JsonConvert.SerializeObject(Professions.ToArray(), settings));
 
                 downloadBar.Progress = 0;
                 total = downloadList.Count;
@@ -1192,6 +1202,7 @@ namespace Kenedia.Modules.BuildsManager
                 GameVersion.Value = Gw2MumbleService.Gw2Mumble.Info.Version;
                 ModuleVersion.Value = Version.BaseVersion().ToString();
                 Logger.Debug("API Data sucessfully fetched!");
+                FetchingAPI = false;
             }
         }
 

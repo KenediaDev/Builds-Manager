@@ -300,7 +300,7 @@ namespace Kenedia.Modules.BuildsManager
 
             file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete));
-            foreach (API.Stat stat in Stats) { stat.Icon.Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) {attri.Name = attri.getLocalName; attri.Icon.Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
+            foreach (API.Stat stat in Stats) { stat.Icon._Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) {attri.Name = attri.getLocalName; attri.Icon._Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
             file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete));
@@ -325,119 +325,59 @@ namespace Kenedia.Modules.BuildsManager
 
 
             Texture2D texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+
+            foreach (API.Profession profession in Professions)
+            {
+                profession.Icon.ImageRegion = new Rectangle(4, 4, 26, 26);
+
+                foreach (API.Specialization specialization in profession.Specializations)
+                {
+                    specialization.Background.ImageRegion = new Rectangle(0, 123, 643, 123);
+
+                    if (specialization.WeaponTrait != null)
+                    {
+                        specialization.WeaponTrait.Icon.ImageRegion = new Rectangle(3, 3, 58, 58);
+                        specialization.WeaponTrait.Icon.DefaultBounds = new Rectangle(0, 0, 64, 64);
+                    }
+
+
+                    foreach (API.Trait trait in specialization.MajorTraits)
+                    {
+                        trait.Icon.ImageRegion = new Rectangle(3, 3, 58, 58);
+                        trait.Icon.DefaultBounds = new Rectangle(0, 0, 64, 64);
+                    }
+
+                    foreach (API.Trait trait in specialization.MinorTraits)
+                    {
+                        trait.Icon.ImageRegion = new Rectangle(3, 3, 58, 58);
+                        trait.Icon.DefaultBounds = new Rectangle(0, 0, 64, 64);
+                    }
+                }
+
+                foreach (API.Skill skill in profession.Skills)
+                {
+                    skill.Icon.ImageRegion = new Rectangle(12, 12, 104, 104);
+                }
+
+                if (profession.Legends.Count > 0)
+                {
+                    foreach (API.Legend legend in profession.Legends)
+                    {
+                        if (legend.Heal.Icon != null && legend.Heal.Icon.Path != "") legend.Heal.Icon.ImageRegion = new Rectangle(12, 12, 104, 104);
+                        if (legend.Elite.Icon != null && legend.Elite.Icon.Path != "") legend.Elite.Icon.ImageRegion = new Rectangle(12, 12, 104, 104);
+                        if (legend.Swap.Icon != null && legend.Swap.Icon.Path != "") legend.Swap.Icon.ImageRegion = new Rectangle(12, 12, 104, 104);
+                        if (legend.Skill.Icon != null && legend.Skill.Icon.Path != "") legend.Skill.Icon.ImageRegion = new Rectangle(12, 12, 104, 104);
+
+                        foreach (API.Skill skill in legend.Utilities)
+                        {
+                            skill.Icon.ImageRegion = new Rectangle(12, 12, 104, 104);
+                        }
+                    }
+                }
+            }
+
             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
             {
-                foreach (API.TrinketItem item in Trinkets)
-                {
-                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
-                }
-
-                foreach (API.WeaponItem item in Weapons)
-                {
-                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
-                }
-                foreach (API.ArmorItem item in Armors)
-                {
-                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
-                }
-                foreach (API.SigilItem item in Sigils)
-                {
-                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
-                }
-                foreach (API.RuneItem item in Runes)
-                {
-                    item.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + item.Icon.Path, graphicsDevice, filesToDelete);
-                }
-
-                foreach (API.Profession profession in Professions)
-                {
-                    //Icon
-                    profession.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(4, 4, 26, 26));
-
-                    //IconBig
-                    profession.IconBig.Texture = LoadImage(BuildsManager.Paths.BasePath + profession.IconBig.Path, graphicsDevice, filesToDelete);
-
-                    foreach (API.Specialization specialization in profession.Specializations)
-                    {
-
-                        //Icon
-                        specialization.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.Icon.Path, graphicsDevice, filesToDelete);
-
-                        //Background
-                        specialization.Background.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.Background.Path, graphicsDevice, filesToDelete, new Rectangle(0, 123, 643, 123));
-
-                        if (specialization.ProfessionIcon != null)
-                        {
-                            //ProfessionIcon
-                            specialization.ProfessionIcon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.ProfessionIcon.Path, graphicsDevice, filesToDelete);
-                        }
-                        if (specialization.ProfessionIconBig != null)
-                        {
-                            //ProfessionIconBig
-                            specialization.ProfessionIconBig.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.ProfessionIconBig.Path, graphicsDevice, filesToDelete);
-                        }
-                        if (specialization.WeaponTrait != null)
-                        {
-                            //WeaponTrait Icon
-                            specialization.WeaponTrait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + specialization.WeaponTrait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58));
-                        }
-
-
-                        foreach (API.Trait trait in specialization.MajorTraits)
-                        {
-                            trait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + trait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58), new Rectangle(0, 0, 64, 64));
-                        }
-
-                        foreach (API.Trait trait in specialization.MinorTraits)
-                        {
-                            trait.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + trait.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(3, 3, 58, 58));
-                        }
-                    }
-
-                    foreach (API.Skill skill in profession.Skills)
-                    {
-                        skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
-                    }
-
-                    if (profession.Legends.Count > 0)
-                    {
-                        foreach (API.Legend legend in profession.Legends)
-                        {
-                            BuildsManager.Logger.Debug("Loading " + legend.Name);
-
-                            if (legend.Heal.Icon != null && legend.Heal.Icon.Path != "") legend.Heal.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Heal.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
-                            if (legend.Elite.Icon != null && legend.Elite.Icon.Path != "") legend.Elite.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Elite.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
-                            if (legend.Swap.Icon != null && legend.Swap.Icon.Path != "") legend.Swap.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Swap.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
-                            if (legend.Skill.Icon != null && legend.Skill.Icon.Path != "") legend.Skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + legend.Skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
-
-                            BuildsManager.Logger.Debug("Loading Utility of " + legend.Name);
-                            foreach (API.Skill skill in legend.Utilities)
-                            {
-                                if (skill.Icon != null && skill.Icon.Path != "") skill.Icon.Texture = LoadImage(BuildsManager.Paths.BasePath + skill.Icon.Path, graphicsDevice, filesToDelete, new Rectangle(12, 12, 104, 104));
-                            }
-                        }
-                    }
-                }
-
-                foreach (string path in filesToDelete)
-                {
-                    try
-                    {
-                        System.IO.File.Delete(path);
-                    }
-                    catch (IOException)
-                    {
-
-                    }
-                }
-
-                if (fetchAPI)
-                {
-                    fetchAPI = false;
-                    BuildsManager.ModuleInstance.Fetch_APIData(true);
-                    return;
-                }
-
                 BuildsManager.DataLoaded = true;
             });
         }

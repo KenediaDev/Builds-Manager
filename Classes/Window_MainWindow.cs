@@ -13,6 +13,7 @@ using Gw2Sharp.ChatLinks;
 using Blish_HUD.Input;
 using MonoGame.Extended.BitmapFonts;
 using System.Threading;
+using Blish_HUD.Content;
 
 namespace Kenedia.Modules.BuildsManager
 {
@@ -190,8 +191,7 @@ namespace Kenedia.Modules.BuildsManager
             base.PaintBeforeChildren(spriteBatch, bounds);
             UpdateLayout();
 
-            var cnt = new ContentService();
-            var font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)ContentService.FontSize.Size16, ContentService.FontStyle.Regular);
+            var font = GameService.Content.DefaultFont16;
 
             Color color;
             Rectangle rect;
@@ -328,8 +328,7 @@ namespace Kenedia.Modules.BuildsManager
 
             Disclaimer_Background = BuildsManager.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
 
-            var cnt = new ContentService();
-            Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
+            Font = GameService.Content.DefaultFont18;
 
             Templates_Panel = new Panel()
             {
@@ -357,10 +356,10 @@ namespace Kenedia.Modules.BuildsManager
                 _Professions.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = profession,
-                    Texture = profession.IconBig.Texture,
+                    Texture = profession.IconBig._AsyncTexture.Texture,
                     Header = profession.Name,
                     Content = new List<string>(),
-                    ContentTextures = new List<Texture2D>(),
+                    ContentTextures = new List<AsyncTexture2D>(),
                 });
             }
             ProfessionSelection.List = _Professions;
@@ -595,10 +594,10 @@ namespace Kenedia.Modules.BuildsManager
                 _Professions.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = profession,
-                    Texture = profession.IconBig.Texture,
+                    Texture = profession.IconBig._AsyncTexture.Texture,
                     Header = profession.Name,
                     Content = new List<string>(),
-                    ContentTextures = new List<Texture2D>(),
+                    ContentTextures = new List<AsyncTexture2D>(),
                 });
             }
             ProfessionSelection.List = _Professions;
@@ -755,11 +754,11 @@ namespace Kenedia.Modules.BuildsManager
 
                 if (template.Specialization != null)
                 {
-                    texture = template.Specialization.ProfessionIconBig.Texture;
+                    texture = template.Specialization.ProfessionIconBig._AsyncTexture.Texture;
                 }
                 else if (template.Build.Profession != null)
                 {
-                    texture = template.Build.Profession.IconBig.Texture;
+                    texture = template.Build.Profession.IconBig._AsyncTexture.Texture;
                 }
 
                 rect = new Rectangle(Detail_Panel.Location.X + 2, 46, 30, 30);

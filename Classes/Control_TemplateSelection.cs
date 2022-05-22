@@ -84,9 +84,8 @@ namespace Kenedia.Modules.BuildsManager
             _Template_Border = BuildsManager.TextureManager.getControlTexture(_Controls.Template_Border);
             _Lock = BuildsManager.TextureManager.getIcon(_Icons.Lock_Locked);
 
-            var cnt = new ContentService();
-            Font = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
-            FontItalic = cnt.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Italic);
+            Font = GameService.Content.DefaultFont14;
+            FontItalic = GameService.Content.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Italic);
             //TemplateTooltip = new Control_TemplateTooltip();
         }
 
@@ -155,11 +154,11 @@ namespace Kenedia.Modules.BuildsManager
 
             if (Template.Specialization != null)
             {
-                texture = Template.Specialization.ProfessionIconBig.Texture;
+                texture = Template.Specialization.ProfessionIconBig._AsyncTexture;
             }
             else if (Template.Build.Profession != null)
             {
-                texture = Template.Build.Profession.IconBig.Texture;
+                texture = Template.Build.Profession.IconBig._AsyncTexture;
             }
 
             spriteBatch.DrawOnCtrl(this,
@@ -362,9 +361,9 @@ namespace Kenedia.Modules.BuildsManager
                 {
 
                     spriteBatch.DrawOnCtrl(this,
-                                           profession.Profession.Icon.Texture,
+                                           profession.Profession.Icon._AsyncTexture,
                                            profession.Bounds,
-                                           profession.Profession.Icon.Texture.Bounds,
+                                           profession.Profession.Icon._AsyncTexture.Texture.Bounds,
                                            profession.Hovered ? Color.White : Professions.Contains(profession.Profession) ? Color.LightGray : new Color(48, 48, 48, 150),
                                            0f,
                                            Vector2.Zero
