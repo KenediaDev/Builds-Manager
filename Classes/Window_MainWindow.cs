@@ -42,10 +42,10 @@ namespace Kenedia.Modules.BuildsManager
         int TabSize;
         public Container_TabbedPanel()
         {
-            _TabBarTexture = BuildsManager.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
+            _TabBarTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
 
-            _Copy = BuildsManager.TextureManager.getControlTexture(_Controls.Copy);
-            _CopyHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Copy_Hovered);
+            _Copy = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Copy);
+            _CopyHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Copy_Hovered);
 
             TemplateBox = new TextBox()
             {
@@ -322,11 +322,11 @@ namespace Kenedia.Modules.BuildsManager
 
         public Window_MainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion) : base(background, windowRegion, contentRegion)
         {
-            _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
-            _Delete = BuildsManager.TextureManager.getControlTexture(_Controls.Delete);
-            _DeleteHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Delete_Hovered);
+            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            _Delete = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Delete);
+            _DeleteHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Delete_Hovered);
 
-            Disclaimer_Background = BuildsManager.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
+            Disclaimer_Background = BuildsManager.ModuleInstance.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
 
             Font = GameService.Content.DefaultFont18;
 
@@ -351,7 +351,7 @@ namespace Kenedia.Modules.BuildsManager
             {
             };
 
-            foreach (API.Profession profession in BuildsManager.Data.Professions)
+            foreach (API.Profession profession in BuildsManager.ModuleInstance.Data.Professions)
             {
                 _Professions.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -367,13 +367,13 @@ namespace Kenedia.Modules.BuildsManager
 
             Import_Button = new Control_AddButton()
             {
-                Texture = BuildsManager.TextureManager.getControlTexture(_Controls.Import),
-                TextureHovered = BuildsManager.TextureManager.getControlTexture(_Controls.Import_Hovered),
+                Texture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Import),
+                TextureHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Import_Hovered),
                 Parent = Templates_Panel,
                 Text = "",
                 Location = new Point(Templates_Panel.Width - 130 - 40, 0),
                 Size = new Point(35, 35),
-                BasicTooltipText = string.Format("Import 'BuildPad' builds from '{0}config.ini'", BuildsManager.Paths.builds),
+                BasicTooltipText = string.Format("Import 'BuildPad' builds from '{0}config.ini'", BuildsManager.ModuleInstance.Paths.builds),
                 Visible = false,
             };
             Import_Button.Click += Import_Button_Click;
@@ -401,13 +401,13 @@ namespace Kenedia.Modules.BuildsManager
                 new Tab()
                 {
                     Name = Strings.common.Build,
-                    Icon = BuildsManager.TextureManager.getIcon(_Icons.Template),
+                    Icon = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Template),
                     Panel = new Panel(){ Parent = Detail_Panel, Visible = true },
                 },
                 new Tab()
                 {
                     Name = Strings.common.Gear,
-                    Icon = BuildsManager.TextureManager.getIcon(_Icons.Helmet),
+                    Icon = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Helmet),
                     Panel = new Panel(){ Parent = Detail_Panel, Visible = false },
                 },
             };
@@ -589,7 +589,7 @@ namespace Kenedia.Modules.BuildsManager
         private void Button_Click(object sender, MouseEventArgs e)
         {
             _Professions = new List<SelectionPopUp.SelectionEntry>();
-            foreach (API.Profession profession in BuildsManager.Data.Professions)
+            foreach (API.Profession profession in BuildsManager.ModuleInstance.Data.Professions)
             {
                 _Professions.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -750,7 +750,7 @@ namespace Kenedia.Modules.BuildsManager
             if(BuildsManager.ModuleInstance.Selected_Template.Profession != null)
             {
                 var template = BuildsManager.ModuleInstance.Selected_Template;
-                Texture2D texture = BuildsManager.TextureManager._Icons[0];
+                Texture2D texture = BuildsManager.ModuleInstance.TextureManager._Icons[0];
 
                 if (template.Specialization != null)
                 {

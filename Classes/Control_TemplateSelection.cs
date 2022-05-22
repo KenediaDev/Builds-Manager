@@ -43,7 +43,6 @@ namespace Kenedia.Modules.BuildsManager
     public class Control_TemplateEntry : Control
     {
         public Template Template;
-        public Control_Build Control_Build;
         private Texture2D _EmptyTraitLine;
         private Texture2D _Lock;
         private Texture2D _Template_Border;
@@ -51,7 +50,6 @@ namespace Kenedia.Modules.BuildsManager
         private BitmapFont FontItalic;
         private Control_TemplateTooltip TemplateTooltip;
         private double Tick = 0;
-        private float Transparency = 255;
         private string FeedbackPopup;
         public override void DoUpdate(GameTime gameTime)
         {
@@ -64,14 +62,12 @@ namespace Kenedia.Modules.BuildsManager
                 if (Tick < 350)
                 {
                     //Fadeout
-                    Transparency -= 25;
                 }
                 else
                 {
                     //Hide
                     Tick = 0;
                     FeedbackPopup = null;
-                    Transparency = 255;
                 }
             }
         }
@@ -80,9 +76,9 @@ namespace Kenedia.Modules.BuildsManager
         {
             Parent = parent;
             Template = template;
-            _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
-            _Template_Border = BuildsManager.TextureManager.getControlTexture(_Controls.Template_Border);
-            _Lock = BuildsManager.TextureManager.getIcon(_Icons.Lock_Locked);
+            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            _Template_Border = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Template_Border);
+            _Lock = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Lock_Locked);
 
             Font = GameService.Content.DefaultFont14;
             FontItalic = GameService.Content.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Italic);
@@ -125,7 +121,8 @@ namespace Kenedia.Modules.BuildsManager
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            Control_Build?.Dispose();
+
+            TemplateTooltip?.Dispose();
         }
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
@@ -255,9 +252,9 @@ namespace Kenedia.Modules.BuildsManager
             //BackgroundColor = Color.Orange;
             _Professions = new List<ProfessionSelection>();
 
-            for (int i = 0; i < BuildsManager.Data.Professions.Count; i++)
+            for (int i = 0; i < BuildsManager.ModuleInstance.Data.Professions.Count; i++)
             {
-                var profession = BuildsManager.Data.Professions[i];
+                var profession = BuildsManager.ModuleInstance.Data.Professions[i];
                 _Professions.Add(new ProfessionSelection()
                 {
                     Profession = profession,
@@ -271,7 +268,7 @@ namespace Kenedia.Modules.BuildsManager
             });
 
             IconSize = Height - 4;
-            ClearTexture = BuildsManager.TextureManager.getControlTexture(_Controls.Clear);
+            ClearTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Clear);
             UpdateLayout();
         }
 
@@ -439,8 +436,6 @@ namespace Kenedia.Modules.BuildsManager
 
         private void ModuleInstance_Template_Deleted(object sender, EventArgs e)
         {
-            foreach(Control_TemplateEntry c in Templates) { c.Dispose(); }
-            Templates = new List<Control_TemplateEntry>();
             Refresh();
         }
 
@@ -448,7 +443,7 @@ namespace Kenedia.Modules.BuildsManager
         {
             var player = GameService.Gw2Mumble.PlayerCharacter;
             _ProfessionSelector.Professions.Clear();
-            _ProfessionSelector.Professions.Add(BuildsManager.Data.Professions.Find(e => e.Id == player.Profession.ToString()));
+            _ProfessionSelector.Professions.Add(BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == player.Profession.ToString()));
             RefreshList();
         }
 
@@ -491,6 +486,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public void RefreshList()
         {
+            ContentPanel.SuspendLayout();
             var filter = FilterBox.Text.ToLower();
             var prof = BuildsManager.ModuleInstance.CurrentProfession;
 
@@ -518,6 +514,7 @@ namespace Kenedia.Modules.BuildsManager
 
             ResizeChilds = true;
             ContentPanel.Invalidate();
+            ContentPanel.ResumeLayout();
         }
 
         private void FilterBox_TextChanged(object sender, EventArgs e)
@@ -535,6 +532,18 @@ namespace Kenedia.Modules.BuildsManager
 
         public void Refresh()
         {
+            SuspendLayout();
+            ContentPanel.SuspendLayout();
+
+            foreach (Control_TemplateEntry template in new List<Control_TemplateEntry>(Templates))
+            {
+                if (BuildsManager.ModuleInstance.Templates.Find(e => e == template.Template) == null)
+                {
+                    template.Dispose();
+                    Templates.Remove(template);
+                }
+            }
+
             foreach (Template template in BuildsManager.ModuleInstance.Templates)
             {
                 if (Templates.Find(e => e.Template == template) == null)
@@ -550,6 +559,8 @@ namespace Kenedia.Modules.BuildsManager
                     };
                 }
             }
+            ResumeLayout();
+            ContentPanel.ResumeLayout();
 
             RefreshList();
         }

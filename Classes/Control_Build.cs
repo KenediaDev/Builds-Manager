@@ -59,7 +59,7 @@ namespace Kenedia.Modules.BuildsManager
             DefaultBounds = new Rectangle(0, 0, _TraitSize, _TraitSize);
             _Trait = trait;
             Size = new Point(_TraitSize, _TraitSize);
-            _Line = BuildsManager.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
 
             ClipsBounds = false;
 
@@ -410,14 +410,14 @@ private void UpdateLayout()
 
             //BackgroundColor = Color.Magenta;
 
-            _SpecSideSelector_Hovered = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
-            _SpecSideSelector = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector);
+            _SpecSideSelector_Hovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
+            _SpecSideSelector = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector);
 
-            _EliteFrame = BuildsManager.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
-            _SpecHighlightFrame = BuildsManager.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
-            _SpecFrame = BuildsManager.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
-            _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
-            _Line = BuildsManager.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            _EliteFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
+            _SpecHighlightFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
+            _SpecFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
+            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
 
             _MinorTraits = new List<Trait_Control>()
                 {
@@ -780,9 +780,9 @@ private void UpdateLayout()
             Parent = parent;
             Size = new Point(_SkillSize, _SkillSize + 15);
 
-            _SelectorTexture = BuildsManager.TextureManager.getControlTexture(_Controls.SkillSelector).GetRegion(0, 2, 64, 12);
-            _SelectorTextureHovered = BuildsManager.TextureManager.getControlTexture(_Controls.SkillSelector_Hovered);
-            _SkillPlaceHolder = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
+            _SelectorTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SkillSelector).GetRegion(0, 2, 64, 12);
+            _SelectorTextureHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SkillSelector_Hovered);
+            _SkillPlaceHolder = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
 
             CustomTooltip = new CustomTooltip(Parent)
             {
@@ -923,7 +923,7 @@ private void UpdateLayout()
             Size = new Point(20 + 4 * _SkillSize, _SkillSize * (int)Math.Ceiling(Skills.Count / (double)4));
             ClipsBounds = false;
 
-            _NoWaterTexture = BuildsManager.TextureManager.getControlTexture(_Controls.NoWaterTexture).GetRegion(16, 16, 96, 96);
+            _NoWaterTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.NoWaterTexture).GetRegion(16, 16, 96, 96);
 
             Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
         }
@@ -1172,9 +1172,9 @@ private void UpdateLayout()
                 HeaderColor = new Color(255, 204, 119, 255),
         };
 
-            _TerrestrialTexture = BuildsManager.TextureManager.getControlTexture(_Controls.Land);
-            _AquaTexture = BuildsManager.TextureManager.getControlTexture(_Controls.Water);
-            _SwapTexture = BuildsManager.TextureManager.getIcon(_Icons.Refresh);
+            _TerrestrialTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Land);
+            _AquaTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Water);
+            _SwapTexture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Refresh);
 
             var slots = Enum.GetValues(typeof(SkillSlots));
             //BackgroundColor = Color.Magenta;
@@ -1685,17 +1685,17 @@ private void UpdateLayout()
             //BackgroundColor = Color.Honeydew;
             Click += OnClick;
 
-            _SpecSideSelector_Hovered = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
-            _SpecSideSelector = BuildsManager.TextureManager.getControlTexture(_Controls.SpecSideSelector);
+            _SpecSideSelector_Hovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
+            _SpecSideSelector = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector);
 
-            _EliteFrame = BuildsManager.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
-            _SpecHighlightFrame = BuildsManager.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
-            _SpecFrame = BuildsManager.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
-            _EmptyTraitLine = BuildsManager.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            _EliteFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
+            _SpecHighlightFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
+            _SpecFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
+            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
 
-            _PlaceHolderTexture = BuildsManager.TextureManager._Icons[(int)_Icons.Refresh];
-            _EmptyTexture = BuildsManager.TextureManager._Icons[(int)_Icons.Bug];
-            _Line = BuildsManager.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            _PlaceHolderTexture = BuildsManager.ModuleInstance.TextureManager._Icons[(int)_Icons.Refresh];
+            _EmptyTexture = BuildsManager.ModuleInstance.TextureManager._Icons[(int)_Icons.Bug];
+            _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
             _Background = _EmptyTraitLine;
 
             SkillBar = new SkillBar_Control(Parent)

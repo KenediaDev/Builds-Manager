@@ -76,7 +76,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public static Texture2D GetTextureFile(GW2API.BaseObject obj, string path, Object targetControl = null, IconTargets iconTarget = IconTargets.Icon)
         {
-            return BuildsManager.TextureManager._Icons[0];
+            return BuildsManager.ModuleInstance.TextureManager._Icons[0];
         }
 
         //Item
@@ -564,7 +564,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         Task.Run(() =>
                         {
-                            var fs = new FileStream(BuildsManager.Paths.BasePath + Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            var fs = new FileStream(BuildsManager.ModuleInstance.Paths.BasePath + Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
                             {
                                 var texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, fs);

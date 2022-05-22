@@ -171,7 +171,7 @@ namespace Kenedia.Modules.BuildsManager
                         ItemStrings[i] = ItemStrings[i].Replace("[", "").Replace("]", "");
                         int id;
                         Int32.TryParse(ItemStrings[i], out id);
-                        if (id > 0) Trinkets[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == id);
+                        if (id > 0) Trinkets[j].Stat = BuildsManager.ModuleInstance.Data.Stats.Find(e => e.Id == id);
                         BuildsManager.Logger.Debug("Trinkets[" + j + "].Stat: " + Trinkets[j].Stat?.Name);
                         j++;
                     }
@@ -184,12 +184,12 @@ namespace Kenedia.Modules.BuildsManager
 
                         int stat_id;
                         Int32.TryParse(ids[0], out stat_id);
-                        if (stat_id > 0) Armor[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        if (stat_id > 0) Armor[j].Stat = BuildsManager.ModuleInstance.Data.Stats.Find(e => e.Id == stat_id);
                         BuildsManager.Logger.Debug("Armor[" + j + "].Stat: " + Armor[j].Stat?.Name);
 
                         int rune_id;
                         Int32.TryParse(ids[1], out rune_id);
-                        if (stat_id > 0) Armor[j].Rune = BuildsManager.Data.Runes.Find(e => e.Id == rune_id);
+                        if (stat_id > 0) Armor[j].Rune = BuildsManager.ModuleInstance.Data.Runes.Find(e => e.Id == rune_id);
                         BuildsManager.Logger.Debug("Armor[" + j + "].Rune: " + Armor[j].Rune?.Name);
 
                         j++;
@@ -203,7 +203,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         int stat_id;
                         Int32.TryParse(ids[0], out stat_id);
-                        if (stat_id > 0) Weapons[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        if (stat_id > 0) Weapons[j].Stat = BuildsManager.ModuleInstance.Data.Stats.Find(e => e.Id == stat_id);
                         BuildsManager.Logger.Debug("Weapons[" + j + "].Stat: " + Weapons[j].Stat?.Name);
 
                         int weaponType = -1;
@@ -213,7 +213,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         int sigil_id;
                         Int32.TryParse(ids[2], out sigil_id);
-                        if (stat_id > 0) Weapons[j].Sigil = BuildsManager.Data.Sigils.Find(e => e.Id == sigil_id);
+                        if (stat_id > 0) Weapons[j].Sigil = BuildsManager.ModuleInstance.Data.Sigils.Find(e => e.Id == sigil_id);
                         BuildsManager.Logger.Debug("Weapons[" + j + "].Sigil: " + Weapons[j].Sigil?.Name);
 
                         j++;
@@ -227,7 +227,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         int stat_id;
                         Int32.TryParse(ids[0], out stat_id);
-                        if (stat_id > 0) AquaticWeapons[j].Stat = BuildsManager.Data.Stats.Find(e => e.Id == stat_id);
+                        if (stat_id > 0) AquaticWeapons[j].Stat = BuildsManager.ModuleInstance.Data.Stats.Find(e => e.Id == stat_id);
                         BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].Stat: " + AquaticWeapons[j].Stat?.Name);
 
                         int weaponType = -1;
@@ -237,12 +237,12 @@ namespace Kenedia.Modules.BuildsManager
 
                         int sigil1_id;
                         Int32.TryParse(ids[2], out sigil1_id);
-                        if (sigil1_id > 0) AquaticWeapons[j].Sigils[0] = BuildsManager.Data.Sigils.Find(e => e.Id == sigil1_id);
+                        if (sigil1_id > 0) AquaticWeapons[j].Sigils[0] = BuildsManager.ModuleInstance.Data.Sigils.Find(e => e.Id == sigil1_id);
                         BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].Sigil: " + AquaticWeapons[j].Sigils[0]?.Name);
 
                         int sigil2_id;
                         Int32.TryParse(ids[3], out sigil2_id);
-                        if (sigil2_id > 0) AquaticWeapons[j].Sigils[1] = BuildsManager.Data.Sigils.Find(e => e.Id == sigil2_id);
+                        if (sigil2_id > 0) AquaticWeapons[j].Sigils[1] = BuildsManager.ModuleInstance.Data.Sigils.Find(e => e.Id == sigil2_id);
                         BuildsManager.Logger.Debug("AquaticWeapons[" + j + "].Sigil: " + AquaticWeapons[j].Sigils[1]?.Name);
 
                         j++;
@@ -344,12 +344,12 @@ namespace Kenedia.Modules.BuildsManager
 
             Name = name;
 
-            Path = BuildsManager.Paths.builds + "Builds.json";
+            Path = BuildsManager.ModuleInstance.Paths.builds + "Builds.json";
 
             Build = new BuildTemplate(Template_json.BuildCode);
             Gear = new GearTemplate(Template_json.GearCode);
 
-            Profession = BuildsManager.Data.Professions.Find(e => e.Id == Build?.Profession?.Id);
+            Profession = BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == Build?.Profession?.Id);
             Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization?.Elite == true)?.Specialization : null;
         }
 
@@ -363,12 +363,12 @@ namespace Kenedia.Modules.BuildsManager
                     Template_json = template;
                     Name = template.Name;
 
-                    Path = BuildsManager.Paths.builds + "Builds.json";
+                    Path = BuildsManager.ModuleInstance.Paths.builds + "Builds.json";
 
                     Build = new BuildTemplate(Template_json.BuildCode);
                     Gear = new GearTemplate(Template_json.GearCode);
 
-                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == Build?.Profession.Id);
+                    Profession = BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == Build?.Profession.Id);
                     Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization.Elite)?.Specialization : null;
                 }
             }
@@ -381,7 +381,7 @@ namespace Kenedia.Modules.BuildsManager
                 Template_json = new Template_json();
                 Profession = BuildsManager.ModuleInstance.CurrentProfession;
 
-                Path = BuildsManager.Paths.builds + "Builds.json";
+                Path = BuildsManager.ModuleInstance.Paths.builds + "Builds.json";
 
                 SetChanged();
             }
@@ -424,7 +424,7 @@ namespace Kenedia.Modules.BuildsManager
             Build = new BuildTemplate();
 
             Profession = BuildsManager.ModuleInstance.CurrentProfession;
-            Path = BuildsManager.Paths.builds;
+            Path = BuildsManager.ModuleInstance.Paths.builds;
 
             SetChanged();
         }
@@ -727,7 +727,7 @@ namespace Kenedia.Modules.BuildsManager
                     TemplateCode = code;
                     build.Parse(chatlink.ToArray());
 
-                    Profession = BuildsManager.Data.Professions.Find(e => e.Id == build.Profession.ToString());
+                    Profession = BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == build.Profession.ToString());
                     if (Profession != null)
                     {
                         if (build.Specialization1Id != 0)

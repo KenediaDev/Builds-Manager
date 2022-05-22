@@ -62,7 +62,7 @@ namespace Kenedia.Modules.BuildsManager
             Parent = GameService.Graphics.SpriteScreen;
 
             Size = new Point(225, 275);
-            Background = BuildsManager.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
+            Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
             ZIndex = 1000;
             Visible = false;
 
@@ -258,7 +258,7 @@ namespace Kenedia.Modules.BuildsManager
             Visible = false;
             ZIndex = 997;
             Size = new Point(300, 500);
-            Background = BuildsManager.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
+            Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
             //BackgroundColor = Color.Red;
             FilterBox = new TextBox()
             {
@@ -688,31 +688,31 @@ namespace Kenedia.Modules.BuildsManager
             Parent = parent;
             
             // BackgroundColor = Color.Aqua;
-            _RuneTexture = BuildsManager.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
+            _RuneTexture = BuildsManager.ModuleInstance.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
 
             Trinkets = new List<API.TrinketItem>();
-            foreach (API.TrinketItem item in BuildsManager.Data.Trinkets)
+            foreach (API.TrinketItem item in BuildsManager.ModuleInstance.Data.Trinkets)
             {
                 Trinkets.Add(item);
             }
 
             WeaponSlots = new List<Texture2D>()
             {
-                BuildsManager.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon1_MainHand],
-                BuildsManager.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon1_OffHand],
+                BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon1_MainHand],
+                BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon1_OffHand],
 
-                BuildsManager.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon2_MainHand],
-                BuildsManager.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon2_OffHand],
+                BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon2_MainHand],
+                BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon2_OffHand],
             };
 
             AquaticWeaponSlots = new List<Texture2D>()
             {
-                BuildsManager.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.AquaticWeapon1],
-                BuildsManager.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.AquaticWeapon2],
+                BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.AquaticWeapon1],
+                BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.AquaticWeapon2],
             };
 
             Weapons = new List<API.WeaponItem>() { };
-            foreach (API.WeaponItem weapon in BuildsManager.Data.Weapons) { Weapons.Add(weapon); }
+            foreach (API.WeaponItem weapon in BuildsManager.ModuleInstance.Data.Weapons) { Weapons.Add(weapon); }
 
             Click += OnClick;
             RightMouseButtonPressed += OnRightClick;
@@ -738,7 +738,7 @@ namespace Kenedia.Modules.BuildsManager
                 SelectionPopUp.Dispose();
             };
 
-            foreach (API.RuneItem item in BuildsManager.Data.Runes)
+            foreach (API.RuneItem item in BuildsManager.ModuleInstance.Data.Runes)
             {
                 Runes_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -749,7 +749,7 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            foreach (API.SigilItem item in BuildsManager.Data.Sigils)
+            foreach (API.SigilItem item in BuildsManager.ModuleInstance.Data.Sigils)
             {
                 Sigils_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -771,7 +771,7 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            foreach (API.Stat item in BuildsManager.Data.Stats)
+            foreach (API.Stat item in BuildsManager.ModuleInstance.Data.Stats)
             {
                 Stats_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
@@ -1125,7 +1125,7 @@ namespace Kenedia.Modules.BuildsManager
                 new API.ArmorItem(),
                 new API.ArmorItem(),
             };
-            foreach (API.ArmorItem armor in BuildsManager.Data.Armors)
+            foreach (API.ArmorItem armor in BuildsManager.ModuleInstance.Data.Armors)
             {
                 if (armor.ArmorWeight == armorWeight)
                 {
@@ -1422,9 +1422,9 @@ namespace Kenedia.Modules.BuildsManager
                                         default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture : BuildsManager.TextureManager._Icons[0],
+                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture : BuildsManager.ModuleInstance.TextureManager._Icons[0],
                                             item.Bounds,
-                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
+                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.ModuleInstance.TextureManager._Icons[0].Bounds,
                                             itemColor,
                                             0f,
                                             default);
@@ -1476,9 +1476,9 @@ namespace Kenedia.Modules.BuildsManager
                                         default);
 
                     spriteBatch.DrawOnCtrl(this,
-                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture : BuildsManager.TextureManager._Icons[0],
+                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture : BuildsManager.ModuleInstance.TextureManager._Icons[0],
                                             item.Bounds,
-                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.TextureManager._Icons[0].Bounds,
+                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.ModuleInstance.TextureManager._Icons[0].Bounds,
                                             itemColor,
                                             0f,
                                             default);
@@ -1612,8 +1612,8 @@ namespace Kenedia.Modules.BuildsManager
             var font = GameService.Content.DefaultFont14;
 
             var lastTrinket = Template.Gear.Trinkets[Template.Gear.Trinkets.Count - 1];
-            var texture = BuildsManager.TextureManager.getEmblem(_Emblems.QuestionMark);
-            var mTexture = BuildsManager.TextureManager.getIcon(_Icons.Mouse);
+            var texture = BuildsManager.ModuleInstance.TextureManager.getEmblem(_Emblems.QuestionMark);
+            var mTexture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Mouse);
             if (lastTrinket != null)
             {
                 spriteBatch.DrawOnCtrl(this,

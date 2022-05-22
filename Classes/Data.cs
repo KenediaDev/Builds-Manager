@@ -16,8 +16,30 @@ using Blish_HUD.Controls;
 
 namespace Kenedia.Modules.BuildsManager
 {
-    public class iData
+    public class iData : IDisposable
     {
+        void IDisposable.Dispose() { }
+        private bool disposed = false;
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                disposed = true;
+
+                Stats.Clear();
+                Professions.Clear();
+                Runes.Clear();
+                Sigils.Clear();
+                Armors.Clear();
+                Weapons.Clear();
+                Trinkets.Clear();
+                SkillID_Pairs.Clear();
+                Legends.Clear();
+
+                PlaceHolder?.Dispose();
+            }
+        }
+
         public class _Legend
         {
             public string Name;
@@ -35,9 +57,6 @@ namespace Kenedia.Modules.BuildsManager
             public int ID;
         }
 
-        public static ContentsManager ContentsManager;
-        public static DirectoriesManager DirectoriesManager;
-
         public List<API.Stat> Stats = new List<API.Stat>();
         public List<API.Profession> Professions = new List<API.Profession>();
         public List<API.RuneItem> Runes = new List<API.RuneItem>();
@@ -48,8 +67,7 @@ namespace Kenedia.Modules.BuildsManager
         public List<SkillID_Pair> SkillID_Pairs = new List<SkillID_Pair>();
         public List<API.Legend> Legends = new List<API.Legend>();
 
-        private bool fetchAPI;
-        static Texture2D PlaceHolder;
+        public Texture2D PlaceHolder;
 
         public void UpdateLanguage()
         {
@@ -57,7 +75,7 @@ namespace Kenedia.Modules.BuildsManager
             var culture = BuildsManager.getCultureString();
             List<string> filesToDelete = new List<string>();
 
-            file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
                 foreach (API.Profession entry in JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete)))
@@ -124,7 +142,7 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
+                file_path = BuildsManager.ModuleInstance.Paths.stats + @"stats [" + culture + "].json";
                 foreach (API.Stat tStat in JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete)))
                 {
                     var stat = Stats.Find(e => e.Id == tStat.Id);
@@ -139,7 +157,7 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                file_path = BuildsManager.Paths.runes + @"runes [" + culture + "].json";
+                file_path = BuildsManager.ModuleInstance.Paths.runes + @"runes [" + culture + "].json";
                 foreach (API.RuneItem tRune in JsonConvert.DeserializeObject<List<API.RuneItem>>(LoadFile(file_path, filesToDelete))){
                     var rune = Runes.Find(e => e.Id == tRune.Id);
 
@@ -150,7 +168,7 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
+                file_path = BuildsManager.ModuleInstance.Paths.sigils + @"sigils [" + culture + "].json";
                 foreach (API.SigilItem tSigil in JsonConvert.DeserializeObject<List<API.SigilItem>>(LoadFile(file_path, filesToDelete))){
                     var sigil = Sigils.Find(e => e.Id == tSigil.Id);
 
@@ -161,7 +179,7 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                file_path = BuildsManager.Paths.armory + @"armors [" + culture + "].json";
+                file_path = BuildsManager.ModuleInstance.Paths.armory + @"armors [" + culture + "].json";
                 foreach (API.ArmorItem tArmor in JsonConvert.DeserializeObject<List<API.ArmorItem>>(LoadFile(file_path, filesToDelete))){
                     var armor = Armors.Find(e => e.Id == tArmor.Id);
 
@@ -172,7 +190,7 @@ namespace Kenedia.Modules.BuildsManager
                 }
 
 
-                file_path = BuildsManager.Paths.armory + @"weapons [" + culture + "].json";
+                file_path = BuildsManager.ModuleInstance.Paths.armory + @"weapons [" + culture + "].json";
                 foreach (API.WeaponItem tWeapon in JsonConvert.DeserializeObject<List<API.WeaponItem>>(LoadFile(file_path, filesToDelete)))
                 {
                     var weapon = Weapons.Find(e => e.Id == tWeapon.Id);
@@ -183,7 +201,7 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                file_path = BuildsManager.Paths.armory + @"trinkets [" + culture + "].json";
+                file_path = BuildsManager.ModuleInstance.Paths.armory + @"trinkets [" + culture + "].json";
                 foreach (API.TrinketItem tTrinket in JsonConvert.DeserializeObject<List<API.TrinketItem>>(LoadFile(file_path, filesToDelete)))
                 {
                     var trinket = Trinkets.Find(e => e.Id == tTrinket.Id);
@@ -224,26 +242,26 @@ namespace Kenedia.Modules.BuildsManager
                 catch (InvalidOperationException)
                 {
                     if (System.IO.File.Exists(path)) filesToDelete.Add(path);
-                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     BuildsManager.Logger.Debug("InvalidOperationException: Failed to load {0}. Fetching the API again.", path);
                     fetchAPI = true;
                     return texture;
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     return texture;
                 }
                 catch (FileNotFoundException)
                 {
-                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     BuildsManager.Logger.Debug("FileNotFoundException: Failed to load {0}. Fetching the API again.", path);
                     fetchAPI = true;
                     return texture;
                 }
                 catch (FileLoadException)
                 {
-                    texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
                     BuildsManager.Logger.Debug("FileLoadException: Failed to load {0}. Fetching the API again.", path);
                     fetchAPI = true;
                     return texture;
@@ -284,47 +302,47 @@ namespace Kenedia.Modules.BuildsManager
             return txt;
         }
 
-        public iData(ContentsManager contentsManager = null, DirectoriesManager directoriesManager = null)
-        {
-            if (contentsManager != null) ContentsManager = contentsManager;
-            if (directoriesManager != null) DirectoriesManager = directoriesManager;
+        public iData()
+        {            
+            var ContentsManager = BuildsManager.ModuleInstance.ContentsManager;
+            var DirectoriesManager = BuildsManager.ModuleInstance.DirectoriesManager;
 
-            PlaceHolder = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+            PlaceHolder = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
             List<string> filesToDelete = new List<string>();
 
             string file_path;
             var culture = BuildsManager.getCultureString();
-            var base_path = BuildsManager.Paths.BasePath + @"\api\";
+            var base_path = BuildsManager.ModuleInstance.Paths.BasePath + @"\api\";
 
             SkillID_Pairs = JsonConvert.DeserializeObject<List<SkillID_Pair>>(new StreamReader(ContentsManager.GetFileStream(@"data\skillpalettes.json")).ReadToEnd());
 
-            file_path = BuildsManager.Paths.stats + @"stats [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.stats + @"stats [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete));
             foreach (API.Stat stat in Stats) { stat.Icon._Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) {attri.Name = attri.getLocalName; attri.Icon._Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
-            file_path = BuildsManager.Paths.professions + @"professions [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete));
 
-            file_path = BuildsManager.Paths.runes + @"runes [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.runes + @"runes [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Runes = JsonConvert.DeserializeObject<List<API.RuneItem>>(LoadFile(file_path, filesToDelete));
 
-            file_path = BuildsManager.Paths.sigils + @"sigils [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.sigils + @"sigils [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Sigils = JsonConvert.DeserializeObject<List<API.SigilItem>>(LoadFile(file_path, filesToDelete));
 
-            file_path = BuildsManager.Paths.armory + @"armors [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.armory + @"armors [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Armors = JsonConvert.DeserializeObject<List<API.ArmorItem>>(LoadFile(file_path, filesToDelete));
 
-            file_path = BuildsManager.Paths.armory + @"weapons [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.armory + @"weapons [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Weapons = JsonConvert.DeserializeObject<List<API.WeaponItem>>(LoadFile(file_path, filesToDelete));
 
-            file_path = BuildsManager.Paths.armory + @"trinkets [" + culture + "].json";
+            file_path = BuildsManager.ModuleInstance.Paths.armory + @"trinkets [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(LoadFile(file_path, filesToDelete));
 
             Trinkets = Trinkets.OrderBy(e => e.TrinketType).ToList();
             Weapons = Weapons.OrderBy(e => (int)e.WeaponType).ToList();
 
 
-            Texture2D texture = BuildsManager.TextureManager.getIcon(_Icons.Bug);
+            Texture2D texture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Bug);
 
             foreach (API.Profession profession in Professions)
             {
@@ -378,7 +396,7 @@ namespace Kenedia.Modules.BuildsManager
 
             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
             {
-                BuildsManager.DataLoaded = true;
+                BuildsManager.ModuleInstance.DataLoaded = true;
             });
         }
     }

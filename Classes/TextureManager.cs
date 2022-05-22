@@ -15,8 +15,16 @@ using Gw2Sharp.ChatLinks;
 
 namespace Kenedia.Modules.BuildsManager
 {
-    public class _UpgradeIDs
+    public class _UpgradeIDs : IDisposable
     {
+        void IDisposable.Dispose() { }
+        private bool disposed = false;
+        public void Dispose()
+        {
+            _Sigils.Clear();
+            _Runes.Clear();
+        }
+
         public _UpgradeIDs(List<int> runes, List<int> sigils)
         {
             _Sigils = new List<int>(sigils);
@@ -26,8 +34,22 @@ namespace Kenedia.Modules.BuildsManager
         public List<int> _Runes { get; private set; }
     }
 
-    public class TextureManager
-    {
+    public class TextureManager : IDisposable
+    {        
+        void IDisposable.Dispose() { }
+        private bool disposed = false;
+        public void Dispose()
+        {
+            _Backgrounds.Clear();
+            _Icons.Clear();
+            _Emblems.Clear();
+            _Controls.Clear();
+            _EquipmentTextures.Clear();
+            _Stats.Clear();
+            _StatIcons.Clear();
+            _EquipSlotTextures.Clear();
+        }
+
         public _UpgradeIDs _UpgradeIDs;
         public List<Texture2D> _Backgrounds = new List<Texture2D>();
         public List<Texture2D> _Icons = new List<Texture2D>();
@@ -39,13 +61,10 @@ namespace Kenedia.Modules.BuildsManager
 
         public List<Texture2D> _EquipSlotTextures = new List<Texture2D>();
 
-        public Blish_HUD.Modules.Managers.ContentsManager ContentsManager;
-        public Blish_HUD.Modules.Managers.DirectoriesManager DirectoriesManager;
-
-        public TextureManager(Blish_HUD.Modules.Managers.ContentsManager contentsManager, Blish_HUD.Modules.Managers.DirectoriesManager  directoriesManager)
+        public TextureManager()
         {
-            ContentsManager = contentsManager;
-            DirectoriesManager = directoriesManager;
+            var ContentsManager = BuildsManager.ModuleInstance.ContentsManager;
+            //var DirectoriesManager = BuildsManager.ModuleInstance.DirectoriesManager;
 
             var values = Enum.GetValues(typeof(_Backgrounds));
             _Backgrounds = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);

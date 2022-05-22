@@ -51,10 +51,10 @@ namespace Kenedia.Modules.BuildsManager
         public static extern bool PostMessage(IntPtr hWnd, uint Msg, int wParam, int lParam);
 
 
-        public static TextureManager TextureManager;
-        public static iPaths Paths;
-        public static iData Data; public iTicks Ticks = new iTicks();
-        public static List<int> ArmoryItems = new List<int>();
+        public TextureManager TextureManager;
+        public iPaths Paths;
+        public iData Data; public iTicks Ticks = new iTicks();
+        public List<int> ArmoryItems = new List<int>();
 
         public SettingEntry<bool> PasteOnCopy;
         public SettingEntry<bool> ShowCornerIcon;
@@ -67,6 +67,7 @@ namespace Kenedia.Modules.BuildsManager
 
         public string CultureString;
         public List<Template> Templates = new List<Template>();
+        public List<Template> DefaultTemplates = new List<Template>();
         private Template _Selected_Template;
         public Template Selected_Template
         {
@@ -134,9 +135,9 @@ namespace Kenedia.Modules.BuildsManager
         private CornerIcon cornerIcon;
 
         public event EventHandler DataLoaded_Event;
-        private static bool _DataLoaded;
+        private bool _DataLoaded;
         public bool FetchingAPI;
-        public static bool DataLoaded
+        public bool DataLoaded
         {
             get => _DataLoaded;
             set
@@ -257,9 +258,31 @@ namespace Kenedia.Modules.BuildsManager
             ToggleWindow.Value.Enabled = true;
             ToggleWindow.Value.Activated += ToggleWindow_Activated;
 
+            IncludeDefaultBuilds.SettingChanged += IncludeDefaultBuilds_SettingChanged;
+
             DataLoaded = false;
 
             GameService.Gw2Mumble.PlayerCharacter.SpecializationChanged += PlayerCharacter_SpecializationChanged;
+        }
+
+        private void IncludeDefaultBuilds_SettingChanged(object sender, ValueChangedEventArgs<bool> e)
+        {
+            if (e.NewValue == false)
+            {
+                foreach(Template t in DefaultTemplates)
+                {
+                    Templates.Remove(t);
+                }
+            }
+            else
+            {
+                foreach (Template t in DefaultTemplates)
+                {
+                    Templates.Add(t);
+                }
+            }
+
+            MainWindow._TemplateSelection.Refresh();
         }
 
         public API.Profession CurrentProfession;
@@ -404,21 +427,19 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
-            if (IncludeDefaultBuilds.Value)
+            
+            var defaultTemps = JsonConvert.DeserializeObject<List<Template_json>>(new StreamReader(ContentsManager.GetFileStream(@"data\builds.json")).ReadToEnd());
+
+            if (defaultTemps != null)
             {
-                var defaultTemps = JsonConvert.DeserializeObject<List<Template_json>>(new StreamReader(ContentsManager.GetFileStream(@"data\builds.json")).ReadToEnd());
-
-                if (defaultTemps != null)
+                foreach (Template_json jsonTemplate in defaultTemps)
                 {
-                    foreach (Template_json jsonTemplate in defaultTemps)
-                    {
-                        var template = new Template(jsonTemplate.Name, jsonTemplate.BuildCode, jsonTemplate.GearCode);
-                        template.Path = null;
+                    var template = new Template(jsonTemplate.Name, jsonTemplate.BuildCode, jsonTemplate.GearCode);
+                    template.Path = null;
+                    DefaultTemplates.Add(template);
+                    if (IncludeDefaultBuilds.Value) Templates.Add(template);
 
-                        Templates.Add(template);
-
-                        if (template.Name == currentTemplate) _Selected_Template = template;
-                    }
+                    if (template.Name == currentTemplate) _Selected_Template = template;
                 }
             }
 
@@ -430,7 +451,7 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void OnModuleLoaded(EventArgs e)
         {
-            TextureManager = new TextureManager(ContentsManager, DirectoriesManager);
+            TextureManager = new TextureManager();
 
             cornerIcon = new CornerIcon()
             {
@@ -495,7 +516,7 @@ namespace Kenedia.Modules.BuildsManager
             {
                 Ticks.global -= 1250;
 
-                if (CurrentProfession == null || CurrentSpecialization == null) PlayerCharacter_SpecializationChanged(null, null);
+                if (CurrentProfession == null ) PlayerCharacter_SpecializationChanged(null, null);
 
                 if (MainWindow?.Visible == true)
                 {
@@ -507,7 +528,20 @@ namespace Kenedia.Modules.BuildsManager
         protected override void Unload()
         {
             MainWindow.Dispose();
+
+            Templates.Clear();
+            DefaultTemplates.Clear();
+
+            TextureManager.Dispose();
+            TextureManager = null;
+
+            Selected_Template = null;
+            CurrentProfession = null;
+            CurrentSpecialization = null;
+
+            Data.Dispose();
             Data = null;
+
             TextureManager = null;
             cornerIcon.Dispose();
 
@@ -933,13 +967,13 @@ namespace Kenedia.Modules.BuildsManager
                 List<API.Skill> Skills = new List<API.Skill>();
                 foreach (Skill skill in skills)
                 {
-                    if (skill != null && skill.Icon != null && skill.Icon.Url != null && skill.Professions.Count == 1)
+                    if (skill != null && skill.Icon != null && skill.Professions.Count == 1)
                     {
                         var temp = new API.Skill()
                         {
                             Name = skill.Name,
                             Id = skill.Id,
-                            Icon = new API.Icon() { Url = skill.Icon.Url.ToString(), Path = Paths.skill_icons.Replace(Paths.BasePath, "") + Regex.Match(skill.Icon, "[0-9]*.png") },
+                            Icon = new API.Icon() { Url = skill.Icon.ToString(), Path = Paths.skill_icons.Replace(Paths.BasePath, "") + Regex.Match(skill.Icon, "[0-9]*.png") },
                             ChatLink = skill.ChatLink,
                             Description = skill.Description,
                             Specialization = skill.Specialization != null ? (int)skill.Specialization : 0,
@@ -1213,7 +1247,7 @@ namespace Kenedia.Modules.BuildsManager
 
             if (Data == null)
             {
-                Data = new iData(ContentsManager, DirectoriesManager);
+                Data = new iData();
             }
             else
             {
