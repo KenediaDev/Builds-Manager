@@ -123,6 +123,7 @@ namespace Kenedia.Modules.BuildsManager
             base.DisposeControl();
 
             TemplateTooltip?.Dispose();
+            Template?.Dispose();
             Template = null;
             _EmptyTraitLine = null;
             _Lock = null;
@@ -606,6 +607,8 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void DisposeControl()
         {
+            base.DisposeControl();
+
             foreach (Template template in BuildsManager.ModuleInstance.Templates)
             {
                 template.Deleted -= Template_Deleted;
@@ -613,11 +616,9 @@ namespace Kenedia.Modules.BuildsManager
 
             foreach (Control_TemplateEntry template in Templates)
             {
-                template.TemplateChanged += OnTemplateChangedEvent;
-                template.Dispose();
+                template.TemplateChanged -= OnTemplateChangedEvent;
             }
-
-            Templates.Clear();
+            Templates.DisposeAll();
 
             ContentPanel?.Dispose();
             FilterBox?.Dispose();
@@ -631,8 +632,6 @@ namespace Kenedia.Modules.BuildsManager
             BuildsManager.ModuleInstance.Template_Deleted -= ModuleInstance_Template_Deleted;
             ContentPanel.ChildAdded -= ContentPanel_ChildsChanged;
             ContentPanel.ChildRemoved -= ContentPanel_ChildsChanged;
-
-            base.DisposeControl();
         }
 
         public event EventHandler<TemplateChangedEvent> TemplateChanged;

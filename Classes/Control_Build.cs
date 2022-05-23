@@ -732,8 +732,8 @@ private void UpdateLayout()
             foreach (Trait_Control trait in _MajorTraits)
             {
                 trait.Click -= Trait_Click;
-                trait.Dispose();
             }
+            _MajorTraits?.DisposeAll();
             _MajorTraits.Clear();
 
             _MinorTraits?.DisposeAll();
@@ -968,6 +968,8 @@ private void UpdateLayout()
         {
             base.DisposeControl();
             CustomTooltip.Dispose();
+
+            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
         }
 
         void OnGlobalClick(object sender, MouseEventArgs e)
@@ -1133,11 +1135,6 @@ private void UpdateLayout()
                     }
                 }
             }
-        }
-
-        public void SetTemplate()
-        {
-
         }
     }
 
@@ -1595,8 +1592,11 @@ private void UpdateLayout()
             _Legends_Aquatic[0].Click -= Legend;
             _Legends_Aquatic[1].Click -= Legend;
 
-            foreach(Skill_Control skill in _Skills_Terrestrial) { skill.Click -= Control_Click; skill.Dispose(); }
-            foreach(Skill_Control skill in _Skills_Aquatic) { skill.Click -= Control_Click; skill.Dispose(); }
+            foreach(Skill_Control skill in _Skills_Terrestrial) { skill.Click -= Control_Click; }
+            foreach(Skill_Control skill in _Skills_Aquatic) { skill.Click -= Control_Click; }
+            _Skills_Terrestrial.DisposeAll();
+            _Skills_Aquatic.DisposeAll();
+
             CustomTooltip.Dispose();
 
             base.DisposeControl();
@@ -1757,6 +1757,7 @@ private void UpdateLayout()
         {
             base.DisposeControl();
 
+            Click -= OnClick;
             CustomTooltip?.Dispose();
         }
         public EventHandler Changed;

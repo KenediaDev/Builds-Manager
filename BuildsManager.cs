@@ -460,9 +460,6 @@ namespace Kenedia.Modules.BuildsManager
                 Parent = GameService.Graphics.SpriteScreen,
                 Visible = ShowCornerIcon.Value,
             };
-            cornerIcon.MouseEntered += CornerIcon_MouseEntered;
-            cornerIcon.MouseLeft += CornerIcon_MouseLeft;
-            cornerIcon.Click += CornerIcon_Click;
 
             loadingSpinner = new LoadingSpinner()
             {
@@ -479,14 +476,17 @@ namespace Kenedia.Modules.BuildsManager
                 Progress = 0.66,
                 Visible = false,
             };
-            cornerIcon.Moved += CornerIcon_Moved;
 
+            cornerIcon.MouseEntered += CornerIcon_MouseEntered;
+            cornerIcon.MouseLeft += CornerIcon_MouseLeft;
+            cornerIcon.Click += CornerIcon_Click;
+            cornerIcon.Moved += CornerIcon_Moved;
             ShowCornerIcon.SettingChanged += ShowCornerIcon_SettingChanged;
+            DataLoaded_Event += BuildsManager_DataLoaded_Event;
 
             // Base handler must be called
             base.OnModuleLoaded(e);
 
-            DataLoaded_Event += BuildsManager_DataLoaded_Event;
             LoadData();
         }
 
@@ -551,6 +551,9 @@ namespace Kenedia.Modules.BuildsManager
             TextureManager.Dispose();
             TextureManager = null;
 
+            _Selected_Template.Edit -= OnSelected_Template_Edit;
+            _Selected_Template.Edit -= null;
+
             Selected_Template = null;
             CurrentProfession = null;
             CurrentSpecialization = null;
@@ -573,7 +576,15 @@ namespace Kenedia.Modules.BuildsManager
             cornerIcon.Moved -= CornerIcon_Moved;
 
             DataLoaded_Event -= BuildsManager_DataLoaded_Event;
+            ShowCornerIcon.SettingChanged -= ShowCornerIcon_SettingChanged;
+            IncludeDefaultBuilds.SettingChanged -= IncludeDefaultBuilds_SettingChanged;
+            GameService.Gw2Mumble.PlayerCharacter.SpecializationChanged -= PlayerCharacter_SpecializationChanged;
+            OverlayService.Overlay.UserLocale.SettingChanged -= UserLocale_SettingChanged;
+            
+            downloadBar.Dispose();
+            downloadBar = null;
 
+            DataLoaded = false;
             ModuleInstance = null;
         }
 

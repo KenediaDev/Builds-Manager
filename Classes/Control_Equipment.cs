@@ -186,15 +186,26 @@ namespace Kenedia.Modules.BuildsManager
         protected override void DisposeControl()
         {
             base.DisposeControl();
-
+            Background = null;
             Input.Mouse.MouseMoved -= Mouse_MouseMoved;
         }
     }
 
     public class SelectionPopUp : Control
     {
-        public class SelectionEntry
+        public class SelectionEntry : IDisposable
         {
+            private bool disposed = false;
+            public void Dispose()
+            {
+                if (!disposed)
+                {
+                    disposed = true;
+                    Texture = null;
+                    ContentTextures = null;
+                }
+            }
+
             public object Object;
             public AsyncTexture2D Texture;
             public string Header;
@@ -290,7 +301,7 @@ namespace Kenedia.Modules.BuildsManager
         protected override void DisposeControl()
         {
             base.DisposeControl();
-
+            CustomTooltip?.Dispose();
             FilterBox?.Dispose();
             if (FilterBox != null) FilterBox.TextChanged -= FilterBox_TextChanged;
             BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
@@ -811,6 +822,16 @@ namespace Kenedia.Modules.BuildsManager
 
             CustomTooltip?.Dispose();
             SelectionPopUp?.Dispose();
+
+            Click -= OnClick;
+            RightMouseButtonPressed -= OnRightClick;
+            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
+            SelectionPopUp.Changed -= SelectionPopUp_Changed;
+
+            Runes_Selection.DisposeAll();
+            Sigils_Selection.DisposeAll();
+            Weapons_Selection.DisposeAll();
+            Stats_Selection.DisposeAll();
 
             BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
             BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;

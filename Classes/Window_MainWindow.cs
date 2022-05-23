@@ -98,6 +98,9 @@ namespace Kenedia.Modules.BuildsManager
                 if (tab.Panel != null) tab.Panel.Dispose();
             }
 
+            TemplateBox.InputFocusChanged -= TemplateBox_InputFocusChanged;
+            GearBox.InputFocusChanged -= GearBox_InputFocusChanged;
+
             base.DisposeControl();
         }
 
@@ -777,16 +780,38 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void DisposeControl()
         {
-            _TemplateSelection.Dispose();
-            NameBox.Dispose();
-            NameLabel.Dispose();
-
-            Import_Button.Dispose();
+            Add_Button.Click -= Button_Click;
             Add_Button.Dispose();
 
-            ProfessionSelection.Changed -= ProfessionSelection_Changed;
+            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
+            BuildsManager.ModuleInstance.Selected_Template_Edit -= Selected_Template_Edit;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.Templates_Loaded -= Templates_Loaded;
+            BuildsManager.ModuleInstance.Selected_Template_Redraw -= Selected_Template_Redraw;
+
+            Detail_Panel.Tabs[0].Panel.Resized -= Panel_Resized;
+            Detail_Panel.TemplateBox.EnterPressed -= TemplateBox_EnterPressed;
+            Detail_Panel.GearBox.EnterPressed -= GearBox_EnterPressed;
+
+            Input.Mouse.LeftMouseButtonPressed -= GlobalClick;
 
             GameService.Gw2Mumble.PlayerCharacter.NameChanged -= PlayerCharacter_NameChanged;
+
+            _TemplateSelection.TemplateChanged -= _TemplateSelection_TemplateChanged;
+            _TemplateSelection.Dispose();
+
+            NameBox.EnterPressed -= NameBox_TextChanged;
+            NameBox.Dispose();
+
+            NameLabel.Click -= NameLabel_Click;
+            NameLabel.Dispose();
+
+            Import_Button.Click -= Import_Button_Click;
+            Import_Button.Dispose();
+
+            ProfessionSelection.Changed -= ProfessionSelection_Changed;
+            ProfessionSelection.Dispose();
+
             base.DisposeControl();
         }
 

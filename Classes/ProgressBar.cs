@@ -91,6 +91,16 @@ namespace Kenedia.Modules.BuildsManager
 
             _Label.Text = Text;
         }
+
+        protected override void DisposeControl()
+        {
+            base.DisposeControl();
+            _Bar_Done.Dispose();
+            _Bar.Dispose();
+            _Label.Dispose();
+            _FilledTexture.Dispose();
+            _BackgroundTexture.Dispose();
+        }
     }
 
     public class ProgressContainer : Container
@@ -123,6 +133,12 @@ namespace Kenedia.Modules.BuildsManager
             // Left
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(0, 1, 3, _size.Y - 2).Add(-PADDING, -PADDING, 0, PADDING * 2), FrameColor * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 1, 1, _size.Y - 2).Add(-PADDING, -PADDING, 0, PADDING * 2), FrameColor * 0.6f);
+        }
+
+        protected override void DisposeControl()
+        {
+            base.DisposeControl();
+            Texture = null;
         }
     }
 }

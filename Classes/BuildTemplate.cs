@@ -602,6 +602,7 @@ namespace Kenedia.Modules.BuildsManager
                 _Specialization?.Dispose();
                 //Specialization?.Dispose();
                 Traits?.DisposeAll();
+                Control?.Dispose();
             }
         }
 
@@ -629,6 +630,11 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (!disposed)
             {
+                foreach (SpecLine specLine in SpecLines)
+                {
+                    specLine.Changed -= OnChanged;
+                }
+
                 Profession?.Dispose();
                 SpecLines?.DisposeAll();
                 Skills_Terrestrial?.DisposeAll();
