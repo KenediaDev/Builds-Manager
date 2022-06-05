@@ -160,7 +160,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         foreach(API.StatAttribute attribute in stat.Attributes)
                         {
-                            attribute.Name = attribute.getLocalName;
+                            attribute.Name = attribute.getLocalName();
                         }
                     }
                 }
@@ -320,7 +320,7 @@ namespace Kenedia.Modules.BuildsManager
 
             file_path = BuildsManager.ModuleInstance.Paths.stats + @"stats [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Stats = JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete));
-            foreach (API.Stat stat in Stats) { stat.Icon._Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) {attri.Name = attri.getLocalName; attri.Icon._Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
+            foreach (API.Stat stat in Stats) { stat.Icon._Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) {attri.Name = attri.getLocalName(); attri.Icon._Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
             file_path = BuildsManager.ModuleInstance.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path)) Professions = JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete));

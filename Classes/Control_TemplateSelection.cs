@@ -123,7 +123,7 @@ namespace Kenedia.Modules.BuildsManager
             base.DisposeControl();
 
             TemplateTooltip?.Dispose();
-            Template?.Dispose();
+            //Template?.Dispose();
             Template = null;
             _EmptyTraitLine = null;
             _Lock = null;
@@ -527,15 +527,18 @@ namespace Kenedia.Modules.BuildsManager
 
             foreach (Control_TemplateEntry template in Templates)
             {
-                var name = template.Template.Name.ToLower();
+                if (template.Template != null)
+                {
+                    var name = template.Template.Name.ToLower();
 
-                if ((_ProfessionSelector.Professions.Count == 0 || _ProfessionSelector.Professions.Contains(template.Template.Profession)) && name.Contains(filter))
-                {
-                    template.Show();
-                }
-                else
-                {
-                    template.Hide();
+                    if ((_ProfessionSelector.Professions.Count == 0 || _ProfessionSelector.Professions.Contains(template.Template.Profession)) && name.Contains(filter))
+                    {
+                        template.Show();
+                    }
+                    else
+                    {
+                        template.Hide();
+                    }
                 }
             }
 
@@ -590,9 +593,10 @@ namespace Kenedia.Modules.BuildsManager
 
         private void Template_Deleted(object sender, EventArgs e)
         {
-            var ctrl = (Control_TemplateEntry)sender;
-            ctrl.Dispose();
-            Templates.Remove(ctrl);
+            var template = (Template)sender;
+            var ctrl = Templates.Find(a => a.Template == template);
+            ctrl?.Dispose();
+            if(ctrl != null) Templates.Remove(ctrl);
         }
 
         public void Clear()

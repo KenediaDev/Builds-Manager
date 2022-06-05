@@ -61,6 +61,15 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Axe.
+        /// </summary>
+        internal static string Axe {
+            get {
+                return ResourceManager.GetString("Axe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Build.
         /// </summary>
         internal static string Build {
@@ -106,6 +115,15 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dagger.
+        /// </summary>
+        internal static string Dagger {
+            get {
+                return ResourceManager.GetString("Dagger", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         internal static string Delete {
@@ -133,6 +151,15 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Focus.
+        /// </summary>
+        internal static string Focus {
+            get {
+                return ResourceManager.GetString("Focus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Gear.
         /// </summary>
         internal static string Gear {
@@ -153,11 +180,56 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Greatsword.
+        /// </summary>
+        internal static string Greatsword {
+            get {
+                return ResourceManager.GetString("Greatsword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hammer.
+        /// </summary>
+        internal static string Hammer {
+            get {
+                return ResourceManager.GetString("Hammer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Healing Power.
         /// </summary>
         internal static string HealingPower {
             get {
                 return ResourceManager.GetString("HealingPower", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Longbow.
+        /// </summary>
+        internal static string Longbow {
+            get {
+                return ResourceManager.GetString("Longbow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mace.
+        /// </summary>
+        internal static string Mace {
+            get {
+                return ResourceManager.GetString("Mace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pistol.
+        /// </summary>
+        internal static string Pistol {
+            get {
+                return ResourceManager.GetString("Pistol", resourceCulture);
             }
         }
         
@@ -180,11 +252,83 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rifle.
+        /// </summary>
+        internal static string Rifle {
+            get {
+                return ResourceManager.GetString("Rifle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scepter.
+        /// </summary>
+        internal static string Scepter {
+            get {
+                return ResourceManager.GetString("Scepter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Search.
         /// </summary>
         internal static string Search {
             get {
                 return ResourceManager.GetString("Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shield.
+        /// </summary>
+        internal static string Shield {
+            get {
+                return ResourceManager.GetString("Shield", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shortbow.
+        /// </summary>
+        internal static string Shortbow {
+            get {
+                return ResourceManager.GetString("Shortbow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Spear.
+        /// </summary>
+        internal static string Spear {
+            get {
+                return ResourceManager.GetString("Spear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Speargun.
+        /// </summary>
+        internal static string Speargun {
+            get {
+                return ResourceManager.GetString("Speargun", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Staff.
+        /// </summary>
+        internal static string Staff {
+            get {
+                return ResourceManager.GetString("Staff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sword.
+        /// </summary>
+        internal static string Sword {
+            get {
+                return ResourceManager.GetString("Sword", resourceCulture);
             }
         }
         
@@ -207,6 +351,15 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Torch.
+        /// </summary>
+        internal static string Torch {
+            get {
+                return ResourceManager.GetString("Torch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Toughness.
         /// </summary>
         internal static string Toughness {
@@ -216,11 +369,38 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Trident.
+        /// </summary>
+        internal static string Trident {
+            get {
+                return ResourceManager.GetString("Trident", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unkown.
+        /// </summary>
+        internal static string Unkown {
+            get {
+                return ResourceManager.GetString("Unkown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vitality.
         /// </summary>
         internal static string Vitality {
             get {
                 return ResourceManager.GetString("Vitality", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warhorn.
+        /// </summary>
+        internal static string Warhorn {
+            get {
+                return ResourceManager.GetString("Warhorn", resourceCulture);
             }
         }
     }

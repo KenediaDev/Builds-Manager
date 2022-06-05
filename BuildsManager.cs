@@ -540,15 +540,15 @@ namespace Kenedia.Modules.BuildsManager
 
         protected override void Unload()
         {
-            MainWindow.Dispose();
+            MainWindow?.Dispose();
 
-            Templates.DisposeAll();
-            Templates.Clear();
+            Templates?.DisposeAll();
+            Templates?.Clear();
 
-            DefaultTemplates.DisposeAll();
-            DefaultTemplates.Clear();
+            DefaultTemplates?.DisposeAll();
+            DefaultTemplates?.Clear();
 
-            TextureManager.Dispose();
+            TextureManager?.Dispose();
             TextureManager = null;
 
             _Selected_Template.Edit -= OnSelected_Template_Edit;
@@ -558,11 +558,11 @@ namespace Kenedia.Modules.BuildsManager
             CurrentProfession = null;
             CurrentSpecialization = null;
 
-            Data.Dispose();
+            Data?.Dispose();
             Data = null;
 
             TextureManager = null;
-            cornerIcon.Dispose();
+            cornerIcon?.Dispose();
 
             ToggleWindow.Value.Enabled = false;
             ToggleWindow.Value.Activated -= ToggleWindow_Activated;
@@ -581,7 +581,7 @@ namespace Kenedia.Modules.BuildsManager
             GameService.Gw2Mumble.PlayerCharacter.SpecializationChanged -= PlayerCharacter_SpecializationChanged;
             OverlayService.Overlay.UserLocale.SettingChanged -= UserLocale_SettingChanged;
             
-            downloadBar.Dispose();
+            downloadBar?.Dispose();
             downloadBar = null;
 
             DataLoaded = false;

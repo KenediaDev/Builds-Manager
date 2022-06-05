@@ -201,7 +201,10 @@ namespace Kenedia.Modules.BuildsManager
                 if (!disposed)
                 {
                     disposed = true;
+                    Texture?.Dispose();
                     Texture = null;
+
+                    ContentTextures?.DisposeAll();
                     ContentTextures = null;
                 }
             }
@@ -262,10 +265,7 @@ namespace Kenedia.Modules.BuildsManager
         public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public int UpgradeIndex = 0;
 
-        private ContentService ContentService;
         private BitmapFont Font;
-        private BitmapFont HeaderFont;
-        private Scrollbar Scrollbar;
         public CustomTooltip CustomTooltip;
         public bool Clicked = false;
         public DateTime LastClick = DateTime.Now;
@@ -291,9 +291,7 @@ namespace Kenedia.Modules.BuildsManager
             FilterBox.TextChanged += FilterBox_TextChanged;
             BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
 
-            ContentService = new ContentService();
-            Font = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Regular);
-            HeaderFont = ContentService.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)18, ContentService.FontStyle.Regular);
+            Font = GameService.Content.DefaultFont14;
 
             Input.Mouse.LeftMouseButtonPressed += Mouse_LeftMouseButtonPressed;            
         }
@@ -306,6 +304,13 @@ namespace Kenedia.Modules.BuildsManager
             if (FilterBox != null) FilterBox.TextChanged -= FilterBox_TextChanged;
             BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
             Input.Mouse.LeftMouseButtonPressed -= Mouse_LeftMouseButtonPressed;
+
+            FilteredList?.DisposeAll();
+            List?.DisposeAll();
+            _SelectionTarget = null;
+
+            SelectedProfession?.Dispose();
+            SelectedProfession = null;
         }
 
         protected override void OnHidden(EventArgs e)
@@ -460,17 +465,17 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             case _EquipmentSlots.Weapon1_MainHand:
                             case _EquipmentSlots.Weapon2_MainHand:
-                                if (!weapon.Wielded.Contains(API.weaponHand.Aquatic) && (weapon.Wielded.Contains(API.weaponHand.Mainhand) || weapon.Wielded.Contains(API.weaponHand.TwoHand) || weapon.Wielded.Contains(API.weaponHand.DualWielded))) weapons.Add(weapon.Weapon.ToString());
+                                if (!weapon.Wielded.Contains(API.weaponHand.Aquatic) && (weapon.Wielded.Contains(API.weaponHand.Mainhand) || weapon.Wielded.Contains(API.weaponHand.TwoHand) || weapon.Wielded.Contains(API.weaponHand.DualWielded))) weapons.Add(weapon.Weapon.getLocalName());
                                 break;
 
                             case _EquipmentSlots.Weapon1_OffHand:
                             case _EquipmentSlots.Weapon2_OffHand:
-                                if (weapon.Wielded.Contains(API.weaponHand.Offhand) || weapon.Wielded.Contains(API.weaponHand.DualWielded)) weapons.Add(weapon.Weapon.ToString());
+                                if (weapon.Wielded.Contains(API.weaponHand.Offhand) || weapon.Wielded.Contains(API.weaponHand.DualWielded)) weapons.Add(weapon.Weapon.getLocalName());
                                 break;
 
                             case _EquipmentSlots.AquaticWeapon1:
                             case _EquipmentSlots.AquaticWeapon2:
-                                if (weapon.Wielded.Contains(API.weaponHand.Aquatic)) weapons.Add(weapon.Weapon.ToString());
+                                if (weapon.Wielded.Contains(API.weaponHand.Aquatic)) weapons.Add(weapon.Weapon.getLocalName());
                                 break;
                         }
                     }
@@ -790,7 +795,7 @@ namespace Kenedia.Modules.BuildsManager
                 {
                     Object = item,
                     Texture = item.Icon._AsyncTexture,
-                    Header = item.WeaponType.ToString(),
+                    Header = item.WeaponType.getLocalName(),
                     Content = new List<string>() { "" },
                 });
             }
@@ -830,6 +835,7 @@ namespace Kenedia.Modules.BuildsManager
 
             Runes_Selection.DisposeAll();
             Sigils_Selection.DisposeAll();
+            Weapons.DisposeAll();
             Weapons_Selection.DisposeAll();
             Stats_Selection.DisposeAll();
 
@@ -850,6 +856,30 @@ namespace Kenedia.Modules.BuildsManager
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
             Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
+
+            foreach(SelectionPopUp.SelectionEntry entry in Weapons_Selection)
+            {
+                var item = (API.WeaponItem)entry.Object;
+                entry.Header = item.WeaponType.getLocalName();
+            }
+
+            foreach(SelectionPopUp.SelectionEntry entry in Stats_Selection)
+            {
+                var stat = (API.Stat) entry.Object;
+                entry.Header = stat.Name;
+            }
+
+            foreach(SelectionPopUp.SelectionEntry entry in Runes_Selection)
+            {
+                var stat = (API.RuneItem) entry.Object;
+                entry.Header = stat.Name;
+            }
+
+            foreach(SelectionPopUp.SelectionEntry entry in Sigils_Selection)
+            {
+                var stat = (API.SigilItem) entry.Object;
+                entry.Header = stat.Name;
+            }
         }
 
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)

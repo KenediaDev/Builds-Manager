@@ -102,6 +102,7 @@
         MainWindow,
         BlueishMainWindow,
         Tooltip,
+        Build,
     }
 
     public enum _Emblems

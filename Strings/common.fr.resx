@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Axe" xml:space="preserve">
+    <value>Hache</value>
+  </data>
   <data name="Build" xml:space="preserve">
     <value>Archétype</value>
   </data>
@@ -132,6 +135,9 @@
   <data name="Create" xml:space="preserve">
     <value>Créer</value>
   </data>
+  <data name="Dagger" xml:space="preserve">
+    <value>Poignard</value>
+  </data>
   <data name="Delete" xml:space="preserve">
     <value>Supprimer</value>
   </data>
@@ -141,6 +147,9 @@
   <data name="Ferocity" xml:space="preserve">
     <value>Férocité</value>
   </data>
+  <data name="Focus" xml:space="preserve">
+    <value>Focus</value>
+  </data>
   <data name="Gear" xml:space="preserve">
     <value>Équipement</value>
   </data>
@@ -149,8 +158,23 @@
 Alt + Clic droit pour sélectionner l'arme
 Clic droit pour copier le nom de l'état/amélioration</value>
   </data>
+  <data name="Greatsword" xml:space="preserve">
+    <value>Grande épée</value>
+  </data>
+  <data name="Hammer" xml:space="preserve">
+    <value>Marteau</value>
+  </data>
   <data name="HealingPower" xml:space="preserve">
     <value>Guérison</value>
+  </data>
+  <data name="Longbow" xml:space="preserve">
+    <value>Arc long</value>
+  </data>
+  <data name="Mace" xml:space="preserve">
+    <value>Pistolet de combat</value>
+  </data>
+  <data name="Pistol" xml:space="preserve">
+    <value>Pistolet</value>
   </data>
   <data name="Power" xml:space="preserve">
     <value>Puissance</value>
@@ -158,8 +182,32 @@ Clic droit pour copier le nom de l'état/amélioration</value>
   <data name="Precision" xml:space="preserve">
     <value>Précision</value>
   </data>
+  <data name="Rifle" xml:space="preserve">
+    <value>Fusil</value>
+  </data>
+  <data name="Scepter" xml:space="preserve">
+    <value>Sceptre</value>
+  </data>
   <data name="Search" xml:space="preserve">
     <value>Recherche</value>
+  </data>
+  <data name="Shield" xml:space="preserve">
+    <value>Bouclier</value>
+  </data>
+  <data name="Shortbow" xml:space="preserve">
+    <value>Arc court</value>
+  </data>
+  <data name="Spear" xml:space="preserve">
+    <value>Javelot</value>
+  </data>
+  <data name="Speargun" xml:space="preserve">
+    <value>Lance de javelot</value>
+  </data>
+  <data name="Staff" xml:space="preserve">
+    <value>Bâton</value>
+  </data>
+  <data name="Sword" xml:space="preserve">
+    <value>Épée</value>
   </data>
   <data name="Template" xml:space="preserve">
     <value>Modèle</value>
@@ -167,10 +215,22 @@ Clic droit pour copier le nom de l'état/amélioration</value>
   <data name="TemplateCode" xml:space="preserve">
     <value>Code du modèle</value>
   </data>
+  <data name="Torch" xml:space="preserve">
+    <value>Torche</value>
+  </data>
   <data name="Toughness" xml:space="preserve">
     <value>Robustesse</value>
   </data>
+  <data name="Trident" xml:space="preserve">
+    <value>Trident</value>
+  </data>
+  <data name="Unkown" xml:space="preserve">
+    <value>Inconnu</value>
+  </data>
   <data name="Vitality" xml:space="preserve">
     <value>Vitalité</value>
+  </data>
+  <data name="Warhorn" xml:space="preserve">
+    <value>Cor de guerre</value>
   </data>
 </root>

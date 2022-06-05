@@ -99,7 +99,8 @@ namespace Kenedia.Modules.BuildsManager
             if (!disposed)
             {
                 disposed = true;
-                Stat?.Dispose();
+                //Stat?.Dispose();
+                Stat = null;
             }
         }
 
@@ -142,10 +143,14 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (!disposed)
             {
-                Trinkets?.DisposeAll();
-                Armor?.DisposeAll();
-                Weapons?.DisposeAll();
-                AquaticWeapons?.DisposeAll();
+                Trinkets = null;
+                //Trinkets?.DisposeAll();
+                Armor = null;
+                //Armor?.DisposeAll();
+                Weapons = null;
+                //Weapons?.DisposeAll();
+                AquaticWeapons = null;
+                //AquaticWeapons?.DisposeAll();
             }
         }
 
@@ -310,8 +315,10 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (!disposed)
             {
-                Profession?.Dispose();
-                Specialization?.Dispose();
+                //Profession?.Dispose();
+                Profession = null;
+                //Specialization?.Dispose();
+                Specialization = null;
                 Gear?.Dispose();
                 Build?.Dispose();
             }
@@ -465,7 +472,8 @@ namespace Kenedia.Modules.BuildsManager
 
         public void Delete()
         {
-            if (Name == "[No Name Set]") {
+            if (Name == "[No Name Set]")
+            {
                 BuildsManager.ModuleInstance.Templates.Remove(this);
                 BuildsManager.ModuleInstance.OnTemplate_Deleted();
                 return;
@@ -550,7 +558,7 @@ namespace Kenedia.Modules.BuildsManager
                 foreach (Template_json template in BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList())
                 {
                     StringWriter sw = new StringWriter(sb);
-                    if(!first) sb.Append("," + Environment.NewLine);
+                    if (!first) sb.Append("," + Environment.NewLine);
                     using (JsonWriter writer = new JsonTextWriter(sw))
                     {
                         writer.Formatting = Formatting.Indented;
@@ -565,7 +573,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         writer.WritePropertyName("GearCode");
                         writer.WriteValue(template.GearCode);
-                        
+
                         writer.WriteEndObject();
                     }
                     first = false;
@@ -630,19 +638,30 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (!disposed)
             {
+                disposed = true;
+
                 foreach (SpecLine specLine in SpecLines)
                 {
                     specLine.Changed -= OnChanged;
                 }
 
-                Profession?.Dispose();
-                SpecLines?.DisposeAll();
-                Skills_Terrestrial?.DisposeAll();
-                InactiveSkills_Terrestrial?.DisposeAll();
-                Skills_Aquatic?.DisposeAll();
-                InactiveSkills_Aquatic?.DisposeAll();
-                Legends_Terrestrial?.DisposeAll();
-                Legends_Aquatic?.DisposeAll();
+                //Profession?.Dispose();
+                //SpecLines?.DisposeAll();
+                //Skills_Terrestrial?.DisposeAll();
+                //InactiveSkills_Terrestrial?.DisposeAll();
+                //Skills_Aquatic?.DisposeAll();
+                //InactiveSkills_Aquatic?.DisposeAll();
+                //Legends_Terrestrial?.DisposeAll();
+                //Legends_Aquatic?.DisposeAll();
+
+                Profession = null;
+                SpecLines = null;
+                Skills_Terrestrial = null;
+                InactiveSkills_Terrestrial = null;
+                Skills_Aquatic = null;
+                InactiveSkills_Aquatic = null;
+                Legends_Terrestrial = null;
+                Legends_Aquatic = null;
             }
         }
 
@@ -725,19 +744,19 @@ namespace Kenedia.Modules.BuildsManager
                 build.RevenantInactiveTerrestrialUtility2SkillPaletteId = (ushort)(rev && InactiveSkills_Terrestrial[2]?.PaletteId != null ? InactiveSkills_Terrestrial[2]?.PaletteId : 0);
                 build.RevenantInactiveTerrestrialUtility3SkillPaletteId = (ushort)(rev && InactiveSkills_Terrestrial[3]?.PaletteId != null ? InactiveSkills_Terrestrial[3]?.PaletteId : 0);
 
-                build.RevenantActiveAquaticLegend = (byte) (rev && Legends_Aquatic[0]?.Id != null ? Legends_Aquatic[0]?.Id : 0);
-                build.RevenantInactiveAquaticLegend = (byte) (rev && Legends_Aquatic[1]?.Id != null ? Legends_Aquatic[1]?.Id : 0);
+                build.RevenantActiveAquaticLegend = (byte)(rev && Legends_Aquatic[0]?.Id != null ? Legends_Aquatic[0]?.Id : 0);
+                build.RevenantInactiveAquaticLegend = (byte)(rev && Legends_Aquatic[1]?.Id != null ? Legends_Aquatic[1]?.Id : 0);
                 build.RevenantInactiveAquaticUtility1SkillPaletteId = (ushort)(rev && InactiveSkills_Aquatic[1]?.PaletteId != null ? InactiveSkills_Aquatic[1]?.PaletteId : 0);
                 build.RevenantInactiveAquaticUtility2SkillPaletteId = (ushort)(rev && InactiveSkills_Aquatic[2]?.PaletteId != null ? InactiveSkills_Aquatic[2]?.PaletteId : 0);
                 build.RevenantInactiveAquaticUtility3SkillPaletteId = (ushort)(rev && InactiveSkills_Aquatic[3]?.PaletteId != null ? InactiveSkills_Aquatic[3]?.PaletteId : 0);
 
-                build.TerrestrialHealingSkillPaletteId = (ushort)(Skills_Terrestrial[0]?.Id > 0? Skills_Terrestrial[0]?.PaletteId : 0);
+                build.TerrestrialHealingSkillPaletteId = (ushort)(Skills_Terrestrial[0]?.Id > 0 ? Skills_Terrestrial[0]?.PaletteId : 0);
                 build.TerrestrialUtility1SkillPaletteId = (ushort)(Skills_Terrestrial[1]?.Id > 0 ? Skills_Terrestrial[1]?.PaletteId : 0);
                 build.TerrestrialUtility2SkillPaletteId = (ushort)(Skills_Terrestrial[2]?.Id > 0 ? Skills_Terrestrial[2]?.PaletteId : 0);
                 build.TerrestrialUtility3SkillPaletteId = (ushort)(Skills_Terrestrial[3]?.Id > 0 ? Skills_Terrestrial[3]?.PaletteId : 0);
                 build.TerrestrialEliteSkillPaletteId = (ushort)(Skills_Terrestrial[4]?.Id > 0 ? Skills_Terrestrial[4]?.PaletteId : 0);
 
-                build.AquaticHealingSkillPaletteId = (ushort) (Skills_Aquatic[0]?.Id > 0 ? Skills_Aquatic[0]?.PaletteId : 0);
+                build.AquaticHealingSkillPaletteId = (ushort)(Skills_Aquatic[0]?.Id > 0 ? Skills_Aquatic[0]?.PaletteId : 0);
                 build.AquaticUtility1SkillPaletteId = (ushort)(Skills_Aquatic[1]?.Id > 0 ? Skills_Aquatic[1]?.PaletteId : 0);
                 build.AquaticUtility2SkillPaletteId = (ushort)(Skills_Aquatic[2]?.Id > 0 ? Skills_Aquatic[2]?.PaletteId : 0);
                 build.AquaticUtility3SkillPaletteId = (ushort)(Skills_Aquatic[3]?.Id > 0 ? Skills_Aquatic[3]?.PaletteId : 0);
