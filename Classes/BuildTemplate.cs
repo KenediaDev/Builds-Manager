@@ -642,7 +642,7 @@ namespace Kenedia.Modules.BuildsManager
 
                 foreach (SpecLine specLine in SpecLines)
                 {
-                    specLine.Changed -= OnChanged;
+                    if(specLine != null) specLine.Changed -= OnChanged;
                 }
 
                 //Profession?.Dispose();
