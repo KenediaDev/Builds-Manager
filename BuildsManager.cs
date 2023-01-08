@@ -551,8 +551,9 @@ namespace Kenedia.Modules.BuildsManager
             TextureManager?.Dispose();
             TextureManager = null;
 
-            _Selected_Template.Edit -= OnSelected_Template_Edit;
-            _Selected_Template.Edit -= null;
+            if (_Selected_Template != null) {
+                _Selected_Template.Edit -= OnSelected_Template_Edit;
+            }
 
             Selected_Template = null;
             CurrentProfession = null;
@@ -570,10 +571,12 @@ namespace Kenedia.Modules.BuildsManager
             ReloadKey.Value.Enabled = false;
             ReloadKey.Value.Activated -= ReloadKey_Activated;
 
-            cornerIcon.MouseEntered -= CornerIcon_MouseEntered;
-            cornerIcon.MouseLeft -= CornerIcon_MouseLeft;
-            cornerIcon.Click -= CornerIcon_Click;
-            cornerIcon.Moved -= CornerIcon_Moved;
+            if (cornerIcon != null) {
+                cornerIcon.MouseEntered -= CornerIcon_MouseEntered;
+                cornerIcon.MouseLeft -= CornerIcon_MouseLeft;
+                cornerIcon.Click -= CornerIcon_Click;
+                cornerIcon.Moved -= CornerIcon_Moved;
+            }
 
             DataLoaded_Event -= BuildsManager_DataLoaded_Event;
             ShowCornerIcon.SettingChanged -= ShowCornerIcon_SettingChanged;
