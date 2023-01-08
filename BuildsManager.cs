@@ -449,7 +449,7 @@ namespace Kenedia.Modules.BuildsManager
             OnSelected_Template_Changed();
         }
 
-        protected override void OnModuleLoaded(EventArgs e)
+        protected override async void OnModuleLoaded(EventArgs e)
         {
             TextureManager = new TextureManager();
 
@@ -487,7 +487,7 @@ namespace Kenedia.Modules.BuildsManager
             // Base handler must be called
             base.OnModuleLoaded(e);
 
-            LoadData();
+            await LoadData();
         }
 
         private void CornerIcon_Moved(object sender, MovedEventArgs e)
