@@ -493,7 +493,7 @@
             this.OnSelected_Template_Changed();
         }
 
-        protected override void OnModuleLoaded(EventArgs e)
+        protected override async void OnModuleLoaded(EventArgs e)
         {
             this.TextureManager = new TextureManager();
 
@@ -531,7 +531,7 @@
             // Base handler must be called
             base.OnModuleLoaded(e);
 
-            this.LoadData();
+            await LoadData();
         }
 
         private void CornerIcon_Moved(object sender, MovedEventArgs e)
@@ -604,8 +604,9 @@
             this.TextureManager?.Dispose();
             this.TextureManager = null;
 
-            this._Selected_Template.Edit -= this.OnSelected_Template_Edit;
-            this._Selected_Template.Edit -= null;
+            if (_Selected_Template != null) {
+                _Selected_Template.Edit -= OnSelected_Template_Edit;
+            }
 
             this.Selected_Template = null;
             this.CurrentProfession = null;
@@ -623,10 +624,10 @@
             this.ReloadKey.Value.Enabled = false;
             this.ReloadKey.Value.Activated -= this.ReloadKey_Activated;
 
-            this.cornerIcon.MouseEntered -= this.CornerIcon_MouseEntered;
-            this.cornerIcon.MouseLeft -= this.CornerIcon_MouseLeft;
-            this.cornerIcon.Click -= this.CornerIcon_Click;
-            this.cornerIcon.Moved -= this.CornerIcon_Moved;
+            cornerIcon.MouseEntered -= CornerIcon_MouseEntered;
+            cornerIcon.MouseLeft -= CornerIcon_MouseLeft;
+            cornerIcon.Click -= CornerIcon_Click;
+            cornerIcon.Moved -= CornerIcon_Moved;
 
             this.DataLoaded_Event -= this.BuildsManager_DataLoaded_Event;
             this.ShowCornerIcon.SettingChanged -= this.ShowCornerIcon_SettingChanged;
