@@ -1,19 +1,19 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using MonoGame.Extended.BitmapFonts;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class SkillSelector_Control : Control
     {
         private class SelectionSkill
@@ -24,85 +24,85 @@
             public bool Hovered;
         }
 
-        public Object currentObject;
-        private CustomTooltip CustomTooltip;
-        private Texture2D _NoWaterTexture;
-        private int _SkillSize = 55;
+        public object currentObject;
+        private readonly CustomTooltip CustomTooltip;
+        private readonly Texture2D _NoWaterTexture;
+        private readonly int _SkillSize = 55;
         public Skill_Control Skill_Control;
-        public List<API.Skill> _Skills = new List<API.Skill>();
-        private List<SelectionSkill> _SelectionSkills = new List<SelectionSkill>();
+        public List<API.Skill> _Skills = new();
+        private List<SelectionSkill> _SelectionSkills = new();
         public bool Aquatic;
 
         public List<API.Skill> Skills
         {
-            get => this._Skills;
+            get => _Skills;
             set
             {
-                this._Skills = value;
+                _Skills = value;
                 if (value != null)
                 {
-                    this._SelectionSkills = new List<SelectionSkill>();
+                    _SelectionSkills = new List<SelectionSkill>();
                     foreach (API.Skill skill in value)
                     {
-                        this._SelectionSkills.Add(new SelectionSkill()
+                        _SelectionSkills.Add(new SelectionSkill()
                         {
                             Skill = skill,
                         });
                     }
 
-                    this.UpdateLayout();
+                    UpdateLayout();
                 }
             }
         }
 
-        private BitmapFont Font;
+        private readonly BitmapFont Font;
 
         public event EventHandler<SkillChangedEvent> SkillChanged;
 
         private void OnSkillChanged(API.Skill skill, Skill_Control skill_Control)
         {
-            this.SkillChanged?.Invoke(this, new SkillChangedEvent(skill, skill_Control));
+            SkillChanged?.Invoke(this, new SkillChangedEvent(skill, skill_Control));
         }
 
         public SkillSelector_Control()
         {
-            this.CustomTooltip = new CustomTooltip(this.Parent)
+            CustomTooltip = new CustomTooltip(Parent)
             {
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
-            this.Font = GameService.Content.DefaultFont18;
-            this.Size = new Point(20 + (4 * this._SkillSize), this._SkillSize * (int)Math.Ceiling(this.Skills.Count / (double)4));
-            this.ClipsBounds = false;
+            Font = GameService.Content.DefaultFont18;
+            Size = new Point(20 + (4 * _SkillSize), _SkillSize * (int)Math.Ceiling(Skills.Count / (double)4));
+            ClipsBounds = false;
 
-            this._NoWaterTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.NoWaterTexture).GetRegion(16, 16, 96, 96);
+            _NoWaterTexture = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.NoWaterTexture).GetRegion(16, 16, 96, 96);
 
-            Input.Mouse.LeftMouseButtonPressed += this.OnGlobalClick;
+            Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            this.CustomTooltip.Dispose();
+            CustomTooltip.Dispose();
 
-            Input.Mouse.LeftMouseButtonPressed -= this.OnGlobalClick;
+            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
         }
 
         private void OnGlobalClick(object sender, MouseEventArgs e)
         {
-            if (this.Visible)
+            if (Visible)
             {
-                foreach (SelectionSkill entry in this._SelectionSkills)
+                foreach (SelectionSkill entry in _SelectionSkills)
                 {
                     if (entry.Hovered)
                     {
-                        var noUnderwater = this.Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
+                        bool noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
                         if (!noUnderwater)
                         {
-                            this.OnSkillChanged(entry.Skill, this.Skill_Control);
-                            this.CustomTooltip.Hide();
-                            this.Hide();
+                            OnSkillChanged(entry.Skill, Skill_Control);
+                            CustomTooltip.Hide();
+                            Hide();
                             Thread.Sleep(100);
                             return;
                         }
@@ -113,30 +113,30 @@
 
         private void UpdateLayout()
         {
-            this.Size = new Point(20 + (4 * this._SkillSize), 40 + (this._SkillSize * (int)Math.Ceiling(this.Skills.Count / (double)4)));
-            var row = 0;
-            var col = 0;
+            Size = new Point(20 + (4 * _SkillSize), 40 + (_SkillSize * (int)Math.Ceiling(Skills.Count / (double)4)));
+            int row = 0;
+            int col = 0;
 
-            var baseRect = new Rectangle(0, 0, this.Width, this.Height);
-            foreach (SelectionSkill entry in this._SelectionSkills)
+            Rectangle baseRect = new(0, 0, Width, Height);
+            foreach (SelectionSkill entry in _SelectionSkills)
             {
-                var rect = new Rectangle(10 + (col * this._SkillSize), 30 + (row * this._SkillSize), this._SkillSize, this._SkillSize);
+                Rectangle rect = new(10 + (col * _SkillSize), 30 + (row * _SkillSize), _SkillSize, _SkillSize);
                 if (!baseRect.Contains(rect))
                 {
                     col = 0;
                     row++;
-                    rect = new Rectangle(10 + (col * this._SkillSize), 30 + (row * this._SkillSize), this._SkillSize, this._SkillSize);
+                    rect = new Rectangle(10 + (col * _SkillSize), 30 + (row * _SkillSize), _SkillSize, _SkillSize);
                 }
 
                 entry.Bounds = rect;
-                entry.Hovered = entry.Bounds.Contains(this.RelativeMousePosition);
+                entry.Hovered = entry.Bounds.Contains(RelativeMousePosition);
                 col++;
             }
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            this.UpdateLayout();
+            UpdateLayout();
 
             spriteBatch.DrawOnCtrl(
                 this,
@@ -147,7 +147,7 @@
                 0f,
                 default);
 
-            var color = Color.Black;
+            Color color = Color.Black;
 
             // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
@@ -165,47 +165,31 @@
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
-            if (this.Skill_Control != null)
+            if (Skill_Control != null)
             {
-                var text = string.Empty;
-                switch (this.Skill_Control.Slot)
+                string text = Skill_Control.Slot switch
                 {
-                    case SkillSlots.Heal:
-                        text = "Healing Skills";
-                        break;
-
-                    case SkillSlots.Elite:
-                        text = "Elite Skills";
-                        break;
-
-                    case SkillSlots.AquaticLegend1:
-                    case SkillSlots.AquaticLegend2:
-                    case SkillSlots.TerrestrialLegend1:
-                    case SkillSlots.TerrestrialLegend2:
-                        text = "Legends";
-                        break;
-
-                    default:
-                        text = "Utility Skills";
-                        break;
-                }
-
-                var sRect = this.Font.GetStringRectangle(text);
+                    SkillSlots.Heal => "Healing Skills",
+                    SkillSlots.Elite => "Elite Skills",
+                    SkillSlots.AquaticLegend1 or SkillSlots.AquaticLegend2 or SkillSlots.TerrestrialLegend1 or SkillSlots.TerrestrialLegend2 => "Legends",
+                    _ => "Utility Skills",
+                };
+                MonoGame.Extended.RectangleF sRect = Font.GetStringRectangle(text);
                 spriteBatch.DrawStringOnCtrl(
                     this,
                     text,
-                    this.Font,
+                    Font,
                     new Rectangle((bounds.Width - (int)sRect.Width) / 2, 0, (int)sRect.Width, 20),
                     Color.White,
                     false,
                     HorizontalAlignment.Left);
 
-                this.CustomTooltip.Visible = false;
-                foreach (SelectionSkill entry in this._SelectionSkills)
+                CustomTooltip.Visible = false;
+                foreach (SelectionSkill entry in _SelectionSkills)
                 {
                     if (entry.Skill != null)
                     {
-                        var noUnderwater = this.Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
+                        bool noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
                         spriteBatch.DrawOnCtrl(
                             this,
                             entry.Skill.Icon._AsyncTexture,
@@ -219,9 +203,9 @@
                         {
                             spriteBatch.DrawOnCtrl(
                                 this,
-                                this._NoWaterTexture,
+                                _NoWaterTexture,
                                 entry.Bounds,
-                                this._NoWaterTexture.Bounds,
+                                _NoWaterTexture.Bounds,
                                 Color.White,
                                 0f,
                                 default);
@@ -247,11 +231,11 @@
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 2, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 1, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
 
-                            this.CustomTooltip.CurrentObject = entry.Skill;
-                            this.CustomTooltip.Header = entry.Skill.Name;
-                            this.CustomTooltip.TooltipContent = new List<string>() { entry.Skill.Description };
-                            this.CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
-                            this.CustomTooltip.Visible = true;
+                            CustomTooltip.CurrentObject = entry.Skill;
+                            CustomTooltip.Header = entry.Skill.Name;
+                            CustomTooltip.TooltipContent = new List<string>() { entry.Skill.Description };
+                            CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
+                            CustomTooltip.Visible = true;
                         }
                     }
                 }

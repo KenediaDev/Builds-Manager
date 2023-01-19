@@ -1,51 +1,51 @@
-﻿namespace Kenedia.Modules.BuildsManager
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using Blish_HUD;
-    using Blish_HUD.Modules.Managers;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Microsoft.Xna.Framework.Graphics;
-    using Newtonsoft.Json;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Blish_HUD;
+using Blish_HUD.Modules.Managers;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
-    public class iData : IDisposable
+namespace Kenedia.Modules.BuildsManager
+{
+    public class Data : IDisposable
     {
-        private bool disposed = false;
+        private bool _disposed = false;
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!_disposed)
             {
-                this.disposed = true;
-                this.Professions.DisposeAll();
-                this.Stats.DisposeAll();
-                this.Runes.DisposeAll();
-                this.Sigils.DisposeAll();
-                this.Armors.DisposeAll();
-                this.Weapons.DisposeAll();
-                this.Trinkets.DisposeAll();
-                this.Legends.DisposeAll();
+                _disposed = true;
+                Professions.DisposeAll();
+                Stats.DisposeAll();
+                Runes.DisposeAll();
+                Sigils.DisposeAll();
+                Armors.DisposeAll();
+                Weapons.DisposeAll();
+                Trinkets.DisposeAll();
+                Legends.DisposeAll();
 
-                this.Stats.Clear();
-                this.Professions.Clear();
-                this.Runes.Clear();
-                this.Sigils.Clear();
-                this.Armors.Clear();
-                this.Weapons.Clear();
-                this.Trinkets.Clear();
-                this.Legends.Clear();
+                Stats.Clear();
+                Professions.Clear();
+                Runes.Clear();
+                Sigils.Clear();
+                Armors.Clear();
+                Weapons.Clear();
+                Trinkets.Clear();
+                Legends.Clear();
 
-                this.SkillID_Pairs.Clear();
+                SkillID_Pairs.Clear();
 
-                this.PlaceHolder?.Dispose();
+                PlaceHolder?.Dispose();
             }
         }
 
-        public class _Legend
+        public class Legend
         {
             public string Name;
             public int Id;
@@ -63,30 +63,30 @@
             public int ID;
         }
 
-        public List<API.Stat> Stats = new List<API.Stat>();
-        public List<API.Profession> Professions = new List<API.Profession>();
-        public List<API.RuneItem> Runes = new List<API.RuneItem>();
-        public List<API.SigilItem> Sigils = new List<API.SigilItem>();
-        public List<API.ArmorItem> Armors = new List<API.ArmorItem>();
-        public List<API.WeaponItem> Weapons = new List<API.WeaponItem>();
-        public List<API.TrinketItem> Trinkets = new List<API.TrinketItem>();
-        public List<SkillID_Pair> SkillID_Pairs = new List<SkillID_Pair>();
-        public List<API.Legend> Legends = new List<API.Legend>();
+        public List<API.Stat> Stats = new();
+        public List<API.Profession> Professions = new();
+        public List<API.RuneItem> Runes = new();
+        public List<API.SigilItem> Sigils = new();
+        public List<API.ArmorItem> Armors = new();
+        public List<API.WeaponItem> Weapons = new();
+        public List<API.TrinketItem> Trinkets = new();
+        public List<SkillID_Pair> SkillID_Pairs = new();
+        public List<API.Legend> Legends = new();
 
         public Texture2D PlaceHolder;
 
         public void UpdateLanguage()
         {
             string file_path;
-            var culture = BuildsManager.getCultureString();
-            List<string> filesToDelete = new List<string>();
+            string culture = BuildsManager.getCultureString();
+            List<string> filesToDelete = new();
 
-            file_path = BuildsManager.ModuleInstance.Paths.professions + @"professions [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                foreach (API.Profession entry in JsonConvert.DeserializeObject<List<API.Profession>>(this.LoadFile(file_path, filesToDelete)))
+                foreach (API.Profession entry in JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var target = this.Professions.Find(e => e.Id == entry.Id);
+                    API.Profession target = Professions.Find(e => e.Id == entry.Id);
 
                     if (target != null)
                     {
@@ -94,14 +94,14 @@
 
                         foreach (API.Specialization specialization in entry.Specializations)
                         {
-                            var targetSpecialization = target.Specializations.Find(e => e.Id == specialization.Id);
+                            API.Specialization targetSpecialization = target.Specializations.Find(e => e.Id == specialization.Id);
                             if (targetSpecialization != null)
                             {
                                 targetSpecialization.Name = specialization.Name;
 
                                 foreach (API.Trait trait in specialization.MajorTraits)
                                 {
-                                    var targetTrait = targetSpecialization.MajorTraits.Find(e => e.Id == trait.Id);
+                                    API.Trait targetTrait = targetSpecialization.MajorTraits.Find(e => e.Id == trait.Id);
                                     if (targetTrait != null)
                                     {
                                         targetTrait.Name = trait.Name;
@@ -111,7 +111,7 @@
 
                                 foreach (API.Trait trait in specialization.MinorTraits)
                                 {
-                                    var targetTrait = targetSpecialization.MinorTraits.Find(e => e.Id == trait.Id);
+                                    API.Trait targetTrait = targetSpecialization.MinorTraits.Find(e => e.Id == trait.Id);
                                     if (targetTrait != null)
                                     {
                                         targetTrait.Name = trait.Name;
@@ -129,7 +129,7 @@
 
                         foreach (API.Skill skill in entry.Skills)
                         {
-                            var targetSkill = target.Skills.Find(e => e.Id == skill.Id);
+                            API.Skill targetSkill = target.Skills.Find(e => e.Id == skill.Id);
                             if (targetSkill != null)
                             {
                                 targetSkill.Name = skill.Name;
@@ -139,7 +139,7 @@
 
                         foreach (API.Legend legend in entry.Legends)
                         {
-                            var targetLegend = target.Legends.Find(e => e.Id == legend.Id);
+                            API.Legend targetLegend = target.Legends.Find(e => e.Id == legend.Id);
                             if (targetLegend != null)
                             {
                                 targetLegend.Name = legend.Name;
@@ -148,10 +148,10 @@
                     }
                 }
 
-                file_path = BuildsManager.ModuleInstance.Paths.stats + @"stats [" + culture + "].json";
-                foreach (API.Stat tStat in JsonConvert.DeserializeObject<List<API.Stat>>(this.LoadFile(file_path, filesToDelete)))
+                file_path = BuildsManager.s_moduleInstance.Paths.stats + @"stats [" + culture + "].json";
+                foreach (API.Stat tStat in JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var stat = this.Stats.Find(e => e.Id == tStat.Id);
+                    API.Stat stat = Stats.Find(e => e.Id == tStat.Id);
                     if (stat != null)
                     {
                         stat.Name = tStat.Name;
@@ -163,10 +163,10 @@
                     }
                 }
 
-                file_path = BuildsManager.ModuleInstance.Paths.runes + @"runes [" + culture + "].json";
-                foreach (API.RuneItem tRune in JsonConvert.DeserializeObject<List<API.RuneItem>>(this.LoadFile(file_path, filesToDelete)))
+                file_path = BuildsManager.s_moduleInstance.Paths.runes + @"runes [" + culture + "].json";
+                foreach (API.RuneItem tRune in JsonConvert.DeserializeObject<List<API.RuneItem>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var rune = this.Runes.Find(e => e.Id == tRune.Id);
+                    API.RuneItem rune = Runes.Find(e => e.Id == tRune.Id);
 
                     if (rune != null)
                     {
@@ -175,10 +175,10 @@
                     }
                 }
 
-                file_path = BuildsManager.ModuleInstance.Paths.sigils + @"sigils [" + culture + "].json";
-                foreach (API.SigilItem tSigil in JsonConvert.DeserializeObject<List<API.SigilItem>>(this.LoadFile(file_path, filesToDelete)))
+                file_path = BuildsManager.s_moduleInstance.Paths.sigils + @"sigils [" + culture + "].json";
+                foreach (API.SigilItem tSigil in JsonConvert.DeserializeObject<List<API.SigilItem>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var sigil = this.Sigils.Find(e => e.Id == tSigil.Id);
+                    API.SigilItem sigil = Sigils.Find(e => e.Id == tSigil.Id);
 
                     if (sigil != null)
                     {
@@ -187,10 +187,10 @@
                     }
                 }
 
-                file_path = BuildsManager.ModuleInstance.Paths.armory + @"armors [" + culture + "].json";
-                foreach (API.ArmorItem tArmor in JsonConvert.DeserializeObject<List<API.ArmorItem>>(this.LoadFile(file_path, filesToDelete)))
+                file_path = BuildsManager.s_moduleInstance.Paths.armory + @"armors [" + culture + "].json";
+                foreach (API.ArmorItem tArmor in JsonConvert.DeserializeObject<List<API.ArmorItem>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var armor = this.Armors.Find(e => e.Id == tArmor.Id);
+                    API.ArmorItem armor = Armors.Find(e => e.Id == tArmor.Id);
 
                     if (armor != null)
                     {
@@ -198,10 +198,10 @@
                     }
                 }
 
-                file_path = BuildsManager.ModuleInstance.Paths.armory + @"weapons [" + culture + "].json";
-                foreach (API.WeaponItem tWeapon in JsonConvert.DeserializeObject<List<API.WeaponItem>>(this.LoadFile(file_path, filesToDelete)))
+                file_path = BuildsManager.s_moduleInstance.Paths.armory + @"weapons [" + culture + "].json";
+                foreach (API.WeaponItem tWeapon in JsonConvert.DeserializeObject<List<API.WeaponItem>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var weapon = this.Weapons.Find(e => e.Id == tWeapon.Id);
+                    API.WeaponItem weapon = Weapons.Find(e => e.Id == tWeapon.Id);
 
                     if (weapon != null)
                     {
@@ -209,10 +209,10 @@
                     }
                 }
 
-                file_path = BuildsManager.ModuleInstance.Paths.armory + @"trinkets [" + culture + "].json";
-                foreach (API.TrinketItem tTrinket in JsonConvert.DeserializeObject<List<API.TrinketItem>>(this.LoadFile(file_path, filesToDelete)))
+                file_path = BuildsManager.s_moduleInstance.Paths.armory + @"trinkets [" + culture + "].json";
+                foreach (API.TrinketItem tTrinket in JsonConvert.DeserializeObject<List<API.TrinketItem>>(LoadFile(file_path, filesToDelete)))
                 {
-                    var trinket = this.Trinkets.Find(e => e.Id == tTrinket.Id);
+                    API.TrinketItem trinket = Trinkets.Find(e => e.Id == tTrinket.Id);
 
                     if (trinket != null)
                     {
@@ -224,8 +224,7 @@
 
         private Texture2D LoadImage(string path, GraphicsDevice graphicsDevice, List<string> filesToDelete, Rectangle region = default, Rectangle default_Bounds = default)
         {
-            var texture = this.PlaceHolder;
-
+            Texture2D texture;
             {
                 try
                 {
@@ -254,24 +253,24 @@
                         filesToDelete.Add(path);
                     }
 
-                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Bug);
+                    texture = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Bug);
                     BuildsManager.Logger.Debug("InvalidOperationException: Failed to load {0}. Fetching the API again.", path);
                     return texture;
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Bug);
+                    texture = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Bug);
                     return texture;
                 }
                 catch (FileNotFoundException)
                 {
-                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Bug);
+                    texture = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Bug);
                     BuildsManager.Logger.Debug("FileNotFoundException: Failed to load {0}. Fetching the API again.", path);
                     return texture;
                 }
                 catch (FileLoadException)
                 {
-                    texture = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Bug);
+                    texture = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Bug);
                     BuildsManager.Logger.Debug("FileLoadException: Failed to load {0}. Fetching the API again.", path);
                     return texture;
                 }
@@ -282,7 +281,7 @@
 
         private string LoadFile(string path, List<string> filesToDelete)
         {
-            var txt = string.Empty;
+            string txt = string.Empty;
 
             {
                 try
@@ -310,70 +309,70 @@
             return txt;
         }
 
-        public iData()
+        public Data()
         {
-            var ContentsManager = BuildsManager.ModuleInstance.ContentsManager;
-            var DirectoriesManager = BuildsManager.ModuleInstance.DirectoriesManager;
+            ContentsManager ContentsManager = BuildsManager.s_moduleInstance.ContentsManager;
+            DirectoriesManager DirectoriesManager = BuildsManager.s_moduleInstance.DirectoriesManager;
 
-            this.PlaceHolder = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Bug);
-            List<string> filesToDelete = new List<string>();
+            PlaceHolder = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Bug);
+            List<string> filesToDelete = new();
 
             string file_path;
-            var culture = BuildsManager.getCultureString();
-            var base_path = BuildsManager.ModuleInstance.Paths.BasePath + @"\api\";
+            string culture = BuildsManager.getCultureString();
+            string base_path = BuildsManager.s_moduleInstance.Paths.BasePath + @"\api\";
 
-            this.SkillID_Pairs = JsonConvert.DeserializeObject<List<SkillID_Pair>>(new StreamReader(ContentsManager.GetFileStream(@"data\skillpalettes.json")).ReadToEnd());
+            SkillID_Pairs = JsonConvert.DeserializeObject<List<SkillID_Pair>>(new StreamReader(ContentsManager.GetFileStream(@"data\skillpalettes.json")).ReadToEnd());
 
-            file_path = BuildsManager.ModuleInstance.Paths.stats + @"stats [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.stats + @"stats [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Stats = JsonConvert.DeserializeObject<List<API.Stat>>(this.LoadFile(file_path, filesToDelete));
+                Stats = JsonConvert.DeserializeObject<List<API.Stat>>(LoadFile(file_path, filesToDelete));
             }
 
-            foreach (API.Stat stat in this.Stats) { stat.Icon._Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) { attri.Name = attri.getLocalName(); attri.Icon._Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
+            foreach (API.Stat stat in Stats) { stat.Icon._Texture = ContentsManager.GetTexture(stat.Icon.Path); stat.Attributes.Sort((a, b) => b.Multiplier.CompareTo(a.Multiplier)); foreach (API.StatAttribute attri in stat.Attributes) { attri.Name = attri.getLocalName(); attri.Icon._Texture = ContentsManager.GetTexture(attri.Icon.Path); } }
 
-            file_path = BuildsManager.ModuleInstance.Paths.professions + @"professions [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.professions + @"professions [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Professions = JsonConvert.DeserializeObject<List<API.Profession>>(this.LoadFile(file_path, filesToDelete));
+                Professions = JsonConvert.DeserializeObject<List<API.Profession>>(LoadFile(file_path, filesToDelete));
             }
 
-            file_path = BuildsManager.ModuleInstance.Paths.runes + @"runes [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.runes + @"runes [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Runes = JsonConvert.DeserializeObject<List<API.RuneItem>>(this.LoadFile(file_path, filesToDelete));
+                Runes = JsonConvert.DeserializeObject<List<API.RuneItem>>(LoadFile(file_path, filesToDelete));
             }
 
-            file_path = BuildsManager.ModuleInstance.Paths.sigils + @"sigils [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.sigils + @"sigils [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Sigils = JsonConvert.DeserializeObject<List<API.SigilItem>>(this.LoadFile(file_path, filesToDelete));
+                Sigils = JsonConvert.DeserializeObject<List<API.SigilItem>>(LoadFile(file_path, filesToDelete));
             }
 
-            file_path = BuildsManager.ModuleInstance.Paths.armory + @"armors [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.armory + @"armors [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Armors = JsonConvert.DeserializeObject<List<API.ArmorItem>>(this.LoadFile(file_path, filesToDelete));
+                Armors = JsonConvert.DeserializeObject<List<API.ArmorItem>>(LoadFile(file_path, filesToDelete));
             }
 
-            file_path = BuildsManager.ModuleInstance.Paths.armory + @"weapons [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.armory + @"weapons [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Weapons = JsonConvert.DeserializeObject<List<API.WeaponItem>>(this.LoadFile(file_path, filesToDelete));
+                Weapons = JsonConvert.DeserializeObject<List<API.WeaponItem>>(LoadFile(file_path, filesToDelete));
             }
 
-            file_path = BuildsManager.ModuleInstance.Paths.armory + @"trinkets [" + culture + "].json";
+            file_path = BuildsManager.s_moduleInstance.Paths.armory + @"trinkets [" + culture + "].json";
             if (System.IO.File.Exists(file_path))
             {
-                this.Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(this.LoadFile(file_path, filesToDelete));
+                Trinkets = JsonConvert.DeserializeObject<List<API.TrinketItem>>(LoadFile(file_path, filesToDelete));
             }
 
-            this.Trinkets = this.Trinkets.OrderBy(e => e.TrinketType).ToList();
-            this.Weapons = this.Weapons.OrderBy(e => (int)e.WeaponType).ToList();
+            Trinkets = Trinkets.OrderBy(e => e.TrinketType).ToList();
+            Weapons = Weapons.OrderBy(e => (int)e.WeaponType).ToList();
 
-            Texture2D texture = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Bug);
+            Texture2D texture = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Bug);
 
-            foreach (API.Profession profession in this.Professions)
+            foreach (API.Profession profession in Professions)
             {
                 profession.Icon.ImageRegion = new Rectangle(4, 4, 26, 26);
 
@@ -437,10 +436,7 @@
                 }
             }
 
-            GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
-            {
-                BuildsManager.ModuleInstance.DataLoaded = true;
-            });
+            GameService.Graphics.QueueMainThreadRender((graphicsDevice) => BuildsManager.s_moduleInstance.DataLoaded = true);
         }
     }
 }

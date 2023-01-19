@@ -4,54 +4,31 @@
     {
         public static string getLocalName(this API.weaponType weaponType)
         {
-            var text = weaponType.ToString();
+            string text = weaponType.ToString();
 
-            switch (weaponType)
+            return weaponType switch
             {
-                case API.weaponType.Axe:
-                    return Strings.common.Axe;
-                case API.weaponType.Dagger:
-                    return Strings.common.Dagger;
-                case API.weaponType.Mace:
-                    return Strings.common.Mace;
-                case API.weaponType.Pistol:
-                    return Strings.common.Pistol;
-                case API.weaponType.Scepter:
-                    return Strings.common.Scepter;
-                case API.weaponType.Sword:
-                    return Strings.common.Sword;
-                case API.weaponType.Focus:
-                    return Strings.common.Focus;
-                case API.weaponType.Shield:
-                    return Strings.common.Shield;
-                case API.weaponType.Torch:
-                    return Strings.common.Torch;
-                case API.weaponType.Warhorn:
-                    return Strings.common.Warhorn;
-                case API.weaponType.Greatsword:
-                    return Strings.common.Greatsword;
-                case API.weaponType.Hammer:
-                    return Strings.common.Hammer;
-                case API.weaponType.Longbow:
-                    // case API.weaponType.LongBow:
-                    return Strings.common.Longbow;
-                case API.weaponType.Rifle:
-                    return Strings.common.Rifle;
-                case API.weaponType.Shortbow:
-                    // case API.weaponType.ShortBow:
-                    return Strings.common.Shortbow;
-                case API.weaponType.Staff:
-                    return Strings.common.Staff;
-                case API.weaponType.Spear:
-                    // case API.weaponType.Harpoon:
-                    return Strings.common.Spear;
-                case API.weaponType.Speargun:
-                    return Strings.common.Speargun;
-                case API.weaponType.Trident:
-                    return Strings.common.Trident;
-            }
-
-            return text;
+                API.weaponType.Axe => Strings.common.Axe,
+                API.weaponType.Dagger => Strings.common.Dagger,
+                API.weaponType.Mace => Strings.common.Mace,
+                API.weaponType.Pistol => Strings.common.Pistol,
+                API.weaponType.Scepter => Strings.common.Scepter,
+                API.weaponType.Sword => Strings.common.Sword,
+                API.weaponType.Focus => Strings.common.Focus,
+                API.weaponType.Shield => Strings.common.Shield,
+                API.weaponType.Torch => Strings.common.Torch,
+                API.weaponType.Warhorn => Strings.common.Warhorn,
+                API.weaponType.Greatsword => Strings.common.Greatsword,
+                API.weaponType.Hammer => Strings.common.Hammer,
+                API.weaponType.Longbow => Strings.common.Longbow,// case API.weaponType.LongBow:
+                API.weaponType.Rifle => Strings.common.Rifle,
+                API.weaponType.Shortbow => Strings.common.Shortbow,// case API.weaponType.ShortBow:
+                API.weaponType.Staff => Strings.common.Staff,
+                API.weaponType.Spear => Strings.common.Spear,// case API.weaponType.Harpoon:
+                API.weaponType.Speargun => Strings.common.Speargun,
+                API.weaponType.Trident => Strings.common.Trident,
+                _ => text,
+            };
         }
     }
 }

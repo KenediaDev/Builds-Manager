@@ -1,24 +1,24 @@
-﻿namespace Kenedia.Modules.BuildsManager.Models
-{
-    using System;
-    using System.Collections.Generic;
-    using Kenedia.Modules.BuildsManager.Controls;
-    using Kenedia.Modules.BuildsManager.Extensions;
+﻿using System;
+using System.Collections.Generic;
+using Kenedia.Modules.BuildsManager.Controls;
+using Kenedia.Modules.BuildsManager.Extensions;
 
+namespace Kenedia.Modules.BuildsManager.Models
+{
     public class SpecLine : IDisposable
     {
         private bool disposed = false;
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!disposed)
             {
-                this.disposed = true;
-                this._Specialization?.Dispose();
+                disposed = true;
+                _Specialization?.Dispose();
 
                 // Specialization?.Dispose();
-                this.Traits?.DisposeAll();
-                this.Control?.Dispose();
+                Traits?.DisposeAll();
+                Control?.Dispose();
             }
         }
 
@@ -27,16 +27,16 @@
 
         public API.Specialization Specialization
         {
-            get => this._Specialization;
+            get => _Specialization;
             set
             {
-                this._Specialization = value;
-                this.Traits = new List<API.Trait>();
-                this.Changed?.Invoke(this, EventArgs.Empty);
+                _Specialization = value;
+                Traits = new List<API.Trait>();
+                Changed?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        public List<API.Trait> Traits = new List<API.Trait>();
+        public List<API.Trait> Traits = new();
         public EventHandler Changed;
         public Specialization_Control Control;
     }

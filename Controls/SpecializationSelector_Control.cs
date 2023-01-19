@@ -1,17 +1,17 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using System.Collections.Generic;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using System.Collections.Generic;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class SpecializationSelector_Control : Control
     {
         public Specialization_Control Specialization_Control;
@@ -21,32 +21,29 @@
 
         public API.Specialization Specialization
         {
-            get => this._Specialization;
+            get => _Specialization;
             set
             {
                 if (value != null)
                 {
-                    this._Specialization = value;
+                    _Specialization = value;
                 }
             }
         }
 
-        public Template Template
-        {
-            get => BuildsManager.ModuleInstance.Selected_Template;
-        }
+        public Template Template => BuildsManager.s_moduleInstance.Selected_Template;
 
         public SpecializationSelector_Control()
         {
-            BuildsManager.ModuleInstance.Selected_Template_Changed += this.ClosePopUp;
-            Input.Mouse.LeftMouseButtonPressed += this.ClosePopUp;
+            BuildsManager.s_moduleInstance.Selected_Template_Changed += ClosePopUp;
+            Input.Mouse.LeftMouseButtonPressed += ClosePopUp;
         }
 
         private void ClosePopUp(object sender, EventArgs e)
         {
-            if (!this.MouseOver)
+            if (!MouseOver)
             {
-                this.Hide();
+                Hide();
             }
         }
 
@@ -54,54 +51,54 @@
         {
             base.OnClick(e);
 
-            var i = 0;
-            var size = 64;
-            if (this.Template.Build.Profession != null)
+            int i = 0;
+            int size = 64;
+            if (Template.Build.Profession != null)
             {
-                foreach (API.Specialization spec in this.Template.Build.Profession.Specializations)
+                foreach (API.Specialization spec in Template.Build.Profession.Specializations)
                 {
-                    if (!spec.Elite || this.Elite)
+                    if (!spec.Elite || Elite)
                     {
-                        var rect = new Rectangle(20 + (i * size), (this.Height - size) / 2, size, size);
+                        Rectangle rect = new(20 + (i * size), (Height - size) / 2, size, size);
 
-                        if (rect.Contains(this.RelativeMousePosition))
+                        if (rect.Contains(RelativeMousePosition))
                         {
-                            var sp = this.Template.Build.SpecLines.Find(x => x.Specialization != null && x.Specialization.Id == spec.Id);
+                            SpecLine sp = Template.Build.SpecLines.Find(x => x.Specialization != null && x.Specialization.Id == spec.Id);
 
-                            if (sp != null && sp != this.Template.Build.SpecLines[this.Index])
+                            if (sp != null && sp != Template.Build.SpecLines[Index])
                             {
                                 // var traits = new List<API.Trait>(sp.Traits);
-                                this.Template.Build.SpecLines[this.Index].Specialization = sp.Specialization;
-                                this.Template.Build.SpecLines[this.Index].Traits = sp.Traits;
+                                Template.Build.SpecLines[Index].Specialization = sp.Specialization;
+                                Template.Build.SpecLines[Index].Traits = sp.Traits;
 
                                 // Template.Build.SpecLines[Index].Control.UpdateLayout();
-                                this.Template.SetChanged();
+                                Template.SetChanged();
 
                                 sp.Specialization = null;
                                 sp.Traits = new List<API.Trait>();
                             }
                             else
                             {
-                                if (this.Template.Build.SpecLines[this.Index] != null)
+                                if (Template.Build.SpecLines[Index] != null)
                                 {
-                                    foreach (SpecLine specLine in this.Template.Build.SpecLines)
+                                    foreach (SpecLine specLine in Template.Build.SpecLines)
                                     {
-                                        if (spec != this.Specialization && specLine.Specialization == spec)
+                                        if (spec != Specialization && specLine.Specialization == spec)
                                         {
                                             specLine.Specialization = null;
                                             specLine.Traits = new List<API.Trait>();
                                         }
                                     }
 
-                                    if (this.Template.Build.SpecLines[this.Index].Specialization != spec)
+                                    if (Template.Build.SpecLines[Index].Specialization != spec)
                                     {
-                                        this.Template.Build.SpecLines[this.Index].Specialization = spec;
-                                        this.Template.SetChanged();
+                                        Template.Build.SpecLines[Index].Specialization = spec;
+                                        Template.SetChanged();
                                     }
                                 }
                             }
 
-                            this.Hide();
+                            Hide();
                             return;
                         }
 
@@ -110,42 +107,42 @@
                 }
             }
 
-            this.Hide();
+            Hide();
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             spriteBatch.DrawOnCtrl(
-                this.Parent,
+                Parent,
                 ContentService.Textures.Pixel,
-                bounds.Add(this.Location),
+                bounds.Add(Location),
                 bounds,
                 new Color(0, 0, 0, 205),
                 0f,
                 Vector2.Zero);
 
-            if (this.Template.Build.Profession != null)
+            if (Template.Build.Profession != null)
             {
                 string text = string.Empty;
 
-                var i = 0;
-                var size = 64;
-                foreach (API.Specialization spec in this.Template.Build.Profession.Specializations)
+                int i = 0;
+                int size = 64;
+                foreach (API.Specialization spec in Template.Build.Profession.Specializations)
                 {
-                    if (!spec.Elite || this.Elite)
+                    if (!spec.Elite || Elite)
                     {
-                        var rect = new Rectangle(20 + (i * size), (this.Height - size) / 2, size, size);
-                        if (rect.Contains(this.RelativeMousePosition))
+                        Rectangle rect = new(20 + (i * size), (Height - size) / 2, size, size);
+                        if (rect.Contains(RelativeMousePosition))
                         {
                             text = spec.Name;
                         }
 
                         spriteBatch.DrawOnCtrl(
-                            this.Parent,
+                            Parent,
                             spec.Icon._AsyncTexture,
-                            rect.Add(this.Location),
+                            rect.Add(Location),
                             spec.Icon._AsyncTexture.Texture.Bounds,
-                            this.Specialization == spec || rect.Contains(this.RelativeMousePosition) ? Color.White : Color.Gray,
+                            Specialization == spec || rect.Contains(RelativeMousePosition) ? Color.White : Color.Gray,
                             0f,
                             Vector2.Zero);
                         i++;
@@ -154,11 +151,11 @@
 
                 if (text != string.Empty)
                 {
-                    this.BasicTooltipText = text;
+                    BasicTooltipText = text;
                 }
                 else
                 {
-                    this.BasicTooltipText = null;
+                    BasicTooltipText = null;
                 }
             }
         }
@@ -166,8 +163,8 @@
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= this.ClosePopUp;
-            Input.Mouse.LeftMouseButtonPressed -= this.ClosePopUp;
+            BuildsManager.s_moduleInstance.Selected_Template_Changed -= ClosePopUp;
+            Input.Mouse.LeftMouseButtonPressed -= ClosePopUp;
         }
     }
 }

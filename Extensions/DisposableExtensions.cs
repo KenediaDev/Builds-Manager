@@ -1,13 +1,13 @@
-﻿namespace Kenedia.Modules.BuildsManager.Extensions
-{
-    using System;
-    using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
+namespace Kenedia.Modules.BuildsManager.Extensions
+{
     internal static class DisposableExtensions
     {
         public static void DisposeAll(this IEnumerable<IDisposable> disposables)
         {
-            foreach (var d in disposables)
+            foreach (IDisposable d in disposables)
             {
                 d?.Dispose();
             }

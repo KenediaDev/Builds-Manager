@@ -1,26 +1,26 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using Blish_HUD.Controls;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Microsoft.Xna.Framework;
-    using Color = Microsoft.Xna.Framework.Color;
+﻿using Blish_HUD.Controls;
+using Kenedia.Modules.BuildsManager.Enums;
+using Microsoft.Xna.Framework;
+using Color = Microsoft.Xna.Framework.Color;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class ProgressBar : Panel
     {
         public double _Progress = 0.33;
 
         public double Progress
         {
-            get { return this._Progress; }
-            set { this._Progress = value; this.UpdateLayout(); }
+            get { return _Progress; }
+            set { _Progress = value; UpdateLayout(); }
         }
 
         public string _Text;
 
         public string Text
         {
-            get { return this._Text; }
-            set { this._Text = value; this.UpdateLayout(); }
+            get { return _Text; }
+            set { _Text = value; UpdateLayout(); }
         }
 
         public Color Done_Color;
@@ -33,37 +33,37 @@
 
         public ProgressBar()
         {
-            this._BackgroundTexture = new Image()
+            _BackgroundTexture = new Image()
             {
                 Parent = this,
-                Size = new Point(this.Size.X, this.Size.Y - 10),
-                Texture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.GlidingFill_Gray),
+                Size = new Point(Size.X, Size.Y - 10),
+                Texture = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.GlidingFill_Gray),
             };
 
-            this._Bar = new ProgressContainer()
+            _Bar = new ProgressContainer()
             {
                 Parent = this,
-                Size = this.Size,
+                Size = Size,
                 FrameColor = Color.DarkOrange,
             };
 
-            this._Bar_Done = new Panel()
+            _Bar_Done = new Panel()
             {
                 Parent = this,
-                Size = new Point((int)(this.Width * this.Progress), this.Height),
+                Size = new Point((int)(Width * Progress), Height),
             };
 
-            this._FilledTexture = new Image()
+            _FilledTexture = new Image()
             {
-                Parent = this._Bar_Done,
-                Size = new Point(this.Size.X, this.Size.Y - 2),
-                Texture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.GlidingFill),
+                Parent = _Bar_Done,
+                Size = new Point(Size.X, Size.Y - 2),
+                Texture = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.GlidingFill),
             };
 
-            this._Label = new Label()
+            _Label = new Label()
             {
                 Parent = this,
-                Size = this.Size,
+                Size = Size,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Middle,
                 Text = "Display Text",
@@ -77,28 +77,28 @@
         {
             base.OnResized(e);
 
-            this.UpdateLayout();
+            UpdateLayout();
         }
 
         private void UpdateLayout()
         {
-            this._Bar.Size = new Point(this.Size.X, this.Size.Y - 2);
-            this._Label.Size = new Point(this.Size.X, this.Size.Y - 2);
-            this._BackgroundTexture.Size = new Point(this.Size.X, this.Size.Y - 3);
-            this._FilledTexture.Size = new Point(this.Size.X, this.Size.Y - 3);
-            this._Bar_Done.Size = new Point((int)(this.Width * this.Progress), this.Height);
+            _Bar.Size = new Point(Size.X, Size.Y - 2);
+            _Label.Size = new Point(Size.X, Size.Y - 2);
+            _BackgroundTexture.Size = new Point(Size.X, Size.Y - 3);
+            _FilledTexture.Size = new Point(Size.X, Size.Y - 3);
+            _Bar_Done.Size = new Point((int)(Width * Progress), Height);
 
-            this._Label.Text = this.Text;
+            _Label.Text = Text;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            this._Bar_Done.Dispose();
-            this._Bar.Dispose();
-            this._Label.Dispose();
-            this._FilledTexture.Dispose();
-            this._BackgroundTexture.Dispose();
+            _Bar_Done.Dispose();
+            _Bar.Dispose();
+            _Label.Dispose();
+            _FilledTexture.Dispose();
+            _BackgroundTexture.Dispose();
         }
     }
 }

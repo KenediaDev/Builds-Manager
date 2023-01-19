@@ -1,8 +1,8 @@
-﻿namespace Kenedia.Modules.BuildsManager.Extensions
-{
-    using System;
-    using Point = Microsoft.Xna.Framework.Point;
+﻿using System;
+using Point = Microsoft.Xna.Framework.Point;
 
+namespace Kenedia.Modules.BuildsManager.Extensions
+{
     public static class PointExtension
     {
         public static Point Scale(this Point p, double factor)

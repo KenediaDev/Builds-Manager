@@ -1,18 +1,18 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class ProfessionSelection : IDisposable
     {
         private bool disposed = false;
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!disposed)
             {
-                this.disposed = true;
-                this.Profession = null;
+                disposed = true;
+                Profession = null;
             }
         }
 

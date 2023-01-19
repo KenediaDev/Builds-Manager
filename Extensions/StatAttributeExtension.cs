@@ -8,37 +8,19 @@ namespace Kenedia.Modules.BuildsManager.Extensions
         {
             string text = attribute.Name;
 
-            switch (attribute.Id)
+            return attribute.Id switch
             {
-                case (int)Stats.Power:
-                    return Strings.common.Power;
-
-                case (int)Stats.Precision:
-                    return Strings.common.Precision;
-
-                case (int)Stats.Toughness:
-                    return Strings.common.Toughness;
-
-                case (int)Stats.Vitality:
-                    return Strings.common.Vitality;
-
-                case (int)Stats.Ferocity:
-                    return Strings.common.Ferocity;
-
-                case (int)Stats.HealingPower:
-                    return Strings.common.HealingPower;
-
-                case (int)Stats.ConditionDamage:
-                    return Strings.common.ConditionDamage;
-
-                case (int)Stats.Concentration:
-                    return Strings.common.Concentration;
-
-                case (int)Stats.Expertise:
-                    return Strings.common.Expertise;
-            }
-
-            return text;
+                (int)Stats.Power => Strings.common.Power,
+                (int)Stats.Precision => Strings.common.Precision,
+                (int)Stats.Toughness => Strings.common.Toughness,
+                (int)Stats.Vitality => Strings.common.Vitality,
+                (int)Stats.Ferocity => Strings.common.Ferocity,
+                (int)Stats.HealingPower => Strings.common.HealingPower,
+                (int)Stats.ConditionDamage => Strings.common.ConditionDamage,
+                (int)Stats.Concentration => Strings.common.Concentration,
+                (int)Stats.Expertise => Strings.common.Expertise,
+                _ => text,
+            };
         }
     }
 }

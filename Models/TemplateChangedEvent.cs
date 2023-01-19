@@ -6,7 +6,7 @@
 
         public TemplateChangedEvent(Template template)
         {
-            this.Template = template;
+            Template = template;
         }
     }
 }

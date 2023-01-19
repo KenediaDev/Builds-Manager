@@ -1,41 +1,37 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class Trait_Control : Control
     {
-        private double _Scale = 1;
-        private int _LineThickness = 5;
+        private double _scale = 1;
 
         public double Scale
         {
-            get => this._Scale;
+            get => _scale;
             set
             {
-                this._Scale = value;
-                this.UpdateLayout();
+                _scale = value;
+                UpdateLayout();
             }
         }
 
         private const int _TraitSize = 38;
-        private Texture2D _Line;
+        private readonly Texture2D _Line;
 
-        public Template Template
-        {
-            get => BuildsManager.ModuleInstance.Selected_Template;
-        }
+        public Template Template => BuildsManager.s_moduleInstance.Selected_Template;
 
         public int Index;
 
@@ -43,39 +39,39 @@
         public int SpecIndex;
         public API.traitType TraitType;
 
-        private CustomTooltip CustomTooltip;
-        private Specialization_Control Specialization_Control;
+        private readonly CustomTooltip CustomTooltip;
+        private readonly Specialization_Control Specialization_Control;
 
         public Trait_Control(Container parent, Point p, API.Trait trait, CustomTooltip customTooltip, Specialization_Control specialization_Control)
         {
-            this.Parent = parent;
-            this.CustomTooltip = customTooltip;
-            this.Specialization_Control = specialization_Control;
-            this.DefaultPoint = p;
-            this.Location = p;
-            this.DefaultBounds = new Rectangle(0, 0, _TraitSize, _TraitSize);
-            this._Trait = trait;
-            this.Size = new Point(_TraitSize, _TraitSize);
-            this._Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            Parent = parent;
+            CustomTooltip = customTooltip;
+            Specialization_Control = specialization_Control;
+            DefaultPoint = p;
+            Location = p;
+            DefaultBounds = new Rectangle(0, 0, _TraitSize, _TraitSize);
+            _Trait = trait;
+            Size = new Point(_TraitSize, _TraitSize);
+            _Line = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.Line).GetRegion(new Rectangle(22, 15, 85, 5));
 
-            this.ClipsBounds = false;
-            this.UpdateLayout();
+            ClipsBounds = false;
+            UpdateLayout();
         }
 
         protected override void OnMouseEntered(MouseEventArgs e)
         {
             base.OnMouseEntered(e);
 
-            if (this.Trait != null)
+            if (Trait != null)
             {
-                this.CustomTooltip.Visible = true;
+                CustomTooltip.Visible = true;
 
-                if (this.CustomTooltip.CurrentObject != this)
+                if (CustomTooltip.CurrentObject != this)
                 {
-                    this.CustomTooltip.CurrentObject = this;
-                    this.CustomTooltip.Header = this.Trait.Name;
-                    this.CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
-                    this.CustomTooltip.TooltipContent = new List<string>() { this.Trait.Description == string.Empty ? "No Description in API" : this.Trait.Description };
+                    CustomTooltip.CurrentObject = this;
+                    CustomTooltip.Header = Trait.Name;
+                    CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
+                    CustomTooltip.TooltipContent = new List<string>() { Trait.Description == string.Empty ? "No Description in API" : Trait.Description };
                 }
             }
         }
@@ -84,9 +80,9 @@
         {
             base.OnMouseLeft(e);
 
-            if (this.CustomTooltip.CurrentObject == this)
+            if (CustomTooltip.CurrentObject == this)
             {
-                this.CustomTooltip.Visible = false;
+                CustomTooltip.Visible = false;
             }
         }
 
@@ -94,31 +90,31 @@
         {
             base.OnClick(mouse);
 
-            if (this.Trait != null && this.Trait.Type == API.traitType.Major && this.Template != null && this.MouseOver)
+            if (Trait != null && Trait.Type == API.traitType.Major && Template != null && MouseOver)
             {
-                if (this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Contains(this.Trait))
+                if (Template.Build.SpecLines[Specialization_Control.Index].Traits.Contains(Trait))
                 {
-                    this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Remove(this.Trait);
+                    Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(Trait);
                 }
                 else
                 {
-                    foreach (API.Trait t in this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Where(e => e.Tier == this.Trait.Tier).ToList())
+                    foreach (API.Trait t in Template.Build.SpecLines[Specialization_Control.Index].Traits.Where(e => e.Tier == Trait.Tier).ToList())
                     {
-                        this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Remove(t);
+                        Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(t);
                     }
 
-                    this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Add(this.Trait);
+                    Template.Build.SpecLines[Specialization_Control.Index].Traits.Add(Trait);
                 }
 
-                this.Template.SetChanged();
+                Template.SetChanged();
             }
         }
 
-        private API.Trait _Trait;
+        private readonly API.Trait _Trait;
 
         public API.Trait Trait
         {
-            get => this.TraitType != null ? this.TraitType == API.traitType.Major ? this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MajorTraits[this.TraitIndex] : this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MinorTraits[this.TraitIndex] : null;
+            get => TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
             set
             {
             }
@@ -130,9 +126,9 @@
         {
             get
             {
-                var trait = this.TraitType == API.traitType.Major ? this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MajorTraits[this.TraitIndex] : this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MinorTraits[this.TraitIndex];
+                API.Trait trait = TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
 
-                return this.Template != null && trait != null && (trait.Type == API.traitType.Minor || this.Template.Build.SpecLines[this.SpecIndex].Traits.Contains(trait));
+                return Template != null && trait != null && (trait.Type == API.traitType.Minor || Template.Build.SpecLines[SpecIndex].Traits.Contains(trait));
             }
         }
 
@@ -142,11 +138,11 @@
         public Rectangle Bounds;
         public Rectangle DefaultBounds;
 
-        public ConnectorLine PreLine = new ConnectorLine();
-        public ConnectorLine PostLine = new ConnectorLine();
+        public ConnectorLine PreLine = new();
+        public ConnectorLine PostLine = new();
         public EventHandler Changed;
 
-        private List<Point> _MinorTraits = new List<Point>()
+        private readonly List<Point> _MinorTraits = new()
         {
             new Point(215, (133 - 38) / 2),
             new Point(360, (133 - 38) / 2),
@@ -155,27 +151,27 @@
 
         private void UpdateLayout()
         {
-            this.Bounds = this.DefaultBounds.Scale(this.Scale);
-            this.Location = this.DefaultPoint.Scale(this.Scale);
+            Bounds = DefaultBounds.Scale(Scale);
+            Location = DefaultPoint.Scale(Scale);
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (this.Template == null || this.Bounds == null)
+            if (Template == null || Bounds == null)
             {
                 return;
             }
 
-            var trait = this.TraitType == API.traitType.Major ? this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MajorTraits[this.TraitIndex] : this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MinorTraits[this.TraitIndex];
+            API.Trait trait = TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
 
             if (trait != null)
             {
                 spriteBatch.DrawOnCtrl(
                     this,
                     trait.Icon._AsyncTexture,
-                    this.Bounds,
+                    Bounds,
                     trait.Icon._AsyncTexture.Texture.Bounds,
-                    this.Selected ? Color.White : (this.MouseOver ? Color.LightGray : Color.Gray),
+                    Selected ? Color.White : (MouseOver ? Color.LightGray : Color.Gray),
                     0f,
                     default);
 
@@ -184,7 +180,6 @@
 
         public void SetTemplate()
         {
-            var template = BuildsManager.ModuleInstance.Selected_Template;
 
         }
     }

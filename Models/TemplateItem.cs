@@ -1,21 +1,21 @@
-﻿namespace Kenedia.Modules.BuildsManager.Models
-{
-    using System;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using Kenedia.Modules.BuildsManager.Enums;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Models
+{
     public class TemplateItem : TemplateItem_json, IDisposable
     {
         private bool disposed = false;
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!disposed)
             {
-                this.disposed = true;
+                disposed = true;
 
                 // Stat?.Dispose();
-                this.Stat = null;
+                Stat = null;
             }
         }
 

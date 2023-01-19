@@ -1,112 +1,112 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
 
-    public class Control_TemplateSelection : FlowPanel
+namespace Kenedia.Modules.BuildsManager.Controls
+{
+    public class ControlTemplateSelection : FlowPanel
     {
         private bool ResizeChilds = false;
         public TextBox FilterBox;
         public FlowPanel ContentPanel;
-        private Control_ProfessionSelector _ProfessionSelector;
-        private List<Control_TemplateEntry> Templates = new List<Control_TemplateEntry>();
+        private readonly Control_ProfessionSelector _ProfessionSelector;
+        private readonly List<Control_TemplateEntry> Templates = new();
 
-        public Control_TemplateSelection(Container parent)
+        public ControlTemplateSelection(Container parent)
         {
-            this.Parent = parent;
-            this.FlowDirection = ControlFlowDirection.SingleTopToBottom;
-            this.ControlPadding = new Vector2(0, 3);
-            this.FilterBox = new TextBox()
+            Parent = parent;
+            FlowDirection = ControlFlowDirection.SingleTopToBottom;
+            ControlPadding = new Vector2(0, 3);
+            FilterBox = new TextBox()
             {
                 Location = new Point(5, 0),
                 Parent = this,
-                Width = this.Width - 5,
+                Width = Width - 5,
                 PlaceholderText = Strings.common.Search + " ...",
             };
 
-            this._ProfessionSelector = new Control_ProfessionSelector()
+            _ProfessionSelector = new Control_ProfessionSelector()
             {
                 Parent = this,
-                Size = new Point(this.Width - 5, this.FilterBox.Height),
-                Location = new Point(5, this.FilterBox.Bottom + 5),
+                Size = new Point(Width - 5, FilterBox.Height),
+                Location = new Point(5, FilterBox.Bottom + 5),
             };
-            this.ContentPanel = new FlowPanel()
+            ContentPanel = new FlowPanel()
             {
                 Parent = this,
-                Size = new Point(this.Width, this.Height - this.AbsoluteBounds.Y - 5),
-                Location = new Point(5, this._ProfessionSelector.Bottom + 5),
+                Size = new Point(Width, Height - AbsoluteBounds.Y - 5),
+                Location = new Point(5, _ProfessionSelector.Bottom + 5),
                 CanScroll = true,
                 FlowDirection = ControlFlowDirection.SingleTopToBottom,
             };
 
-            this.Location = new Point(this.FilterBox.LocalBounds.Left, this._ProfessionSelector.LocalBounds.Bottom + 5);
-            this.Size = new Point(255, parent.Height - (this.AbsoluteBounds.Y - 5));
+            Location = new Point(FilterBox.LocalBounds.Left, _ProfessionSelector.LocalBounds.Bottom + 5);
+            Size = new Point(255, parent.Height - (AbsoluteBounds.Y - 5));
 
             // BackgroundColor = Color.Magenta;
-            this.Refresh();
-            this.FilterBox.TextChanged += this.FilterBox_TextChanged;
-            this._ProfessionSelector.Changed += this._ProfessionSelector_Changed;
+            Refresh();
+            FilterBox.TextChanged += FilterBox_TextChanged;
+            _ProfessionSelector.Changed += _ProfessionSelector_Changed;
 
-            BuildsManager.ModuleInstance.LanguageChanged += this.ModuleInstance_LanguageChanged;
-            BuildsManager.ModuleInstance.Templates_Loaded += this.ModuleInstance_Templates_Loaded;
-            BuildsManager.ModuleInstance.Template_Deleted += this.ModuleInstance_Template_Deleted;
-            this.ContentPanel.ChildAdded += this.ContentPanel_ChildsChanged;
-            this.ContentPanel.ChildRemoved += this.ContentPanel_ChildsChanged;
+            BuildsManager.s_moduleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
+            BuildsManager.s_moduleInstance.Templates_Loaded += ModuleInstance_Templates_Loaded;
+            BuildsManager.s_moduleInstance.Template_Deleted += ModuleInstance_Template_Deleted;
+            ContentPanel.ChildAdded += ContentPanel_ChildsChanged;
+            ContentPanel.ChildRemoved += ContentPanel_ChildsChanged;
         }
 
         private void _ProfessionSelector_Changed(object sender, EventArgs e)
         {
-            this.RefreshList();
+            RefreshList();
         }
 
         private void ModuleInstance_Template_Deleted(object sender, EventArgs e)
         {
-            this.Refresh();
+            Refresh();
         }
 
         public void SetSelection()
         {
-            var player = GameService.Gw2Mumble.PlayerCharacter;
-            this._ProfessionSelector.Professions.Clear();
-            this._ProfessionSelector.Professions.Add(BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == player.Profession.ToString()));
-            this.RefreshList();
+            Blish_HUD.Gw2Mumble.PlayerCharacter player = GameService.Gw2Mumble.PlayerCharacter;
+            _ProfessionSelector.Professions.Clear();
+            _ProfessionSelector.Professions.Add(BuildsManager.s_moduleInstance.Data.Professions.Find(e => e.Id == player.Profession.ToString()));
+            RefreshList();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
-            this.FilterBox.PlaceholderText = Strings.common.Search + " ...";
+            FilterBox.PlaceholderText = Strings.common.Search + " ...";
         }
 
         private void ContentPanel_ChildsChanged(object sender, ChildChangedEventArgs e)
         {
-            this.ResizeChilds = true;
+            ResizeChilds = true;
         }
 
         public override void UpdateContainer(GameTime gameTime)
         {
             base.UpdateContainer(gameTime);
 
-            if (this.ResizeChilds)
+            if (ResizeChilds)
             {
-                var not_fitting = this.ContentPanel.Height < (this.Templates.Where(e => e.Visible).ToList().Count * 38);
-                foreach (Control_TemplateEntry template in this.Templates)
+                bool not_fitting = ContentPanel.Height < (Templates.Where(e => e.Visible).ToList().Count * 38);
+                foreach (Control_TemplateEntry template in Templates)
                 {
-                    template.Width = not_fitting ? this.Width - 20 : this.Width - 5;
+                    template.Width = not_fitting ? Width - 20 : Width - 5;
                 }
 
-                this.ResizeChilds = false;
+                ResizeChilds = false;
             }
         }
 
         private void ModuleInstance_Templates_Loaded(object sender, EventArgs e)
         {
-            this.Refresh();
+            Refresh();
         }
 
         protected override void OnMoved(MovedEventArgs e)
@@ -117,13 +117,13 @@
 
         public void RefreshList()
         {
-            this.ContentPanel.SuspendLayout();
-            var filter = this.FilterBox.Text.ToLower();
-            var prof = BuildsManager.ModuleInstance.CurrentProfession;
+            ContentPanel.SuspendLayout();
+            string filter = FilterBox.Text.ToLower();
+            API.Profession prof = BuildsManager.s_moduleInstance.CurrentProfession;
 
-            this.ContentPanel.SortChildren<Control_TemplateEntry>((a, b) =>
+            ContentPanel.SortChildren<Control_TemplateEntry>((a, b) =>
             {
-                var ret = (b.Template.Build.Profession == prof).CompareTo(a.Template.Build.Profession == prof);
+                int ret = (b.Template.Build.Profession == prof).CompareTo(a.Template.Build.Profession == prof);
                 if (ret == 0)
                 {
                     ret = a.Template.Build.Profession.Id.CompareTo(b.Template.Build.Profession.Id);
@@ -142,13 +142,13 @@
                 return ret;
             });
 
-            foreach (Control_TemplateEntry template in this.Templates)
+            foreach (Control_TemplateEntry template in Templates)
             {
                 if (template.Template != null)
                 {
-                    var name = template.Template.Name.ToLower();
+                    string name = template.Template.Name.ToLower();
 
-                    if ((this._ProfessionSelector.Professions.Count == 0 || this._ProfessionSelector.Professions.Contains(template.Template.Profession)) && name.Contains(filter))
+                    if ((_ProfessionSelector.Professions.Count == 0 || _ProfessionSelector.Professions.Contains(template.Template.Profession)) && name.Contains(filter))
                     {
                         template.Show();
                     }
@@ -159,112 +159,112 @@
                 }
             }
 
-            this.ResizeChilds = true;
-            this.ContentPanel.Invalidate();
-            this.ContentPanel.ResumeLayout();
+            ResizeChilds = true;
+            ContentPanel.Invalidate();
+            ContentPanel.ResumeLayout();
         }
 
         private void FilterBox_TextChanged(object sender, EventArgs e)
         {
-            this.RefreshList();
+            RefreshList();
         }
 
         protected override void OnResized(ResizedEventArgs e)
         {
             base.OnResized(e);
-            this.FilterBox.Width = this.Width - 5;
-            this._ProfessionSelector.Width = this.Width - 5;
-            this.ContentPanel.Size = new Point(this.Width, this.Height - this.LocalBounds.Y);
+            FilterBox.Width = Width - 5;
+            _ProfessionSelector.Width = Width - 5;
+            ContentPanel.Size = new Point(Width, Height - LocalBounds.Y);
         }
 
         public void Refresh()
         {
-            this.SuspendLayout();
-            this.ContentPanel.SuspendLayout();
+            SuspendLayout();
+            ContentPanel.SuspendLayout();
 
-            foreach (Control_TemplateEntry template in new List<Control_TemplateEntry>(this.Templates))
+            foreach (Control_TemplateEntry template in new List<Control_TemplateEntry>(Templates))
             {
-                if (BuildsManager.ModuleInstance.Templates.Find(e => e == template.Template) == null)
+                if (BuildsManager.s_moduleInstance.Templates.Find(e => e == template.Template) == null)
                 {
                     template.Dispose();
-                    this.Templates.Remove(template);
+                    Templates.Remove(template);
                 }
             }
 
-            foreach (Template template in BuildsManager.ModuleInstance.Templates)
+            foreach (Template template in BuildsManager.s_moduleInstance.Templates)
             {
-                if (this.Templates.Find(e => e.Template == template) == null)
+                if (Templates.Find(e => e.Template == template) == null)
                 {
-                    var ctrl = new Control_TemplateEntry(this.ContentPanel, template) { Size = new Point(this.Width - 20, 38) };
-                    ctrl.TemplateChanged += this.OnTemplateChangedEvent;
-                    this.Templates.Add(ctrl);
+                    Control_TemplateEntry ctrl = new(ContentPanel, template) { Size = new Point(Width - 20, 38) };
+                    ctrl.TemplateChanged += OnTemplateChangedEvent;
+                    Templates.Add(ctrl);
 
-                    template.Deleted += this.Template_Deleted;
+                    template.Deleted += Template_Deleted;
                 }
             }
 
-            this.ResumeLayout();
-            this.ContentPanel.ResumeLayout();
+            ResumeLayout();
+            ContentPanel.ResumeLayout();
 
-            this.RefreshList();
+            RefreshList();
         }
 
         private void Template_Deleted(object sender, EventArgs e)
         {
-            var template = (Template)sender;
-            var ctrl = this.Templates.Find(a => a.Template == template);
+            Template template = (Template)sender;
+            Control_TemplateEntry ctrl = Templates.Find(a => a.Template == template);
             ctrl?.Dispose();
             if (ctrl != null)
             {
-                this.Templates.Remove(ctrl);
+                Templates.Remove(ctrl);
             }
         }
 
         public void Clear()
         {
-            foreach (Control_TemplateEntry ctrl in this.Templates)
+            foreach (Control_TemplateEntry ctrl in Templates)
             {
                 ctrl.Dispose();
             }
 
-            this.Templates.Clear();
+            Templates.Clear();
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
 
-            foreach (Template template in BuildsManager.ModuleInstance.Templates)
+            foreach (Template template in BuildsManager.s_moduleInstance.Templates)
             {
-                template.Deleted -= this.Template_Deleted;
+                template.Deleted -= Template_Deleted;
             }
 
-            foreach (Control_TemplateEntry template in this.Templates)
+            foreach (Control_TemplateEntry template in Templates)
             {
-                template.TemplateChanged -= this.OnTemplateChangedEvent;
+                template.TemplateChanged -= OnTemplateChangedEvent;
             }
 
-            this.Templates.DisposeAll();
+            Templates.DisposeAll();
 
-            this.ContentPanel?.Dispose();
-            this.FilterBox?.Dispose();
-            this._ProfessionSelector?.Dispose();
+            ContentPanel?.Dispose();
+            FilterBox?.Dispose();
+            _ProfessionSelector?.Dispose();
 
-            this.FilterBox.TextChanged -= this.FilterBox_TextChanged;
-            this._ProfessionSelector.Changed -= this._ProfessionSelector_Changed;
+            FilterBox.TextChanged -= FilterBox_TextChanged;
+            _ProfessionSelector.Changed -= _ProfessionSelector_Changed;
 
-            BuildsManager.ModuleInstance.LanguageChanged -= this.ModuleInstance_LanguageChanged;
-            BuildsManager.ModuleInstance.Templates_Loaded -= this.ModuleInstance_Templates_Loaded;
-            BuildsManager.ModuleInstance.Template_Deleted -= this.ModuleInstance_Template_Deleted;
-            this.ContentPanel.ChildAdded -= this.ContentPanel_ChildsChanged;
-            this.ContentPanel.ChildRemoved -= this.ContentPanel_ChildsChanged;
+            BuildsManager.s_moduleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
+            BuildsManager.s_moduleInstance.Templates_Loaded -= ModuleInstance_Templates_Loaded;
+            BuildsManager.s_moduleInstance.Template_Deleted -= ModuleInstance_Template_Deleted;
+            ContentPanel.ChildAdded -= ContentPanel_ChildsChanged;
+            ContentPanel.ChildRemoved -= ContentPanel_ChildsChanged;
         }
 
         public event EventHandler<TemplateChangedEvent> TemplateChanged;
 
-        private void OnTemplateChangedEvent(Object sender, TemplateChangedEvent e)
+        private void OnTemplateChangedEvent(object sender, TemplateChangedEvent e)
         {
-            this.TemplateChanged?.Invoke(this, new TemplateChangedEvent(e.Template));
+            TemplateChanged?.Invoke(this, new TemplateChangedEvent(e.Template));
         }
     }
 }

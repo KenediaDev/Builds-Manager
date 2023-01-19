@@ -1,67 +1,64 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System.Collections.Generic;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System.Collections.Generic;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class Skill_Control : Control
     {
-        public Template Template
-        {
-            get => BuildsManager.ModuleInstance.Selected_Template;
-        }
+        public Template Template => BuildsManager.s_moduleInstance.Selected_Template;
 
         private API.Skill _Skill;
 
         public API.Skill Skill
         {
-            get => this._Skill;
+            get => _Skill;
             set
             {
-                this._Skill = value;
+                _Skill = value;
 
             }
         }
 
-        private int _SkillSize = 55;
+        private readonly int _SkillSize = 55;
         public SkillSlots Slot;
         private Texture2D _SelectorTexture;
         private Texture2D _SelectorTextureHovered;
         private Texture2D _SkillPlaceHolder;
         public bool Aquatic;
-        private CustomTooltip CustomTooltip;
+        private readonly CustomTooltip CustomTooltip;
 
         private double _Scale = 1;
 
         public double Scale
         {
-            get => this._Scale;
+            get => _Scale;
             set
             {
-                this._Scale = value;
-                this.Size = new Point(this._SkillSize, this._SkillSize + 15).Scale(value);
-                this.Location = this.Location.Scale(value);
+                _Scale = value;
+                Size = new Point(_SkillSize, _SkillSize + 15).Scale(value);
+                Location = Location.Scale(value);
             }
         }
 
         public Skill_Control(Container parent)
         {
-            this.Parent = parent;
-            this.Size = new Point(this._SkillSize, this._SkillSize + 15);
+            Parent = parent;
+            Size = new Point(_SkillSize, _SkillSize + 15);
 
-            this._SelectorTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.SkillSelector).GetRegion(0, 2, 64, 12);
-            this._SelectorTextureHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.SkillSelector_Hovered);
-            this._SkillPlaceHolder = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
+            _SelectorTexture = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.SkillSelector).GetRegion(0, 2, 64, 12);
+            _SelectorTextureHovered = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.SkillSelector_Hovered);
+            _SkillPlaceHolder = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
 
-            this.CustomTooltip = new CustomTooltip(this.Parent)
+            CustomTooltip = new CustomTooltip(Parent)
             {
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
@@ -74,12 +71,12 @@
         {
             base.OnMouseEntered(e);
 
-            if (this.Skill != null && this.Skill.Id > 0)
+            if (Skill != null && Skill.Id > 0)
             {
-                this.CustomTooltip.Visible = true;
-                this.CustomTooltip.Header = this.Skill.Name;
-                this.CustomTooltip.TooltipContent = new List<string>() { this.Skill.Description };
-                this.CustomTooltip.CurrentObject = this.Skill;
+                CustomTooltip.Visible = true;
+                CustomTooltip.Header = Skill.Name;
+                CustomTooltip.TooltipContent = new List<string>() { Skill.Description };
+                CustomTooltip.CurrentObject = Skill;
             }
         }
 
@@ -87,33 +84,33 @@
         {
             base.OnMouseLeft(e);
 
-            this.CustomTooltip.Visible = false;
+            CustomTooltip.Visible = false;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            var skillRect = new Rectangle(new Point(0, 12), new Point(this.Width, this.Height - 12)).Scale(this.Scale);
+            Rectangle skillRect = new Rectangle(new Point(0, 12), new Point(Width, Height - 12)).Scale(Scale);
             spriteBatch.DrawOnCtrl(
                 this,
-                this.MouseOver ? this._SelectorTextureHovered : this._SelectorTexture,
-                new Rectangle(new Point(0, 0), new Point(this.Width, 12)).Scale(this.Scale),
-                this._SelectorTexture.Bounds,
+                MouseOver ? _SelectorTextureHovered : _SelectorTexture,
+                new Rectangle(new Point(0, 0), new Point(Width, 12)).Scale(Scale),
+                _SelectorTexture.Bounds,
                 Color.White,
                 0f,
                 default);
 
             spriteBatch.DrawOnCtrl(
                 this,
-                (this.Skill != null && this.Skill.Icon != null && this.Skill.Icon._AsyncTexture != null) ? this.Skill.Icon._AsyncTexture.Texture : this._SkillPlaceHolder,
+                (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Skill.Icon._AsyncTexture.Texture : _SkillPlaceHolder,
                 skillRect,
-                (this.Skill != null && this.Skill.Icon != null && this.Skill.Icon._AsyncTexture != null) ? this.Skill.Icon._AsyncTexture.Texture.Bounds : this._SkillPlaceHolder.Bounds,
-                (this.Skill != null && this.Skill.Icon != null && this.Skill.Icon._AsyncTexture != null) ? Color.White : new Color(0, 0, 0, 155),
+                (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Skill.Icon._AsyncTexture.Texture.Bounds : _SkillPlaceHolder.Bounds,
+                (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Color.White : new Color(0, 0, 0, 155),
                 0f,
                 default);
 
-            if (this.MouseOver)
+            if (MouseOver)
             {
-                var color = Color.Honeydew;
+                Color color = Color.Honeydew;
 
                 // Top
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Top, skillRect.Width, 2), Rectangle.Empty, color * 0.5f);
@@ -136,9 +133,9 @@
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            this._SelectorTexture = null;
-            this._SelectorTextureHovered = null;
-            this._SkillPlaceHolder = null;
+            _SelectorTexture = null;
+            _SelectorTextureHovered = null;
+            _SkillPlaceHolder = null;
         }
     }
 }

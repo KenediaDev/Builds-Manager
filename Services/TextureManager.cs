@@ -1,197 +1,195 @@
-﻿namespace Kenedia.Modules.BuildsManager
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Blish_HUD;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Microsoft.Xna.Framework.Graphics;
+
+namespace Kenedia.Modules.BuildsManager
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Blish_HUD;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Microsoft.Xna.Framework.Graphics;
-
-    public class _UpgradeIDs : IDisposable
+    public class UpgradeIDs : IDisposable
     {
-        private bool disposed = false;
-
         public void Dispose()
         {
-            this._Sigils.Clear();
-            this._Runes.Clear();
+            Sigils.Clear();
+            Runes.Clear();
         }
 
-        public _UpgradeIDs(List<int> runes, List<int> sigils)
+        public UpgradeIDs(List<int> runes, List<int> sigils)
         {
-            this._Sigils = new List<int>(sigils);
-            this._Runes = new List<int>(runes);
+            Sigils = new List<int>(sigils);
+            Runes = new List<int>(runes);
         }
 
-        public List<int> _Sigils { get; private set; }
+        public List<int> Sigils { get; private set; }
 
-        public List<int> _Runes { get; private set; }
+        public List<int> Runes { get; private set; }
     }
 
     public class TextureManager : IDisposable
     {
-        private bool disposed = false;
+        private bool _disposed = false;
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!_disposed)
             {
-                this.disposed = true;
+                _disposed = true;
 
-                this._Backgrounds?.DisposeAll();
-                this._Icons?.DisposeAll();
-                this._Emblems?.DisposeAll();
-                this._Controls?.DisposeAll();
-                this._EquipmentTextures?.DisposeAll();
-                this._Stats?.DisposeAll();
-                this._StatIcons?.DisposeAll();
-                this._EquipSlotTextures?.DisposeAll();
+                _Backgrounds?.DisposeAll();
+                _Icons?.DisposeAll();
+                _Emblems?.DisposeAll();
+                _Controls?.DisposeAll();
+                _EquipmentTextures?.DisposeAll();
+                _Stats?.DisposeAll();
+                _StatIcons?.DisposeAll();
+                _EquipSlotTextures?.DisposeAll();
             }
         }
 
-        public _UpgradeIDs _UpgradeIDs;
-        public List<Texture2D> _Backgrounds = new List<Texture2D>();
-        public List<Texture2D> _Icons = new List<Texture2D>();
-        public List<Texture2D> _Emblems = new List<Texture2D>();
-        public List<Texture2D> _Controls = new List<Texture2D>();
-        public List<Texture2D> _EquipmentTextures = new List<Texture2D>();
-        public List<Texture2D> _Stats = new List<Texture2D>();
-        public List<Texture2D> _StatIcons = new List<Texture2D>();
+        public UpgradeIDs _UpgradeIDs;
+        public List<Texture2D> _Backgrounds = new();
+        public List<Texture2D> _Icons = new();
+        public List<Texture2D> _Emblems = new();
+        public List<Texture2D> _Controls = new();
+        public List<Texture2D> _EquipmentTextures = new();
+        public List<Texture2D> _Stats = new();
+        public List<Texture2D> _StatIcons = new();
 
-        public List<Texture2D> _EquipSlotTextures = new List<Texture2D>();
+        public List<Texture2D> _EquipSlotTextures = new();
 
         public TextureManager()
         {
-            var ContentsManager = BuildsManager.ModuleInstance.ContentsManager;
+            Blish_HUD.Modules.Managers.ContentsManager ContentsManager = BuildsManager.s_moduleInstance.ContentsManager;
 
             // var DirectoriesManager = BuildsManager.ModuleInstance.DirectoriesManager;
 
-            var values = Enum.GetValues(typeof(Backgrounds));
-            this._Backgrounds = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            Array values = Enum.GetValues(typeof(Backgrounds));
+            _Backgrounds = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (Backgrounds num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\backgrounds\" + (int)num + ".png");
-                this._Backgrounds.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\backgrounds\" + (int)num + ".png");
+                _Backgrounds.Insert((int)num, texture);
             }
 
             values = Enum.GetValues(typeof(Icons));
-            this._Icons = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            _Icons = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (Icons num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\icons\" + (int)num + ".png");
-                this._Icons.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\icons\" + (int)num + ".png");
+                _Icons.Insert((int)num, texture);
             }
 
             values = Enum.GetValues(typeof(Emblems));
-            this._Emblems = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            _Emblems = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (Emblems num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\emblems\" + (int)num + ".png");
-                this._Emblems.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\emblems\" + (int)num + ".png");
+                _Emblems.Insert((int)num, texture);
             }
 
             values = Enum.GetValues(typeof(ControlTexture));
-            this._Controls = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            _Controls = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (ControlTexture num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\controls\" + (int)num + ".png");
-                this._Controls.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\controls\" + (int)num + ".png");
+                _Controls.Insert((int)num, texture);
             }
 
             values = Enum.GetValues(typeof(EquipmentTextures));
-            this._EquipmentTextures = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            _EquipmentTextures = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (EquipmentTextures num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\equipment slots\" + (int)num + ".png");
-                this._EquipmentTextures.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\equipment slots\" + (int)num + ".png");
+                _EquipmentTextures.Insert((int)num, texture);
             }
 
             values = Enum.GetValues(typeof(EquipSlotTextures));
-            this._EquipSlotTextures = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            _EquipSlotTextures = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (EquipSlotTextures num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\equipment slots\" + (int)num + ".png").GetRegion(37, 37, 54, 54);
-                this._EquipSlotTextures.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\equipment slots\" + (int)num + ".png").GetRegion(37, 37, 54, 54);
+                _EquipSlotTextures.Insert((int)num, texture);
             }
 
             values = Enum.GetValues(typeof(Stats));
-            this._Stats = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
+            _Stats = new List<Texture2D>(new Texture2D[values.Cast<int>().Max() + 1]);
             foreach (Stats num in values)
             {
-                var texture = ContentsManager.GetTexture(@"textures\stats\" + (int)num + ".png");
-                this._Stats.Insert((int)num, texture);
+                Texture2D texture = ContentsManager.GetTexture(@"textures\stats\" + (int)num + ".png");
+                _Stats.Insert((int)num, texture);
             }
 
-            BuildsManager.ModuleInstance.LoadingTexture = this.getIcon(Icons.SingleSpinner);
+            BuildsManager.s_moduleInstance.LoadingTexture = getIcon(Icons.SingleSpinner);
         }
 
         public Texture2D getBackground(Backgrounds background)
         {
-            var index = (int)background;
+            int index = (int)background;
 
-            if (index < this._Backgrounds.Count && this._Backgrounds[index] != null)
+            if (index < _Backgrounds.Count && _Backgrounds[index] != null)
             {
-                return this._Backgrounds[index];
+                return _Backgrounds[index];
             }
 
-            return this._Icons[0];
+            return _Icons[0];
         }
 
         public Texture2D getIcon(Icons icon)
         {
-            var index = (int)icon;
+            int index = (int)icon;
 
-            if (index < this._Icons.Count && this._Icons[index] != null)
+            if (index < _Icons.Count && _Icons[index] != null)
             {
-                return this._Icons[index];
+                return _Icons[index];
             }
 
-            return this._Icons[0];
+            return _Icons[0];
         }
 
         public Texture2D getEmblem(Emblems emblem)
         {
-            var index = (int)emblem;
-            if (index < this._Emblems.Count && this._Emblems[index] != null)
+            int index = (int)emblem;
+            if (index < _Emblems.Count && _Emblems[index] != null)
             {
-                return this._Emblems[index];
+                return _Emblems[index];
             }
 
-            return this._Icons[0];
+            return _Icons[0];
         }
 
         public Texture2D getEquipTexture(EquipmentTextures equipment)
         {
-            var index = (int)equipment;
-            if (index < this._EquipmentTextures.Count && this._EquipmentTextures[index] != null)
+            int index = (int)equipment;
+            if (index < _EquipmentTextures.Count && _EquipmentTextures[index] != null)
             {
-                return this._EquipmentTextures[index];
+                return _EquipmentTextures[index];
             }
 
-            return this._Icons[0];
+            return _Icons[0];
         }
 
         public Texture2D getStatTexture(Stats stat)
         {
-            var index = (int)stat;
-            if (index < this._Stats.Count && this._Stats[index] != null)
+            int index = (int)stat;
+            if (index < _Stats.Count && _Stats[index] != null)
             {
-                return this._Stats[index];
+                return _Stats[index];
             }
 
-            return this._Icons[0];
+            return _Icons[0];
         }
 
         public Texture2D getControlTexture(ControlTexture control)
         {
-            var index = (int)control;
-            if (index < this._Controls.Count && this._Controls[index] != null)
+            int index = (int)control;
+            if (index < _Controls.Count && _Controls[index] != null)
             {
-                return this._Controls[index];
+                return _Controls[index];
             }
 
-            return this._Icons[0];
+            return _Icons[0];
         }
     }
 }

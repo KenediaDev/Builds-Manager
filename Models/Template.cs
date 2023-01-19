@@ -1,28 +1,28 @@
-﻿namespace Kenedia.Modules.BuildsManager.Models
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using Blish_HUD.Controls;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Blish_HUD.Controls;
+using Newtonsoft.Json;
 
+namespace Kenedia.Modules.BuildsManager.Models
+{
     public class Template : IDisposable
     {
-        private bool disposed = false;
+        private readonly bool disposed = false;
 
         public void Dispose()
         {
-            if (!this.disposed)
+            if (!disposed)
             {
                 // Profession?.Dispose();
-                this.Profession = null;
+                Profession = null;
 
                 // Specialization?.Dispose();
-                this.Specialization = null;
-                this.Gear?.Dispose();
-                this.Build?.Dispose();
+                Specialization = null;
+                Gear?.Dispose();
+                Build?.Dispose();
             }
         }
 
@@ -66,15 +66,15 @@
 
         public string Name
         {
-            get => this._Name;
+            get => _Name;
             set
             {
-                if (this._Name != null && this.Path == null)
+                if (_Name != null && Path == null)
                 {
                     return;
                 }
 
-                this._Name = value;
+                _Name = value;
             }
         }
 
@@ -82,146 +82,146 @@
         public API.Specialization Specialization;
 
         public string Path;
-        public GearTemplate Gear = new GearTemplate();
+        public GearTemplate Gear = new();
         public BuildTemplate Build;
 
         public Template(string name, string build, string gear)
         {
-            this.Template_json = new Template_json()
+            Template_json = new Template_json()
             {
                 Name = name,
                 BuildCode = build,
                 GearCode = gear,
             };
 
-            this.Name = name;
+            Name = name;
 
-            this.Path = BuildsManager.ModuleInstance.Paths.builds + "Builds.json";
+            Path = BuildsManager.s_moduleInstance.Paths.builds + "Builds.json";
 
-            this.Build = new BuildTemplate(this.Template_json.BuildCode);
-            this.Gear = new GearTemplate(this.Template_json.GearCode);
+            Build = new BuildTemplate(Template_json.BuildCode);
+            Gear = new GearTemplate(Template_json.GearCode);
 
-            this.Profession = BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == this.Build?.Profession?.Id);
-            this.Specialization = this.Profession != null ? this.Build.SpecLines.Find(e => e.Specialization?.Elite == true)?.Specialization : null;
+            Profession = BuildsManager.s_moduleInstance.Data.Professions.Find(e => e.Id == Build?.Profession?.Id);
+            Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization?.Elite == true)?.Specialization : null;
         }
 
         public Template(string path = default)
         {
             if (path != default && File.Exists(path))
             {
-                var template = JsonConvert.DeserializeObject<Template_json>(File.ReadAllText(path));
+                Template_json template = JsonConvert.DeserializeObject<Template_json>(File.ReadAllText(path));
                 if (template != null)
                 {
-                    this.Template_json = template;
-                    this.Name = template.Name;
+                    Template_json = template;
+                    Name = template.Name;
 
-                    this.Path = BuildsManager.ModuleInstance.Paths.builds + "Builds.json";
+                    Path = BuildsManager.s_moduleInstance.Paths.builds + "Builds.json";
 
-                    this.Build = new BuildTemplate(this.Template_json.BuildCode);
-                    this.Gear = new GearTemplate(this.Template_json.GearCode);
+                    Build = new BuildTemplate(Template_json.BuildCode);
+                    Gear = new GearTemplate(Template_json.GearCode);
 
-                    this.Profession = BuildsManager.ModuleInstance.Data.Professions.Find(e => e.Id == this.Build?.Profession.Id);
-                    this.Specialization = this.Profession != null ? this.Build.SpecLines.Find(e => e.Specialization.Elite)?.Specialization : null;
+                    Profession = BuildsManager.s_moduleInstance.Data.Professions.Find(e => e.Id == Build?.Profession.Id);
+                    Specialization = Profession != null ? Build.SpecLines.Find(e => e.Specialization.Elite)?.Specialization : null;
                 }
             }
             else
             {
-                this.Gear = new GearTemplate();
-                this.Build = new BuildTemplate();
-                this.Name = "[No Name Set]";
+                Gear = new GearTemplate();
+                Build = new BuildTemplate();
+                Name = "[No Name Set]";
 
-                this.Template_json = new Template_json();
-                this.Profession = BuildsManager.ModuleInstance.CurrentProfession;
+                Template_json = new Template_json();
+                Profession = BuildsManager.s_moduleInstance.CurrentProfession;
 
-                this.Path = BuildsManager.ModuleInstance.Paths.builds + "Builds.json";
+                Path = BuildsManager.s_moduleInstance.Paths.builds + "Builds.json";
 
-                this.SetChanged();
+                SetChanged();
             }
         }
 
         public void Reset()
         {
-            this.Name = "[No Name Set]";
-            this.Template_json = new Template_json()
+            Name = "[No Name Set]";
+            Template_json = new Template_json()
             {
-                Name = this.Name,
+                Name = Name,
             };
-            this.Specialization = null;
+            Specialization = null;
 
-            foreach (TemplateItem item in this.Gear.Trinkets)
+            foreach (TemplateItem item in Gear.Trinkets)
             {
                 item.Stat = null;
             }
 
-            foreach (Armor_TemplateItem item in this.Gear.Armor)
+            foreach (Armor_TemplateItem item in Gear.Armor)
             {
                 item.Stat = null;
                 item.Rune = null;
             }
 
-            foreach (Weapon_TemplateItem item in this.Gear.Weapons)
+            foreach (Weapon_TemplateItem item in Gear.Weapons)
             {
                 item.WeaponType = API.weaponType.Unkown;
                 item.Stat = null;
                 item.Sigil = null;
             }
 
-            foreach (AquaticWeapon_TemplateItem item in this.Gear.AquaticWeapons)
+            foreach (AquaticWeapon_TemplateItem item in Gear.AquaticWeapons)
             {
                 item.WeaponType = API.weaponType.Unkown;
                 item.Stat = null;
                 item.Sigils = new List<API.SigilItem>() { new API.SigilItem(), new API.SigilItem() };
             }
 
-            this.Build = new BuildTemplate();
+            Build = new BuildTemplate();
 
-            this.Profession = BuildsManager.ModuleInstance.CurrentProfession;
-            this.Path = BuildsManager.ModuleInstance.Paths.builds;
+            Profession = BuildsManager.s_moduleInstance.CurrentProfession;
+            Path = BuildsManager.s_moduleInstance.Paths.builds;
 
-            this.SetChanged();
+            SetChanged();
         }
 
         public void Delete()
         {
-            if (this.Name == "[No Name Set]")
+            if (Name == "[No Name Set]")
             {
-                BuildsManager.ModuleInstance.Templates.Remove(this);
-                BuildsManager.ModuleInstance.OnTemplate_Deleted();
+                BuildsManager.s_moduleInstance.Templates.Remove(this);
+                BuildsManager.s_moduleInstance.OnTemplate_Deleted();
                 return;
             }
 
-            if (this.Path == null)
-            {
-                return;
-            }
-
-            BuildsManager.ModuleInstance.Templates.Remove(this);
-
-            if (this.Path == null || this.Name == null)
+            if (Path == null)
             {
                 return;
             }
 
-            this.Save();
-            BuildsManager.ModuleInstance.OnTemplate_Deleted();
-            this.Deleted?.Invoke(this, EventArgs.Empty);
+            BuildsManager.s_moduleInstance.Templates.Remove(this);
+
+            if (Path == null || Name == null)
+            {
+                return;
+            }
+
+            Save();
+            BuildsManager.s_moduleInstance.OnTemplate_Deleted();
+            Deleted?.Invoke(this, EventArgs.Empty);
         }
 
         public void Save_Unformatted()
         {
-            if (this.Path == null || this.Name == null)
+            if (Path == null || Name == null)
             {
                 return;
             }
 
-            if (this.Name == "[No Name Set]")
+            if (Name == "[No Name Set]")
             {
                 return;
             }
 
-            var path = this.Path;
+            string path = Path;
 
-            BuildsManager.Logger.Debug("Saving: {0} in {1}.", this.Name, this.Path);
+            BuildsManager.Logger.Debug("Saving: {0} in {1}.", Name, Path);
 
             FileInfo fi = null;
             try
@@ -232,19 +232,19 @@
             catch (PathTooLongException) { }
             catch (NotSupportedException) { }
 
-            if (this.Name.Contains("/") || this.Name.Contains(@"\") || ReferenceEquals(fi, null))
+            if (Name.Contains("/") || Name.Contains(@"\") || ReferenceEquals(fi, null))
             {
                 // file name is not valid
-                ScreenNotification.ShowNotification(this.Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
+                ScreenNotification.ShowNotification(Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
             }
             else
             {
-                this.Template_json.Name = this.Name;
-                this.Template_json.BuildCode = this.Build?.ParseBuildCode();
-                this.Template_json.GearCode = this.Gear?.TemplateCode;
+                Template_json.Name = Name;
+                Template_json.BuildCode = Build?.ParseBuildCode();
+                Template_json.GearCode = Gear?.TemplateCode;
 
-                var culture = BuildsManager.getCultureString();
-                File.WriteAllText(this.Path, JsonConvert.SerializeObject(BuildsManager.ModuleInstance.Templates.Where(e => e.Path == this.Path).Select(a => a.Template_json).ToList()));
+                string culture = BuildsManager.getCultureString();
+                File.WriteAllText(Path, JsonConvert.SerializeObject(BuildsManager.s_moduleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList()));
 
                 // File.WriteAllText(Path, JsonConvert.SerializeObject(BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList(), Formatting.Indented));
             }
@@ -252,19 +252,19 @@
 
         public void Save()
         {
-            if (this.Path == null || this.Name == null)
+            if (Path == null || Name == null)
             {
                 return;
             }
 
-            if (this.Name == "[No Name Set]")
+            if (Name == "[No Name Set]")
             {
                 return;
             }
 
-            var path = this.Path;
+            string path = Path;
 
-            BuildsManager.Logger.Debug("Saving: {0} in {1}.", this.Name, this.Path);
+            BuildsManager.Logger.Debug("Saving: {0} in {1}.", Name, Path);
 
             FileInfo fi = null;
             try
@@ -275,22 +275,22 @@
             catch (PathTooLongException) { }
             catch (NotSupportedException) { }
 
-            if (this.Name.Contains("/") || this.Name.Contains(@"\") || ReferenceEquals(fi, null))
+            if (Name.Contains("/") || Name.Contains(@"\") || ReferenceEquals(fi, null))
             {
                 // file name is not valid
-                ScreenNotification.ShowNotification(this.Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
+                ScreenNotification.ShowNotification(Name + " is not a valid Name!", ScreenNotification.NotificationType.Error);
             }
             else
             {
-                this.Template_json.Name = this.Name;
-                this.Template_json.BuildCode = this.Build?.ParseBuildCode();
-                this.Template_json.GearCode = this.Gear?.TemplateCode;
+                Template_json.Name = Name;
+                Template_json.BuildCode = Build?.ParseBuildCode();
+                Template_json.GearCode = Gear?.TemplateCode;
 
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 bool first = true;
-                foreach (Template_json template in BuildsManager.ModuleInstance.Templates.Where(e => e.Path == this.Path).Select(a => a.Template_json).ToList())
+                foreach (Template_json template in BuildsManager.s_moduleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList())
                 {
-                    StringWriter sw = new StringWriter(sb);
+                    StringWriter sw = new(sb);
                     if (!first)
                     {
                         sb.Append("," + Environment.NewLine);
@@ -317,7 +317,7 @@
                     first = false;
                 }
 
-                File.WriteAllText(this.Path, "[" + sb.ToString() + "]");
+                File.WriteAllText(Path, "[" + sb.ToString() + "]");
 
                 // File.WriteAllText(Path, JsonConvert.SerializeObject(BuildsManager.ModuleInstance.Templates.Where(e => e.Path == Path).Select(a => a.Template_json).ToList(), Formatting.Indented));
             }
@@ -329,13 +329,13 @@
 
         private void OnEdit(object sender, EventArgs e)
         {
-            this.Edit?.Invoke(this, EventArgs.Empty);
-            this.Save();
+            Edit?.Invoke(this, EventArgs.Empty);
+            Save();
         }
 
         public void SetChanged()
         {
-            this.OnEdit(null, EventArgs.Empty);
+            OnEdit(null, EventArgs.Empty);
         }
     }
 }

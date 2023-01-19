@@ -1,18 +1,18 @@
-﻿namespace Kenedia.Modules.BuildsManager
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-    using Blish_HUD;
-    using Blish_HUD.Content;
-    using Blish_HUD.Controls;
-    using Gw2Sharp.WebApi.V2.Models;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Microsoft.Xna.Framework.Graphics;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Blish_HUD;
+using Blish_HUD.Content;
+using Blish_HUD.Controls;
+using Gw2Sharp.WebApi.V2.Models;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Microsoft.Xna.Framework.Graphics;
 
+namespace Kenedia.Modules.BuildsManager
+{
     public enum API_ImageStates
     {
         Unkown,
@@ -46,10 +46,10 @@
 
     public class ObjectExtension
     {
-        public subtExtension Icon = new subtExtension();
-        public subtExtension Background = new subtExtension();
-        public subtExtension ProfessionIcon = new subtExtension();
-        public subtExtension ProfessionIconBig = new subtExtension();
+        public subtExtension Icon = new();
+        public subtExtension Background = new();
+        public subtExtension ProfessionIcon = new();
+        public subtExtension ProfessionIconBig = new();
     }
 
     public class subtExtension
@@ -59,8 +59,8 @@
         public string Path;
         public string FileName;
         public string Url;
-        public List<Control> Controls = new List<Control>();
-        public List<Texture2D> Textures = new List<Texture2D>();
+        public List<Control> Controls = new();
+        public List<Texture2D> Textures = new();
 
     }
 
@@ -68,43 +68,42 @@
     {
         public static void setTexture(this Image ctrl, GW2API.Item item, string path)
         {
-            ctrl.Texture = item.getIcon(path, ctrl);
+            ctrl.Texture = item.GetIcon(path, ctrl);
             ctrl.BasicTooltipText = item.Name;
         }
-
     }
 
     public static class API_Extension
     {
-        public static readonly ConditionalWeakTable<GW2API.BaseObject, ObjectExtension> Flags = new ConditionalWeakTable<GW2API.BaseObject, ObjectExtension>();
+        public static readonly ConditionalWeakTable<GW2API.BaseObject, ObjectExtension> Flags = new();
 
-        public static Texture2D GetTextureFile(GW2API.BaseObject obj, string path, Object targetControl = null, IconTargets iconTarget = IconTargets.Icon)
+        public static Texture2D GetTextureFile(GW2API.BaseObject obj, string path, object targetControl = null, IconTargets iconTarget = IconTargets.Icon)
         {
-            return BuildsManager.ModuleInstance.TextureManager._Icons[0];
+            return BuildsManager.s_moduleInstance.TextureManager._Icons[0];
         }
 
         // Item
-        public static Texture2D getIcon(this GW2API.Item o, string path = null, Object targetControl = null)
+        public static Texture2D GetIcon(this GW2API.Item o, string path = null, object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
 
-        public static Texture2D getIcon(this GW2API.Trait o, string path = null, Object targetControl = null)
+        public static Texture2D GetIcon(this GW2API.Trait o, string path = null, object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
 
-        public static Texture2D getIcon(this GW2API.Skill o, string path = null, Object targetControl = null)
+        public static Texture2D GetIcon(this GW2API.Skill o, string path = null, object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
 
-        public static Texture2D getIcon(this GW2API.Specialization o, string path = null, Object targetControl = null)
+        public static Texture2D GetIcon(this GW2API.Specialization o, string path = null, object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
 
-        public static Texture2D getBackground(this GW2API.Specialization o, string path = null, Object targetControl = null)
+        public static Texture2D GetBackground(this GW2API.Specialization o, string path = null, object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Background != null ? o.Background.Path : path, targetControl, IconTargets.Background);
         }
@@ -122,54 +121,40 @@
     public class APIDownload_Image
     {
         public API_Image Parent;
-        public string display_text = string.Empty;
-        public string url;
-        public string path;
+        public string Display_text = string.Empty;
+        public string Url;
+        public string Path;
     }
 
     public class API_Image
     {
-        public List<Control> connectedControls = new List<Control>();
+        public List<Control> connectedControls = new();
         public string Url;
-        public bool fileChecked;
-        public bool fileFetched;
-        public bool fileLoaded;
+        public bool FileChecked;
+        public bool FileFetched;
+        public bool FileLoaded;
 
-        public string folderPath;
-
-        private string _iconPath;
+        public string FolderPath;
         private string _fileName;
 
-        public string fileName
+        public string FileName
         {
             get
             {
-                if (this._fileName != null)
+                if (_fileName != null)
                 {
-                    return this._fileName;
+                    return _fileName;
                 }
 
-                this._fileName = Regex.Match(this.Url, "[0-9]*.png").ToString();
+                _fileName = Regex.Match(Url, "[0-9]*.png").ToString();
 
-                return this._fileName;
+                return _fileName;
             }
         }
 
-        public string iconPath
-        {
-            get
-            {
-                return this.folderPath + @"/" + this.fileName;
-            }
-        }
+        public string IconPath => FolderPath + @"/" + FileName;
 
-        public Texture2D _Texture;
         public Texture2D Texture;
-
-        private bool fetchImage()
-        {
-            return false;
-        }
     }
 
     public class GW2API
@@ -184,68 +169,69 @@
 
         public class LegendaryItem
         {
-            public class iType
+            public class LegendaryItemType
             {
                 public bool IsUnknown;
                 public int Value;
                 public string RawValue;
             }
 
-            public class iDetails
+            public class LegendaryItemDetails
             {
                 public List<int> StatChoices;
-                public iType Type;
+                public LegendaryItemType Type;
             }
 
-            public class iIcon
+            public class LegendaryItemIcon
             {
                 public string Url;
             }
 
-            public class iRarity
+            public class LegendaryItemRarity
             {
-                public bool isSet;
+                public bool IsSet;
                 public bool IsUnknown;
                 public int Value;
                 public string RawValue;
             }
 
             public string Name;
-            public iIcon Icon;
+            public LegendaryItemIcon Icon;
             public string ChatLink;
             public int Id;
-            public iDetails Details;
-            public iType Type;
-            public iRarity Rarity;
-            public ItemRarity __Rarity;
+            public LegendaryItemDetails Details;
+            public LegendaryItemType Type;
+            public LegendaryItemRarity Rarity;
+            private ItemRarity _itemRarity;
 
-            public ItemRarity _Rarity
+            public ItemRarity ItemRarity
             {
+                set => _itemRarity = value;
                 get
                 {
-                    if (this.Rarity.isSet)
+                    if (Rarity.IsSet)
                     {
-                        return this.__Rarity;
+                        return _itemRarity;
                     }
 
-                    if (this.Rarity != null)
+                    if (Rarity != null)
                     {
-                        switch (this.Rarity.Value)
+                        switch (Rarity.Value)
                         {
-                            case 0: this.__Rarity = ItemRarity.Unknown; break;
-                            case 1: this.__Rarity = ItemRarity.Junk; break;
-                            case 2: this.__Rarity = ItemRarity.Basic; break;
-                            case 3: this.__Rarity = ItemRarity.Fine; break;
-                            case 4: this.__Rarity = ItemRarity.Masterwork; break;
-                            case 5: this.__Rarity = ItemRarity.Rare; break;
-                            case 6: this.__Rarity = ItemRarity.Exotic; break;
-                            case 7: this.__Rarity = ItemRarity.Ascended; break;
-                            case 8: this.__Rarity = ItemRarity.Legendary; break;
+                            case 0: _itemRarity = ItemRarity.Unknown; break;
+                            case 1: _itemRarity = ItemRarity.Junk; break;
+                            case 2: _itemRarity = ItemRarity.Basic; break;
+                            case 3: _itemRarity = ItemRarity.Fine; break;
+                            case 4: _itemRarity = ItemRarity.Masterwork; break;
+                            case 5: _itemRarity = ItemRarity.Rare; break;
+                            case 6: _itemRarity = ItemRarity.Exotic; break;
+                            case 7: _itemRarity = ItemRarity.Ascended; break;
+                            case 8: _itemRarity = ItemRarity.Legendary; break;
                         }
                     }
 
-                    this.Rarity.isSet = true;
-                    return this.__Rarity;
+                    Rarity.IsSet = true;
+                    return _itemRarity;
                 }
             }
 
@@ -368,7 +354,7 @@
 
         public class Profession : BaseObject
         {
-            public string Id;
+            public new string Id;
             public IReadOnlyDictionary<int, int> SkillsByPalette;
             public List<ProfessionSkill> Skills;
             public List<Flag> Flags;
@@ -433,7 +419,7 @@
             public Icon Background;
             public Icon ProfessionIconBig;
             public Icon ProfessionIcon;
-            public List<Trait> Traits = new List<Trait>();
+            public List<Trait> Traits = new();
         }
     }
 
@@ -441,25 +427,15 @@
     {
         public static string UniformAttributeName(string statName)
         {
-            switch (statName)
+            return statName switch
             {
-                case "ConditionDamage":
-                    return "Condition Damage";
-
-                case "BoonDuration":
-                    return "Concentration";
-
-                case "ConditionDuration":
-                    return "Expertise";
-
-                case "Healing":
-                    return "Healing Power";
-
-                case "CritDamage":
-                    return "Ferocity";
-            }
-
-            return statName;
+                "ConditionDamage" => "Condition Damage",
+                "BoonDuration" => "Concentration",
+                "ConditionDuration" => "Expertise",
+                "Healing" => "Healing Power",
+                "CritDamage" => "Ferocity",
+                _ => statName,
+            };
         }
 
         public enum traitType
@@ -588,10 +564,10 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this._Texture?.Dispose();
+                    disposed = true;
+                    _Texture?.Dispose();
 
                     // _AsyncTexture?.Dispose();
                 }
@@ -608,41 +584,41 @@
             {
                 get
                 {
-                    if (this._Texture == null && !BuildsManager.ModuleInstance.FetchingAPI)
+                    if (_Texture == null && !BuildsManager.s_moduleInstance.FetchingAPI)
                     {
-                        this._Texture = new AsyncTexture2D(ContentService.Textures.TransparentPixel);
+                        _Texture = new AsyncTexture2D(ContentService.Textures.TransparentPixel);
 
                         Task.Run(() =>
                         {
-                            var fs = new FileStream(BuildsManager.ModuleInstance.Paths.BasePath + this.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            FileStream fs = new(BuildsManager.s_moduleInstance.Paths.BasePath + Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
                             {
-                                var texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, fs);
+                                Texture2D texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, fs);
 
-                                if (this.ImageRegion != null)
+                                if (ImageRegion != null)
                                 {
                                     double factor = 1;
 
-                                    if (this.DefaultBounds != default)
+                                    if (DefaultBounds != default)
                                     {
-                                        factor = (double)texture.Width / (double)this.DefaultBounds.Width;
+                                        factor = (double)texture.Width / (double)DefaultBounds.Width;
                                     }
 
-                                    this.ImageRegion = this.ImageRegion.Scale(factor);
+                                    ImageRegion = ImageRegion.Scale(factor);
 
-                                    if (texture.Bounds.Width > 0 && this.ImageRegion.Width > 0 && texture.Bounds.Contains(this.ImageRegion))
+                                    if (texture.Bounds.Width > 0 && ImageRegion.Width > 0 && texture.Bounds.Contains(ImageRegion))
                                     {
-                                        texture = texture.GetRegion(this.ImageRegion);
+                                        texture = texture.GetRegion(ImageRegion);
                                     }
                                 }
 
-                                this._Texture.SwapTexture(texture);
+                                _Texture.SwapTexture(texture);
                                 fs.Close();
                             });
                         });
                     }
 
-                    return this._Texture;
+                    return _Texture;
                 }
             }
         }
@@ -654,10 +630,10 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon?.Dispose();
+                    disposed = true;
+                    Icon?.Dispose();
                 }
             }
 
@@ -709,10 +685,10 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon?.Dispose();
+                    disposed = true;
+                    Icon?.Dispose();
                 }
             }
 
@@ -734,15 +710,15 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Heal?.Dispose();
-                    this.Elite?.Dispose();
-                    this.Swap?.Dispose();
-                    this.Skill?.Dispose();
+                    disposed = true;
+                    Heal?.Dispose();
+                    Elite?.Dispose();
+                    Swap?.Dispose();
+                    Skill?.Dispose();
 
-                    this.Utilities?.DisposeAll();
+                    Utilities?.DisposeAll();
                 }
             }
 
@@ -762,10 +738,10 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon?.Dispose();
+                    disposed = true;
+                    Icon?.Dispose();
                 }
             }
 
@@ -785,16 +761,16 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon?.Dispose();
-                    this.Background?.Dispose();
-                    this.ProfessionIcon?.Dispose();
-                    this.ProfessionIconBig?.Dispose();
-                    this.WeaponTrait?.Dispose();
-                    this.MinorTraits?.DisposeAll();
-                    this.MajorTraits?.DisposeAll();
+                    disposed = true;
+                    Icon?.Dispose();
+                    Background?.Dispose();
+                    ProfessionIcon?.Dispose();
+                    ProfessionIconBig?.Dispose();
+                    WeaponTrait?.Dispose();
+                    MinorTraits?.DisposeAll();
+                    MajorTraits?.DisposeAll();
                 }
             }
 
@@ -808,8 +784,8 @@
             public bool Elite;
 
             public Trait WeaponTrait;
-            public List<Trait> MinorTraits = new List<Trait>();
-            public List<Trait> MajorTraits = new List<Trait>();
+            public List<Trait> MinorTraits = new();
+            public List<Trait> MajorTraits = new();
         }
 
         public class ProfessionWeapon
@@ -825,15 +801,15 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon?.Dispose();
-                    this.IconBig?.Dispose();
+                    disposed = true;
+                    Icon?.Dispose();
+                    IconBig?.Dispose();
 
-                    this.Specializations?.DisposeAll();
-                    this.Skills?.DisposeAll();
-                    this.Legends?.DisposeAll();
+                    Specializations?.DisposeAll();
+                    Skills?.DisposeAll();
+                    Legends?.DisposeAll();
                 }
             }
 
@@ -841,10 +817,10 @@
             public string Id;
             public Icon Icon;
             public Icon IconBig;
-            public List<Specialization> Specializations = new List<Specialization>();
-            public List<ProfessionWeapon> Weapons = new List<ProfessionWeapon>();
-            public List<Skill> Skills = new List<Skill>();
-            public List<Legend> Legends = new List<Legend>();
+            public List<Specialization> Specializations = new();
+            public List<ProfessionWeapon> Weapons = new();
+            public List<Skill> Skills = new();
+            public List<Legend> Legends = new();
         }
 
         public class StatAttribute : IDisposable
@@ -853,10 +829,10 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon?.Dispose();
+                    disposed = true;
+                    Icon?.Dispose();
                 }
             }
 
@@ -873,17 +849,17 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Icon.Dispose();
-                    this.Attributes?.DisposeAll();
+                    disposed = true;
+                    Icon.Dispose();
+                    Attributes?.DisposeAll();
                 }
             }
 
             public int Id;
             public string Name;
-            public List<StatAttribute> Attributes = new List<StatAttribute>();
+            public List<StatAttribute> Attributes = new();
             public Icon Icon;
         }
     }

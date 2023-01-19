@@ -9,8 +9,8 @@ namespace Kenedia.Modules.BuildsManager.Models
 
         public SkillChangedEvent(API.Skill skill, Skill_Control skill_Control)
         {
-            this.Skill = skill;
-            this.Skill_Control = skill_Control;
+            Skill = skill;
+            Skill_Control = skill_Control;
         }
     }
 }

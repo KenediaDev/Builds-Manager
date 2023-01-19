@@ -6,67 +6,41 @@ namespace Kenedia.Modules.BuildsManager.Extensions
     {
         public static EquipmentSlots GetEquipmentSlot(this ArmorSlot slot)
         {
-            switch (slot)
+            return slot switch
             {
-                case ArmorSlot.Helm:
-                    return EquipmentSlots.Helmet;
-                case ArmorSlot.Shoulders:
-                    return EquipmentSlots.Shoulders;
-                case ArmorSlot.Coat:
-                    return EquipmentSlots.Chest;
-                case ArmorSlot.Gloves:
-                    return EquipmentSlots.Gloves;
-                case ArmorSlot.Leggings:
-                    return EquipmentSlots.Leggings;
-                case ArmorSlot.Boots:
-                    return EquipmentSlots.Boots;
-            }
-
-            return EquipmentSlots.Unkown;
+                ArmorSlot.Helm => EquipmentSlots.Helmet,
+                ArmorSlot.Shoulders => EquipmentSlots.Shoulders,
+                ArmorSlot.Coat => EquipmentSlots.Chest,
+                ArmorSlot.Gloves => EquipmentSlots.Gloves,
+                ArmorSlot.Leggings => EquipmentSlots.Leggings,
+                ArmorSlot.Boots => EquipmentSlots.Boots,
+                _ => EquipmentSlots.Unkown,
+            };
         }
 
         public static ArmorSlot GetArmorSlot(this EquipmentSlots slot)
         {
-            switch (slot)
+            return slot switch
             {
-                case EquipmentSlots.Helmet:
-                    return ArmorSlot.Helm;
-                case EquipmentSlots.Shoulders:
-                    return ArmorSlot.Shoulders;
-                case EquipmentSlots.Chest:
-                    return ArmorSlot.Coat;
-                case EquipmentSlots.Gloves:
-                    return ArmorSlot.Gloves;
-                case EquipmentSlots.Leggings:
-                    return ArmorSlot.Leggings;
-                case EquipmentSlots.Boots:
-                    return ArmorSlot.Boots;
-            }
-
-            return ArmorSlot.Unkown;
+                EquipmentSlots.Helmet => ArmorSlot.Helm,
+                EquipmentSlots.Shoulders => ArmorSlot.Shoulders,
+                EquipmentSlots.Chest => ArmorSlot.Coat,
+                EquipmentSlots.Gloves => ArmorSlot.Gloves,
+                EquipmentSlots.Leggings => ArmorSlot.Leggings,
+                EquipmentSlots.Boots => ArmorSlot.Boots,
+                _ => ArmorSlot.Unkown,
+            };
         }
 
         public static ArmorWeight GetArmorWeight(this Gw2Sharp.Models.ProfessionType profession)
         {
-            switch (profession)
+            return profession switch
             {
-                case Gw2Sharp.Models.ProfessionType.Elementalist:
-                case Gw2Sharp.Models.ProfessionType.Necromancer:
-                case Gw2Sharp.Models.ProfessionType.Mesmer:
-                    return ArmorWeight.Light;
-
-                case Gw2Sharp.Models.ProfessionType.Ranger:
-                case Gw2Sharp.Models.ProfessionType.Thief:
-                case Gw2Sharp.Models.ProfessionType.Engineer:
-                    return ArmorWeight.Medium;
-
-                case Gw2Sharp.Models.ProfessionType.Warrior:
-                case Gw2Sharp.Models.ProfessionType.Guardian:
-                case Gw2Sharp.Models.ProfessionType.Revenant:
-                    return ArmorWeight.Heavy;
-            }
-
-            return ArmorWeight.Unkown;
+                Gw2Sharp.Models.ProfessionType.Elementalist or Gw2Sharp.Models.ProfessionType.Necromancer or Gw2Sharp.Models.ProfessionType.Mesmer => ArmorWeight.Light,
+                Gw2Sharp.Models.ProfessionType.Ranger or Gw2Sharp.Models.ProfessionType.Thief or Gw2Sharp.Models.ProfessionType.Engineer => ArmorWeight.Medium,
+                Gw2Sharp.Models.ProfessionType.Warrior or Gw2Sharp.Models.ProfessionType.Guardian or Gw2Sharp.Models.ProfessionType.Revenant => ArmorWeight.Heavy,
+                _ => ArmorWeight.Unkown,
+            };
         }
 
         public static string convertWeaponType(this GW2API.intDetails details)

@@ -1,22 +1,22 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using Blish_HUD;
-    using Blish_HUD.Content;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using MonoGame.Extended.BitmapFonts;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Blish_HUD;
+using Blish_HUD.Content;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class SelectionPopUp : Control
     {
         public class SelectionEntry : IDisposable
@@ -25,14 +25,14 @@
 
             public void Dispose()
             {
-                if (!this.disposed)
+                if (!disposed)
                 {
-                    this.disposed = true;
-                    this.Texture?.Dispose();
-                    this.Texture = null;
+                    disposed = true;
+                    Texture?.Dispose();
+                    Texture = null;
 
-                    this.ContentTextures?.DisposeAll();
-                    this.ContentTextures = null;
+                    ContentTextures?.DisposeAll();
+                    ContentTextures = null;
                 }
             }
 
@@ -61,48 +61,45 @@
             Profession,
         }
 
-        private Texture2D Background;
-        private TextBox FilterBox;
+        private readonly Texture2D Background;
+        private readonly TextBox FilterBox;
         private selectionType _SelectionType;
 
         public selectionType SelectionType
         {
-            get => this._SelectionType;
+            get => _SelectionType;
             set
             {
-                if (this._SelectionType != value && this.FilterBox != null)
+                if (_SelectionType != value && FilterBox != null)
                 {
-                    this.FilterBox.Text = string.Empty;
+                    FilterBox.Text = string.Empty;
                 }
 
-                this._SelectionType = value;
+                _SelectionType = value;
             }
         }
 
-        public List<SelectionEntry> List = new List<SelectionEntry>();
-        public List<SelectionEntry> FilteredList = new List<SelectionEntry>();
+        public List<SelectionEntry> List = new();
+        public List<SelectionEntry> FilteredList = new();
         private object _SelectionTarget;
 
         public object SelectionTarget
         {
-            get => this._SelectionTarget;
+            get => _SelectionTarget;
             set
             {
-                this.FilteredList = new List<SelectionEntry>();
-                this._SelectionTarget = value;
-                this.UpdateLayouts = true;
+                FilteredList = new List<SelectionEntry>();
+                _SelectionTarget = value;
+                UpdateLayouts = true;
             }
         }
 
-        public Template Template
-        {
-            get => BuildsManager.ModuleInstance.Selected_Template;
-        }
+        public Template Template => BuildsManager.s_moduleInstance.Selected_Template;
 
         public EquipmentSlots Slot = EquipmentSlots.Unkown;
         public int UpgradeIndex = 0;
 
-        private BitmapFont Font;
+        private readonly BitmapFont Font;
         public CustomTooltip CustomTooltip;
         public bool Clicked = false;
         public DateTime LastClick = DateTime.Now;
@@ -111,63 +108,63 @@
 
         public SelectionPopUp(Container parent)
         {
-            this.Parent = parent;
-            this.Visible = false;
-            this.ZIndex = 997;
-            this.Size = new Point(300, 500);
-            this.Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)Backgrounds.Tooltip];
+            Parent = parent;
+            Visible = false;
+            ZIndex = 997;
+            Size = new Point(300, 500);
+            Background = BuildsManager.s_moduleInstance.TextureManager._Backgrounds[(int)Backgrounds.Tooltip];
 
             // BackgroundColor = Color.Red;
-            this.FilterBox = new TextBox()
+            FilterBox = new TextBox()
             {
-                Parent = this.Parent,
+                Parent = Parent,
                 PlaceholderText = Strings.common.Search + " ...",
-                Width = this.Width - 6,
+                Width = Width - 6,
                 ZIndex = 998,
                 Visible = false,
             };
-            this.FilterBox.TextChanged += this.FilterBox_TextChanged;
-            BuildsManager.ModuleInstance.LanguageChanged += this.ModuleInstance_LanguageChanged;
+            FilterBox.TextChanged += FilterBox_TextChanged;
+            BuildsManager.s_moduleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
 
-            this.Font = GameService.Content.DefaultFont14;
+            Font = GameService.Content.DefaultFont14;
 
-            Input.Mouse.LeftMouseButtonPressed += this.Mouse_LeftMouseButtonPressed;
+            Input.Mouse.LeftMouseButtonPressed += Mouse_LeftMouseButtonPressed;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            this.CustomTooltip?.Dispose();
-            this.FilterBox?.Dispose();
-            if (this.FilterBox != null)
+            CustomTooltip?.Dispose();
+            FilterBox?.Dispose();
+            if (FilterBox != null)
             {
-                this.FilterBox.TextChanged -= this.FilterBox_TextChanged;
+                FilterBox.TextChanged -= FilterBox_TextChanged;
             }
 
-            BuildsManager.ModuleInstance.LanguageChanged -= this.ModuleInstance_LanguageChanged;
-            Input.Mouse.LeftMouseButtonPressed -= this.Mouse_LeftMouseButtonPressed;
+            BuildsManager.s_moduleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
+            Input.Mouse.LeftMouseButtonPressed -= Mouse_LeftMouseButtonPressed;
 
-            this.FilteredList?.DisposeAll();
-            this.List?.DisposeAll();
-            this._SelectionTarget = null;
+            FilteredList?.DisposeAll();
+            List?.DisposeAll();
+            _SelectionTarget = null;
 
-            this.SelectedProfession?.Dispose();
-            this.SelectedProfession = null;
+            SelectedProfession?.Dispose();
+            SelectedProfession = null;
         }
 
         protected override void OnHidden(EventArgs e)
         {
             base.OnHidden(e);
-            this.FilterBox?.Hide();
-            this.Clicked = false;
+            FilterBox?.Hide();
+            Clicked = false;
         }
 
         protected override void OnResized(ResizedEventArgs e)
         {
             base.OnResized(e);
-            if (this.FilterBox != null)
+            if (FilterBox != null)
             {
-                this.FilterBox.Width = this.Width - 6;
+                FilterBox.Width = Width - 6;
             }
         }
 
@@ -175,25 +172,25 @@
         {
             base.OnMoved(e);
 
-            if (this.FilterBox != null)
+            if (FilterBox != null)
             {
-                this.FilterBox.Location = this.Location.Add(new Point(3, 4));
+                FilterBox.Location = Location.Add(new Point(3, 4));
             }
         }
 
         private void Mouse_LeftMouseButtonPressed(object sender, MouseEventArgs e)
         {
-            this.OnChanged();
+            OnChanged();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
-            this.FilterBox.PlaceholderText = Strings.common.Search + " ...";
+            FilterBox.PlaceholderText = Strings.common.Search + " ...";
         }
 
         private void FilterBox_TextChanged(object sender, EventArgs e)
         {
-            this.UpdateLayout();
+            UpdateLayout();
         }
 
         public API.Profession SelectedProfession;
@@ -202,93 +199,93 @@
 
         private void OnChanged()
         {
-            if (this.List == null || this.List.Count == 0 || !this.Visible)
+            if (List == null || List.Count == 0 || !Visible)
             {
                 return;
             }
 
-            var list = new List<SelectionEntry>(this.FilteredList);
+            List<SelectionEntry> list = new(FilteredList);
             foreach (SelectionEntry entry in list)
             {
                 if (entry.Hovered)
                 {
-                    switch (this.SelectionType)
+                    switch (SelectionType)
                     {
                         case selectionType.Runes:
-                            var rune = (API.RuneItem)entry.Object;
-                            var armor = (Armor_TemplateItem)this.SelectionTarget;
+                            API.RuneItem rune = (API.RuneItem)entry.Object;
+                            Armor_TemplateItem armor = (Armor_TemplateItem)SelectionTarget;
                             armor.Rune = rune;
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Sigils:
-                            var sigil = (API.SigilItem)entry.Object;
-                            var weapon = (Weapon_TemplateItem)this.SelectionTarget;
+                            API.SigilItem sigil = (API.SigilItem)entry.Object;
+                            Weapon_TemplateItem weapon = (Weapon_TemplateItem)SelectionTarget;
                             weapon.Sigil = sigil;
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.AquaticSigils:
-                            var aquaSigil = (API.SigilItem)entry.Object;
-                            var aquaWeapon = (AquaticWeapon_TemplateItem)this.SelectionTarget;
-                            aquaWeapon.Sigils[this.UpgradeIndex] = aquaSigil;
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            API.SigilItem aquaSigil = (API.SigilItem)entry.Object;
+                            AquaticWeapon_TemplateItem aquaWeapon = (AquaticWeapon_TemplateItem)SelectionTarget;
+                            aquaWeapon.Sigils[UpgradeIndex] = aquaSigil;
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Profession:
-                            this.SelectedProfession = (API.Profession)entry.Object;
-                            this.FilterBox.Text = null;
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            SelectedProfession = (API.Profession)entry.Object;
+                            FilterBox.Text = null;
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Stats:
-                            var stat = (API.Stat)entry.Object;
-                            var item = (TemplateItem)this.SelectionTarget;
+                            API.Stat stat = (API.Stat)entry.Object;
+                            TemplateItem item = (TemplateItem)SelectionTarget;
                             item.Stat = stat;
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Weapons:
-                            var selectedWeapon = (API.WeaponItem)entry.Object;
-                            var iWeapon = (Weapon_TemplateItem)this.SelectionTarget;
+                            API.WeaponItem selectedWeapon = (API.WeaponItem)entry.Object;
+                            Weapon_TemplateItem iWeapon = (Weapon_TemplateItem)SelectionTarget;
                             iWeapon.WeaponType = selectedWeapon.WeaponType;
 
-                            switch (this.Slot)
+                            switch (Slot)
                             {
                                 case EquipmentSlots.Weapon1_MainHand:
-                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType != API.weaponType.Unkown)
+                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType != API.weaponType.Unkown)
                                     {
-                                        this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType = API.weaponType.Unkown;
+                                        Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType = API.weaponType.Unkown;
                                     }
 
                                     break;
 
                                 case EquipmentSlots.Weapon2_MainHand:
-                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType != API.weaponType.Unkown)
+                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType != API.weaponType.Unkown)
                                     {
-                                        this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType = API.weaponType.Unkown;
+                                        Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType = API.weaponType.Unkown;
                                     }
 
                                     break;
                             }
 
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.AquaticWeapons:
-                            var selectedAquaWeapon = (API.WeaponItem)entry.Object;
-                            var AquaWeapon = (AquaticWeapon_TemplateItem)this.SelectionTarget;
+                            API.WeaponItem selectedAquaWeapon = (API.WeaponItem)entry.Object;
+                            AquaticWeapon_TemplateItem AquaWeapon = (AquaticWeapon_TemplateItem)SelectionTarget;
                             AquaWeapon.WeaponType = selectedAquaWeapon.WeaponType;
-                            this.Changed?.Invoke(this, EventArgs.Empty);
+                            Changed?.Invoke(this, EventArgs.Empty);
                             break;
                     }
 
-                    this.LastClick = DateTime.Now;
-                    this.List = new List<SelectionEntry>();
-                    this.FilteredList = new List<SelectionEntry>();
+                    LastClick = DateTime.Now;
+                    List = new List<SelectionEntry>();
+                    FilteredList = new List<SelectionEntry>();
 
-                    this.Clicked = true;
-                    this.Hide();
+                    Clicked = true;
+                    Hide();
                     break;
                 }
             }
@@ -302,7 +299,7 @@
 
         private void UpdateLayout()
         {
-            if (this.List == null || this.List.Count == 0)
+            if (List == null || List.Count == 0)
             {
                 return;
             }
@@ -310,16 +307,16 @@
             int i = 0;
             int size = 42;
 
-            this.FilteredList = new List<SelectionEntry>();
-            if ((this.SelectionType == selectionType.Weapons || this.SelectionType == selectionType.AquaticWeapons) && this.Template != null && this.Template.Build != null && this.Template.Build.Profession != null)
+            FilteredList = new List<SelectionEntry>();
+            if ((SelectionType == selectionType.Weapons || SelectionType == selectionType.AquaticWeapons) && Template != null && Template.Build != null && Template.Build.Profession != null)
             {
-                List<string> weapons = new List<string>();
+                List<string> weapons = new();
 
-                foreach (API.ProfessionWeapon weapon in this.Template.Build.Profession.Weapons)
+                foreach (API.ProfessionWeapon weapon in Template.Build.Profession.Weapons)
                 {
-                    if (weapon.Specialization == 0 || this.Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == weapon.Specialization) != null)
+                    if (weapon.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == weapon.Specialization) != null)
                     {
-                        switch (this.Slot)
+                        switch (Slot)
                         {
                             case EquipmentSlots.Weapon1_MainHand:
                             case EquipmentSlots.Weapon2_MainHand:
@@ -351,21 +348,21 @@
                     }
                 }
 
-                this.List = this.List.Where(e => weapons.Contains(e.Header)).ToList();
+                List = List.Where(e => weapons.Contains(e.Header)).ToList();
             }
 
-            if (this.FilterBox.Text != null && this.FilterBox.Text != string.Empty)
+            if (FilterBox.Text != null && FilterBox.Text != string.Empty)
             {
-                List<string> tags = this.FilterBox.Text.ToLower().Split(' ').ToList();
-                var filteredTags = tags.Where(e => e.Trim().Length > 0);
+                List<string> tags = FilterBox.Text.ToLower().Split(' ').ToList();
+                IEnumerable<string> filteredTags = tags.Where(e => e.Trim().Length > 0);
 
-                foreach (SelectionEntry entry in this.List)
+                foreach (SelectionEntry entry in List)
                 {
-                    List<filterTag> Tags = new List<filterTag>();
+                    List<filterTag> Tags = new();
 
                     foreach (string t in filteredTags)
                     {
-                        var tag = new filterTag()
+                        filterTag tag = new()
                         {
                             text = t.Trim().ToLower(),
                             match = false,
@@ -374,13 +371,13 @@
 
                         if (entry.Header.ToLower().Contains(tag.text))
                         {
-                            this.FilteredList.Add(entry);
+                            FilteredList.Add(entry);
                             tag.match = true;
                         }
 
                         foreach (string s in entry.Content)
                         {
-                            var lower = s.ToLower();
+                            string lower = s.ToLower();
 
                             tag.match = tag.match ? tag.match : lower.Contains(tag.text);
                             if (tag.match)
@@ -390,31 +387,31 @@
                         }
                     }
 
-                    if (!this.FilteredList.Contains(entry) && (Tags.Count == Tags.Where(e => e.match == true).ToList().Count))
+                    if (!FilteredList.Contains(entry) && (Tags.Count == Tags.Where(e => e.match == true).ToList().Count))
                     {
-                        this.FilteredList.Add(entry);
+                        FilteredList.Add(entry);
                     }
                 }
             }
             else
             {
-                this.FilteredList = new List<SelectionEntry>(this.List);
+                FilteredList = new List<SelectionEntry>(List);
             }
 
-            foreach (SelectionEntry entry in this.FilteredList)
+            foreach (SelectionEntry entry in FilteredList)
             {
-                entry.AbsolutBounds = new Rectangle(0, this.FilterBox.Height + 5 + (i * (size + 5)), this.Width, size);
-                entry.TextureBounds = new Rectangle(2, this.FilterBox.Height + 5 + (i * (size + 5)), size, size);
-                entry.TextBounds = new Rectangle(2 + size + 5, this.FilterBox.Height + (i * (size + 5)), size, size);
+                entry.AbsolutBounds = new Rectangle(0, FilterBox.Height + 5 + (i * (size + 5)), Width, size);
+                entry.TextureBounds = new Rectangle(2, FilterBox.Height + 5 + (i * (size + 5)), size, size);
+                entry.TextBounds = new Rectangle(2 + size + 5, FilterBox.Height + (i * (size + 5)), size, size);
                 entry.ContentBounds = new List<Rectangle>();
 
                 int j = 0;
-                int statSize = this.Font.LineHeight;
+                int statSize = Font.LineHeight;
                 if (entry.ContentTextures != null && entry.ContentTextures.Count > 0)
                 {
                     foreach (AsyncTexture2D texture in entry.ContentTextures)
                     {
-                        entry.ContentBounds.Add(new Rectangle(size + (j * statSize), this.FilterBox.Height + this.Font.LineHeight + 12 + (i * (size + 5)), statSize, statSize));
+                        entry.ContentBounds.Add(new Rectangle(size + (j * statSize), FilterBox.Height + Font.LineHeight + 12 + (i * (size + 5)), statSize, statSize));
                         j++;
                     }
                 }
@@ -422,21 +419,21 @@
                 i++;
             }
 
-            this.Height = this.FilterBox.Height + 5 + (Math.Min(10, Math.Max(this.FilteredList.Count, 1)) * (size + 5));
+            Height = FilterBox.Height + 5 + (Math.Min(10, Math.Max(FilteredList.Count, 1)) * (size + 5));
         }
 
         private void UpdateStates()
         {
-            var list = new List<SelectionEntry>(this.FilteredList);
+            List<SelectionEntry> list = new(FilteredList);
             foreach (SelectionEntry entry in list)
             {
-                entry.Hovered = entry.AbsolutBounds.Contains(this.RelativeMousePosition);
+                entry.Hovered = entry.AbsolutBounds.Contains(RelativeMousePosition);
 
-                if (entry.Hovered && this.SelectionType != selectionType.Weapons && this.CustomTooltip != null)
+                if (entry.Hovered && SelectionType != selectionType.Weapons && CustomTooltip != null)
                 {
-                    this.CustomTooltip.Visible = true;
-                    this.CustomTooltip.Header = entry.Header;
-                    this.CustomTooltip.TooltipContent = entry.Content;
+                    CustomTooltip.Visible = true;
+                    CustomTooltip.Header = entry.Header;
+                    CustomTooltip.TooltipContent = entry.Content;
                 }
             }
         }
@@ -445,25 +442,25 @@
         {
             base.OnShown(e);
 
-            this.UpdateLayout();
-            this.FilterBox.Show();
-            this.Clicked = false;
+            UpdateLayout();
+            FilterBox.Show();
+            Clicked = false;
 
-            this.FilterBox.Focused = true;
-            this.FilterBox.SelectionStart = 0;
-            this.FilterBox.SelectionEnd = this.FilterBox.Length;
+            FilterBox.Focused = true;
+            FilterBox.SelectionStart = 0;
+            FilterBox.SelectionEnd = FilterBox.Length;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            this.Clicked = false;
-            if (this.UpdateLayouts)
+            Clicked = false;
+            if (UpdateLayouts)
             {
-                this.UpdateLayout();
-                this.UpdateLayouts = false;
+                UpdateLayout();
+                UpdateLayouts = false;
             }
 
-            this.UpdateStates();
+            UpdateStates();
 
             spriteBatch.DrawOnCtrl(
                 this,
@@ -476,7 +473,7 @@
 
             spriteBatch.DrawOnCtrl(
                 this,
-                this.Background,
+                Background,
                 bounds.Add(-2, 0, 0, 0),
                 bounds,
                 Color.White,
@@ -485,7 +482,7 @@
 
             int i = 0;
             int size = 42;
-            var list = new List<SelectionEntry>(this.FilteredList);
+            List<SelectionEntry> list = new(FilteredList);
             foreach (SelectionEntry entry in list)
             {
                 spriteBatch.DrawOnCtrl(
@@ -500,7 +497,7 @@
                 spriteBatch.DrawStringOnCtrl(
                     this,
                     entry.Header,
-                    this.Font,
+                    Font,
                     entry.TextBounds,
                     entry.Hovered ? Color.Orange : Color.White,
                     false,
@@ -509,7 +506,7 @@
                 if (entry.ContentTextures != null && entry.ContentTextures.Count > 0)
                 {
                     int j = 0;
-                    int statSize = this.Font.LineHeight;
+                    int statSize = Font.LineHeight;
                     foreach (AsyncTexture2D texture in entry.ContentTextures)
                     {
                         spriteBatch.DrawOnCtrl(
@@ -525,10 +522,10 @@
                 }
                 else
                 {
-                    List<string> strings = new List<string>();
+                    List<string> strings = new();
                     foreach (string s in entry.Content)
                     {
-                        var ss = s;
+                        string ss = s;
 
                         if (s.Contains("<c=@reminder>"))
                         {
@@ -547,8 +544,8 @@
                     spriteBatch.DrawStringOnCtrl(
                         this,
                         string.Join("; ", strings).Replace(Environment.NewLine, string.Empty),
-                        this.Font,
-                        new Rectangle(2 + size + 5, this.Font.LineHeight + this.FilterBox.Height + (i * (size + 5)) + this.Font.LineHeight - 5, size, this.Font.LineHeight),
+                        Font,
+                        new Rectangle(2 + size + 5, Font.LineHeight + FilterBox.Height + (i * (size + 5)) + Font.LineHeight - 5, size, Font.LineHeight),
                         Color.LightGray,
                         false,
                         HorizontalAlignment.Left,
@@ -558,7 +555,7 @@
                 i++;
             }
 
-            var color = Color.Black;
+            Color color = Color.Black;
 
             // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);

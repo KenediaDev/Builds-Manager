@@ -1,19 +1,19 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using System.Collections.Generic;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using System.Collections.Generic;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Enums;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class Control_ProfessionSelector : Control
     {
-        public List<API.Profession> Professions = new List<API.Profession>();
+        public List<API.Profession> Professions = new();
         public List<ProfessionSelection> _Professions;
         public Texture2D ClearTexture;
         public int IconSize;
@@ -21,66 +21,66 @@
         public Control_ProfessionSelector()
         {
             // BackgroundColor = Color.Orange;
-            this._Professions = new List<ProfessionSelection>();
+            _Professions = new List<ProfessionSelection>();
 
-            for (int i = 0; i < BuildsManager.ModuleInstance.Data.Professions.Count; i++)
+            for (int i = 0; i < BuildsManager.s_moduleInstance.Data.Professions.Count; i++)
             {
-                var profession = BuildsManager.ModuleInstance.Data.Professions[i];
-                this._Professions.Add(new ProfessionSelection()
+                API.Profession profession = BuildsManager.s_moduleInstance.Data.Professions[i];
+                _Professions.Add(new ProfessionSelection()
                 {
                     Profession = profession,
                     Index = i,
                 });
             }
 
-            this._Professions.Add(new ProfessionSelection()
+            _Professions.Add(new ProfessionSelection()
             {
-                Index = this._Professions.Count,
+                Index = _Professions.Count,
             });
 
-            this.IconSize = this.Height - 4;
-            this.ClearTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.Clear);
-            this.UpdateLayout();
+            IconSize = Height - 4;
+            ClearTexture = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.Clear);
+            UpdateLayout();
         }
 
         protected override void OnResized(ResizedEventArgs e)
         {
             base.OnResized(e);
-            this.IconSize = this.Height - 4;
-            this.UpdateLayout();
+            IconSize = Height - 4;
+            UpdateLayout();
         }
 
         protected override void OnClick(MouseEventArgs e)
         {
             base.OnClick(e);
 
-            foreach (ProfessionSelection profession in this._Professions)
+            foreach (ProfessionSelection profession in _Professions)
             {
                 if (profession.Hovered)
                 {
                     if (profession.Profession == null)
                     {
-                        this.Professions.Clear();
+                        Professions.Clear();
                     }
-                    else if (this.Professions.Contains(profession.Profession))
+                    else if (Professions.Contains(profession.Profession))
                     {
-                        this.Professions.Remove(profession.Profession);
+                        Professions.Remove(profession.Profession);
                     }
                     else
                     {
-                        this.Professions.Add(profession.Profession);
+                        Professions.Add(profession.Profession);
                     }
 
-                    this.OnChanged(null, EventArgs.Empty);
+                    OnChanged(null, EventArgs.Empty);
                 }
             }
         }
 
         private void UpdateLayout()
         {
-            foreach (ProfessionSelection profession in this._Professions)
+            foreach (ProfessionSelection profession in _Professions)
             {
-                profession.Bounds = new Rectangle(2 + (profession.Index * (this.IconSize + 2)), 2, this.IconSize, this.IconSize);
+                profession.Bounds = new Rectangle(2 + (profession.Index * (IconSize + 2)), 2, IconSize, IconSize);
             }
         }
 
@@ -88,7 +88,7 @@
 
         private void OnChanged(object sender, EventArgs e)
         {
-            this.Changed?.Invoke(this, EventArgs.Empty);
+            Changed?.Invoke(this, EventArgs.Empty);
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
@@ -102,7 +102,7 @@
                 0f,
                 Vector2.Zero);
 
-            var color = Color.Black;
+            Color color = Color.Black;
 
             // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
@@ -120,9 +120,9 @@
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
-            foreach (ProfessionSelection profession in this._Professions)
+            foreach (ProfessionSelection profession in _Professions)
             {
-                profession.Hovered = profession.Bounds.Contains(this.RelativeMousePosition);
+                profession.Hovered = profession.Bounds.Contains(RelativeMousePosition);
 
                 if (profession.Profession != null)
                 {
@@ -131,7 +131,7 @@
                         profession.Profession.Icon._AsyncTexture,
                         profession.Bounds,
                         profession.Profession.Icon._AsyncTexture.Texture.Bounds,
-                        profession.Hovered ? Color.White : this.Professions.Contains(profession.Profession) ? Color.LightGray : new Color(48, 48, 48, 150),
+                        profession.Hovered ? Color.White : Professions.Contains(profession.Profession) ? Color.LightGray : new Color(48, 48, 48, 150),
                         0f,
                         Vector2.Zero);
                 }
@@ -139,24 +139,23 @@
                 {
                     spriteBatch.DrawOnCtrl(
                         this,
-                        this.ClearTexture,
+                        ClearTexture,
                         profession.Bounds,
-                        this.ClearTexture.Bounds,
-                        profession.Hovered ? Color.White : this.Professions.Count > 0 ? Color.LightGray : new Color(48, 48, 48, 150),
+                        ClearTexture.Bounds,
+                        profession.Hovered ? Color.White : Professions.Count > 0 ? Color.LightGray : new Color(48, 48, 48, 150),
                         0f,
                         Vector2.Zero);
                 }
             }
-
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            this.Professions?.Clear();
-            foreach (ProfessionSelection p in this._Professions) { p.Dispose(); }
-            this._Professions?.Clear();
-            this.ClearTexture = null;
+            Professions?.Clear();
+            foreach (ProfessionSelection p in _Professions) { p.Dispose(); }
+            _Professions?.Clear();
+            ClearTexture = null;
         }
     }
 }

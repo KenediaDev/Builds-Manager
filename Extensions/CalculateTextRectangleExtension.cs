@@ -1,20 +1,20 @@
-﻿namespace Kenedia.Modules.BuildsManager.Extensions
-{
-    using MonoGame.Extended.BitmapFonts;
-    using Point = Microsoft.Xna.Framework.Point;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using MonoGame.Extended.BitmapFonts;
+using Point = Microsoft.Xna.Framework.Point;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Extensions
+{
     public static class CalculateTextRectangleExtension
     {
         public static Rectangle CalculateTextRectangle(this Rectangle rect, string text, BitmapFont font)
         {
             int rows = 1;
             int width = 0;
-            var placeholder = font.GetCharacterRegion(' ');
+            BitmapFontRegion placeholder = font.GetCharacterRegion(' ');
 
             foreach (char c in text)
             {
-                var region = font.GetCharacterRegion(c);
+                BitmapFontRegion region = font.GetCharacterRegion(c);
 
                 if (region != null && width + region.Width > rect.Width)
                 {
@@ -32,7 +32,7 @@
         {
             int rows = 1;
             int width = 0;
-            var placeholder = font.GetCharacterRegion(' ');
+            BitmapFontRegion placeholder = font.GetCharacterRegion(' ');
 
             foreach (char c in text)
             {
@@ -43,8 +43,8 @@
                     continue;
                 }
 
-                var region = font.GetCharacterRegion(c);
-                var cWidth = region != null ? region.Width : placeholder.Width;
+                BitmapFontRegion region = font.GetCharacterRegion(c);
+                int cWidth = region != null ? region.Width : placeholder.Width;
 
                 if (width + cWidth > rect.Width)
                 {

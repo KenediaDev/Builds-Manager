@@ -1,27 +1,27 @@
-﻿namespace Kenedia.Modules.BuildsManager.Controls
-{
-    using System;
-    using Blish_HUD;
-    using Blish_HUD.Controls;
-    using Blish_HUD.Input;
-    using Kenedia.Modules.BuildsManager.Enums;
-    using Kenedia.Modules.BuildsManager.Extensions;
-    using Kenedia.Modules.BuildsManager.Models;
-    using Microsoft.Xna.Framework;
-    using Microsoft.Xna.Framework.Graphics;
-    using MonoGame.Extended.BitmapFonts;
-    using Color = Microsoft.Xna.Framework.Color;
-    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+﻿using System;
+using Blish_HUD;
+using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using Kenedia.Modules.BuildsManager.Enums;
+using Kenedia.Modules.BuildsManager.Extensions;
+using Kenedia.Modules.BuildsManager.Models;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended.BitmapFonts;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
+namespace Kenedia.Modules.BuildsManager.Controls
+{
     public class Control_TemplateEntry : Control
     {
         public Template Template;
         private Texture2D _EmptyTraitLine;
         private Texture2D _Lock;
         private Texture2D _Template_Border;
-        private BitmapFont Font;
-        private BitmapFont FontItalic;
-        private Control_TemplateTooltip TemplateTooltip;
+        private readonly BitmapFont Font;
+        private readonly BitmapFont FontItalic;
+        private readonly Control_TemplateTooltip TemplateTooltip;
         private double Tick = 0;
         private string FeedbackPopup;
 
@@ -29,33 +29,33 @@
         {
             base.DoUpdate(gameTime);
 
-            if (this.FeedbackPopup != null)
+            if (FeedbackPopup != null)
             {
-                this.Tick += gameTime.ElapsedGameTime.TotalMilliseconds;
+                Tick += gameTime.ElapsedGameTime.TotalMilliseconds;
 
-                if (this.Tick < 350)
+                if (Tick < 350)
                 {
                     // Fadeout
                 }
                 else
                 {
                     // Hide
-                    this.Tick = 0;
-                    this.FeedbackPopup = null;
+                    Tick = 0;
+                    FeedbackPopup = null;
                 }
             }
         }
 
         public Control_TemplateEntry(Container parent, Template template)
         {
-            this.Parent = parent;
-            this.Template = template;
-            this._EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
-            this._Template_Border = BuildsManager.ModuleInstance.TextureManager.getControlTexture(ControlTexture.Template_Border);
-            this._Lock = BuildsManager.ModuleInstance.TextureManager.getIcon(Icons.Lock_Locked);
+            Parent = parent;
+            Template = template;
+            _EmptyTraitLine = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            _Template_Border = BuildsManager.s_moduleInstance.TextureManager.getControlTexture(ControlTexture.Template_Border);
+            _Lock = BuildsManager.s_moduleInstance.TextureManager.getIcon(Icons.Lock_Locked);
 
-            this.Font = GameService.Content.DefaultFont14;
-            this.FontItalic = GameService.Content.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Italic);
+            Font = GameService.Content.DefaultFont14;
+            FontItalic = GameService.Content.GetFont(ContentService.FontFace.Menomonia, (ContentService.FontSize)14, ContentService.FontStyle.Italic);
 
             // TemplateTooltip = new Control_TemplateTooltip();
         }
@@ -64,13 +64,13 @@
 
         private void OnTemplateChangedEvent(Template template)
         {
-            var code = template.Build.ParseBuildCode();
+            string code = template.Build.ParseBuildCode();
             if (code != null && code != string.Empty && Input.Keyboard.ActiveModifiers.HasFlag(Microsoft.Xna.Framework.Input.ModifierKeys.Ctrl))
             {
                 try
                 {
                     ClipboardUtil.WindowsClipboardService.SetTextAsync(template.Build.ParseBuildCode());
-                    this.FeedbackPopup = "Copied Build Code!";
+                    FeedbackPopup = "Copied Build Code!";
                 }
                 catch (ArgumentException)
                 {
@@ -83,41 +83,41 @@
                 return;
             }
 
-            this.TemplateChanged?.Invoke(this, new TemplateChangedEvent(template));
+            TemplateChanged?.Invoke(this, new TemplateChangedEvent(template));
         }
 
         protected override void OnClick(MouseEventArgs e)
         {
             base.OnClick(e);
-            this.OnTemplateChangedEvent(this.Template);
+            OnTemplateChangedEvent(Template);
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
 
-            this.TemplateTooltip?.Dispose();
+            TemplateTooltip?.Dispose();
 
             // Template?.Dispose();
-            this.Template = null;
-            this._EmptyTraitLine = null;
-            this._Lock = null;
-            this._Template_Border = null;
+            Template = null;
+            _EmptyTraitLine = null;
+            _Lock = null;
+            _Template_Border = null;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (this.TemplateTooltip != null)
+            if (TemplateTooltip != null)
             {
-                this.TemplateTooltip.Visible = this.MouseOver;
+                TemplateTooltip.Visible = MouseOver;
             }
 
             spriteBatch.DrawOnCtrl(
                 this,
-                this._Template_Border,
+                _Template_Border,
                 bounds,
-                this._Template_Border.Bounds,
-                this.MouseOver ? Color.Gray : Color.Gray,
+                _Template_Border.Bounds,
+                MouseOver ? Color.Gray : Color.Gray,
                 0f,
                 Vector2.Zero);
 
@@ -126,20 +126,20 @@
                 ContentService.Textures.Pixel,
                 bounds,
                 bounds,
-                BuildsManager.ModuleInstance.Selected_Template == this.Template ? new Color(0, 0, 0, 200) : new Color(0, 0, 0, 145),
+                BuildsManager.s_moduleInstance.Selected_Template == Template ? new Color(0, 0, 0, 200) : new Color(0, 0, 0, 145),
                 0f,
                 Vector2.Zero);
 
-            Texture2D texture = this._EmptyTraitLine;
-            var player = GameService.Gw2Mumble.PlayerCharacter;
+            Texture2D texture = _EmptyTraitLine;
+            Blish_HUD.Gw2Mumble.PlayerCharacter player = GameService.Gw2Mumble.PlayerCharacter;
 
-            if (this.Template.Specialization != null)
+            if (Template.Specialization != null)
             {
-                texture = this.Template.Specialization.ProfessionIconBig._AsyncTexture;
+                texture = Template.Specialization.ProfessionIconBig._AsyncTexture;
             }
-            else if (this.Template.Build.Profession != null)
+            else if (Template.Build.Profession != null)
             {
-                texture = this.Template.Build.Profession.IconBig._AsyncTexture;
+                texture = Template.Build.Profession.IconBig._AsyncTexture;
             }
 
             spriteBatch.DrawOnCtrl(
@@ -147,32 +147,32 @@
                 texture,
                 new Rectangle(2, 2, bounds.Height - 4, bounds.Height - 4),
                 texture.Bounds,
-                this.Template.Profession?.Id == player.Profession.ToString() ? Color.White : Color.LightGray,
+                Template.Profession?.Id == player.Profession.ToString() ? Color.White : Color.LightGray,
                 0f,
                 Vector2.Zero);
 
-            if (this.Template.Path == null)
+            if (Template.Path == null)
             {
                 spriteBatch.DrawOnCtrl(
                     this,
-                    this._Lock,
+                    _Lock,
                     new Rectangle(bounds.Height - 14, bounds.Height - 14, 12, 12),
-                    this._Lock.Bounds,
+                    _Lock.Bounds,
                     new Color(168 + 15, 143 + 15, 102 + 15, 255),
                     0f,
                     Vector2.Zero);
             }
 
-            var textBounds = new Rectangle(bounds.X + bounds.Height + 5, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
-            var popupBounds = new Rectangle(bounds.X + bounds.Height - 10, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
-            var rect = this.Font.CalculateTextRectangle(this.Template.Name, textBounds);
+            Rectangle textBounds = new(bounds.X + bounds.Height + 5, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
+            Rectangle popupBounds = new(bounds.X + bounds.Height - 10, bounds.Y, bounds.Width - (bounds.Height + 5), bounds.Height);
+            Rectangle rect = Font.CalculateTextRectangle(Template.Name, textBounds);
 
-            if (this.FeedbackPopup != null)
+            if (FeedbackPopup != null)
             {
                 spriteBatch.DrawStringOnCtrl(
                     this,
-                    this.FeedbackPopup,
-                    this.FontItalic,
+                    FeedbackPopup,
+                    FontItalic,
                     popupBounds,
                     new Color(175, 175, 175, 125),
                     false,
@@ -183,17 +183,17 @@
             {
                 spriteBatch.DrawStringOnCtrl(
                     this,
-                    this.Template.Name,
-                    this.Font,
+                    Template.Name,
+                    Font,
                     textBounds,
-                    BuildsManager.ModuleInstance.Selected_Template == this.Template ? Color.LimeGreen : this.MouseOver ? Color.White : this.Template.Profession?.Id == player.Profession.ToString() ? Color.LightGray : Color.Gray,
+                    BuildsManager.s_moduleInstance.Selected_Template == Template ? Color.LimeGreen : MouseOver ? Color.White : Template.Profession?.Id == player.Profession.ToString() ? Color.LightGray : Color.Gray,
                     true,
                     HorizontalAlignment.Left,
                     rect.Height > textBounds.Height ? VerticalAlignment.Top : VerticalAlignment.Middle);
             }
 
             // var color = MouseOver ? Color.Honeydew : Color.Black;
-            var color = this.MouseOver ? Color.Honeydew : Color.Transparent;
+            Color color = MouseOver ? Color.Honeydew : Color.Transparent;
 
             // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
