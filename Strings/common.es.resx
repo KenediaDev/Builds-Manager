@@ -233,4 +233,7 @@ Clic derecho para copiar el nombre de la estadística/actualización</value>
   <data name="Warhorn" xml:space="preserve">
     <value>Cuerno de guerra</value>
   </data>
+  <data name="MyTestString" xml:space="preserve">
+    <value>Esta es una frase de prueba.</value>
+  </data>
 </root>

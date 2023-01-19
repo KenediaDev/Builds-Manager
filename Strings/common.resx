@@ -233,4 +233,7 @@ Right Click to copy Stat/Upgrade Name</value>
   <data name="Warhorn" xml:space="preserve">
     <value>Warhorn</value>
   </data>
+  <data name="MyTestString" xml:space="preserve">
+    <value>This is a test phrase.</value>
+  </data>
 </root>

@@ -233,4 +233,7 @@ Rechtsklick zum Kopieren des Werte/Upgrade-Namens</value>
   <data name="Warhorn" xml:space="preserve">
     <value>Kriegshorn</value>
   </data>
+  <data name="MyTestString" xml:space="preserve">
+    <value>Dies ist eine Testphrase.</value>
+  </data>
 </root>

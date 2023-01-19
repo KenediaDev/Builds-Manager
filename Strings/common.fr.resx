@@ -233,4 +233,7 @@ Clic droit pour copier le nom de l'état/amélioration</value>
   <data name="Warhorn" xml:space="preserve">
     <value>Cor de guerre</value>
   </data>
+  <data name="MyTestString" xml:space="preserve">
+    <value>Il s'agit d'une phrase d'essai.</value>
+  </data>
 </root>

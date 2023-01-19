@@ -153,22 +153,68 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildsManager.cs" />
-    <Compile Include="Classes\Control_Build.cs" />
-    <Compile Include="Classes\BuildTemplate.cs" />
-    <Compile Include="Classes\ClassExtensions.cs" />
-    <Compile Include="Classes\Control_IconButton.cs" />
-    <Compile Include="Classes\Control_TemplateSelection.cs" />
-    <Compile Include="Classes\Data.cs" />
-    <Compile Include="Classes\Control_Equipment.cs" />
-    <Compile Include="Classes\GW2API.cs" />
-    <Compile Include="Classes\LocalTexture.cs" />
-    <Compile Include="Classes\Paths.cs" />
-    <Compile Include="Classes\ProgressBar.cs" />
-    <Compile Include="Classes\Ticks.cs" />
-    <Compile Include="Classes\TextureManager.cs" />
-    <Compile Include="Classes\Enum.cs" />
-    <Compile Include="Classes\TraitLine.cs" />
-    <Compile Include="Classes\Window_MainWindow.cs" />
+    <Compile Include="Controls\ConnectorLine.cs" />
+    <Compile Include="Controls\Control_Build.cs" />
+    <Compile Include="Controls\Control_ProfessionSelector.cs" />
+    <Compile Include="Controls\Control_TemplateEntry.cs" />
+    <Compile Include="Controls\Control_TemplateTooltip.cs" />
+    <Compile Include="Controls\CustomTooltip.cs" />
+    <Compile Include="Controls\ProfessionSelection.cs" />
+    <Compile Include="Controls\ProgressContainer.cs" />
+    <Compile Include="Controls\SelectionPopUp.cs" />
+    <Compile Include="Controls\SkillBar_Control.cs" />
+    <Compile Include="Controls\SkillSelector_Control.cs" />
+    <Compile Include="Models\AquaticWeapon_TemplateItem.cs" />
+    <Compile Include="Models\AquaticWeapon_TemplateItem_json.cs" />
+    <Compile Include="Models\Armor_TemplateItem.cs" />
+    <Compile Include="Models\Armor_TemplateItem_json.cs" />
+    <Compile Include="Models\GearTemplate.cs" />
+    <Compile Include="Models\GearTemplate_json.cs" />
+    <Compile Include="Models\SpecLine.cs" />
+    <Compile Include="Models\Template.cs" />
+    <Compile Include="Models\TemplateChangedEvent.cs" />
+    <Compile Include="Models\SkillChangedEvent.cs" />
+    <Compile Include="Controls\Skill_Control.cs" />
+    <Compile Include="Enums\SkillSlots.cs" />
+    <Compile Include="Controls\SpecializationSelector_Control.cs" />
+    <Compile Include="Controls\Specialization_Control.cs" />
+    <Compile Include="Controls\Trait_Control.cs" />
+    <Compile Include="Enums\ArmorSlot.cs" />
+    <Compile Include="Enums\ArmorWeight.cs" />
+    <Compile Include="Enums\Backgrounds.cs" />
+    <Compile Include="Enums\Controls.cs" />
+    <Compile Include="Enums\Emblems.cs" />
+    <Compile Include="Enums\EquipmentSlots.cs" />
+    <Compile Include="Enums\EquipmentStats.cs" />
+    <Compile Include="Enums\EquipmentTextures.cs" />
+    <Compile Include="Enums\EquipSlotTextures.cs" />
+    <Compile Include="Enums\Icons.cs" />
+    <Compile Include="Enums\Stats.cs" />
+    <Compile Include="Extensions\EnumExtension.cs" />
+    <Compile Include="Extensions\DisposableExtensions.cs" />
+    <Compile Include="Extensions\intExtension.cs" />
+    <Compile Include="Extensions\PointExtension.cs" />
+    <Compile Include="Extensions\RectangleExtension.cs" />
+    <Compile Include="Extensions\StatAttributeExtension.cs" />
+    <Compile Include="Extensions\weaponTypeExtension.cs" />
+    <Compile Include="Models\BuildTemplate.cs" />
+    <Compile Include="Extensions\CalculateTextRectangleExtension.cs" />
+    <Compile Include="Controls\Control_IconButton.cs" />
+    <Compile Include="Controls\Control_TemplateSelection.cs" />
+    <Compile Include="Models\TemplateItem.cs" />
+    <Compile Include="Models\TemplateItem_json.cs" />
+    <Compile Include="Models\Template_json.cs" />
+    <Compile Include="Models\Weapon_TemplateItem.cs" />
+    <Compile Include="Models\Weapon_TemplateItem_json.cs" />
+    <Compile Include="Services\Data.cs" />
+    <Compile Include="Controls\Control_Equipment.cs" />
+    <Compile Include="Services\GW2API.cs" />
+    <Compile Include="Services\Paths.cs" />
+    <Compile Include="Controls\ProgressBar.cs" />
+    <Compile Include="Services\Ticks.cs" />
+    <Compile Include="Services\TextureManager.cs" />
+    <Compile Include="Enums\RevenantLegends.cs" />
+    <Compile Include="Views\Window_MainWindow.cs" />
     <Compile Include="Strings\common.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -701,6 +747,9 @@
   <ItemGroup>
     <Analyzer Include="packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utility\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

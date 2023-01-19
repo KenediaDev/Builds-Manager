@@ -19,7 +19,7 @@ namespace Kenedia.Modules.BuildsManager.Strings {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class common {
@@ -221,6 +221,15 @@ namespace Kenedia.Modules.BuildsManager.Strings {
         internal static string Mace {
             get {
                 return ResourceManager.GetString("Mace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is a test phrase..
+        /// </summary>
+        internal static string MyTestString {
+            get {
+                return ResourceManager.GetString("MyTestString", resourceCulture);
             }
         }
         

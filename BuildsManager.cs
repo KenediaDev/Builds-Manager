@@ -14,6 +14,10 @@
     using Blish_HUD.Modules.Managers;
     using Blish_HUD.Settings;
     using Gw2Sharp.WebApi.V2.Models;
+    using Kenedia.Modules.BuildsManager.Controls;
+    using Kenedia.Modules.BuildsManager.Enums;
+    using Kenedia.Modules.BuildsManager.Extensions;
+    using Kenedia.Modules.BuildsManager.Models;
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
@@ -371,7 +375,7 @@
 
                             if (this.Templates.Find(e => e.Template_json.Name == template.Template_json.Name && e.Template_json.BuildCode == template.Template_json.BuildCode) == null)
                             {
-                                template.Build = new BuildTemplate(buildpadBuild[1]);
+                                template.Build = new Models.BuildTemplate(buildpadBuild[1]);
                                 template.Name = buildpadBuild[5];
 
                                 template.Profession = template.Build.Profession;
@@ -499,7 +503,7 @@
 
             this.cornerIcon = new CornerIcon()
             {
-                Icon = this.TextureManager.getIcon(_Icons.Template),
+                Icon = this.TextureManager.getIcon(Icons.Template),
                 BasicTooltipText = $"{this.Name}",
                 Parent = GameService.Graphics.SpriteScreen,
                 Visible = this.ShowCornerIcon.Value,
@@ -555,12 +559,12 @@
 
         private void CornerIcon_MouseLeft(object sender, Blish_HUD.Input.MouseEventArgs e)
         {
-            this.cornerIcon.Icon = this.TextureManager.getIcon(_Icons.Template);
+            this.cornerIcon.Icon = this.TextureManager.getIcon(Icons.Template);
         }
 
         private void CornerIcon_MouseEntered(object sender, Blish_HUD.Input.MouseEventArgs e)
         {
-            this.cornerIcon.Icon = this.TextureManager.getIcon(_Icons.Template_White);
+            this.cornerIcon.Icon = this.TextureManager.getIcon(Icons.Template_White);
         }
 
         private void ShowCornerIcon_SettingChanged(object sender, ValueChangedEventArgs<bool> e)
@@ -866,7 +870,7 @@
                 List<API.Stat> Stats = new List<API.Stat>();
                 foreach (Itemstat stat in stats)
                 {
-                    if (stat != null && Enum.GetName(typeof(_EquipmentStats), stat.Id) != null)
+                    if (stat != null && Enum.GetName(typeof(EquipmentStats), stat.Id) != null)
                     {
                         {
                             var temp = new API.Stat()
@@ -1387,13 +1391,13 @@
             var Width = 915;
 
             this.MainWindow = new Window_MainWindow(
-                this.TextureManager.getBackground(_Backgrounds.MainWindow),
+                this.TextureManager.getBackground(Backgrounds.MainWindow),
                 new Rectangle(30, 30, Width, Height + 30),
                 new Rectangle(30, 15, Width - 3, Height + 25))
             {
                 Parent = GameService.Graphics.SpriteScreen,
                 Title = "Builds Manager",
-                Emblem = this.TextureManager._Emblems[(int)_Emblems.SwordAndShield],
+                Emblem = this.TextureManager._Emblems[(int)Emblems.SwordAndShield],
                 Subtitle = "v." + this.Version.BaseVersion().ToString(),
                 SavesPosition = true,
                 Id = $"BuildsManager New",
