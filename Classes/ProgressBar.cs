@@ -1,29 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Blish_HUD;
-using Blish_HUD.Controls;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Color = Microsoft.Xna.Framework.Color;
-
-namespace Kenedia.Modules.BuildsManager
+﻿namespace Kenedia.Modules.BuildsManager
 {
+    using System;
+    using Blish_HUD;
+    using Blish_HUD.Controls;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
+    using Color = Microsoft.Xna.Framework.Color;
+
     public class ProgressBar : Panel
     {
         public double _Progress = 0.33;
-        public double Progress { 
-            get { return _Progress; }
-            set { _Progress = value; UpdateLayout(); }
+
+        public double Progress
+        {
+            get { return this._Progress; }
+            set { this._Progress = value; this.UpdateLayout(); }
         }
+
         public string _Text;
+
         public string Text
         {
-            get { return _Text; }
-            set { _Text = value; UpdateLayout(); }
+            get { return this._Text; }
+            set { this._Text = value; this.UpdateLayout(); }
         }
+
         public Color Done_Color;
         public Color Bar_Color;
         public Image _BackgroundTexture;
@@ -34,37 +35,37 @@ namespace Kenedia.Modules.BuildsManager
 
         public ProgressBar()
         {
-            _BackgroundTexture = new Image()
+            this._BackgroundTexture = new Image()
             {
                 Parent = this,
-                Size = new Point(Size.X, Size.Y - 10),
+                Size = new Point(this.Size.X, this.Size.Y - 10),
                 Texture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.GlidingFill_Gray),
             };
 
-            _Bar = new ProgressContainer()
+            this._Bar = new ProgressContainer()
             {
                 Parent = this,
-                Size = Size,
+                Size = this.Size,
                 FrameColor = Color.DarkOrange,
             };
 
-            _Bar_Done = new Panel()
+            this._Bar_Done = new Panel()
             {
                 Parent = this,
-                Size = new Point((int) (Width * Progress), Height),
+                Size = new Point((int)(this.Width * this.Progress), this.Height),
             };
 
-            _FilledTexture = new Image()
+            this._FilledTexture = new Image()
             {
-                Parent = _Bar_Done,
-                Size = new Point(Size.X, Size.Y - 2),
+                Parent = this._Bar_Done,
+                Size = new Point(this.Size.X, this.Size.Y - 2),
                 Texture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.GlidingFill),
             };
 
-            _Label = new Label()
+            this._Label = new Label()
             {
                 Parent = this,
-                Size = Size,
+                Size = this.Size,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Middle,
                 Text = "Display Text",
@@ -78,34 +79,34 @@ namespace Kenedia.Modules.BuildsManager
         {
             base.OnResized(e);
 
-            UpdateLayout(); 
+            this.UpdateLayout();
         }
 
-        void UpdateLayout()
+        private void UpdateLayout()
         {
-            _Bar.Size = new Point(Size.X, Size.Y - 2);
-            _Label.Size = new Point(Size.X, Size.Y - 2);
-            _BackgroundTexture.Size = new Point(Size.X, Size.Y - 3);
-            _FilledTexture.Size = new Point(Size.X, Size.Y - 3);
-            _Bar_Done.Size = new Point((int)(Width * Progress), Height);
+            this._Bar.Size = new Point(this.Size.X, this.Size.Y - 2);
+            this._Label.Size = new Point(this.Size.X, this.Size.Y - 2);
+            this._BackgroundTexture.Size = new Point(this.Size.X, this.Size.Y - 3);
+            this._FilledTexture.Size = new Point(this.Size.X, this.Size.Y - 3);
+            this._Bar_Done.Size = new Point((int)(this.Width * this.Progress), this.Height);
 
-            _Label.Text = Text;
+            this._Label.Text = this.Text;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            _Bar_Done.Dispose();
-            _Bar.Dispose();
-            _Label.Dispose();
-            _FilledTexture.Dispose();
-            _BackgroundTexture.Dispose();
+            this._Bar_Done.Dispose();
+            this._Bar.Dispose();
+            this._Label.Dispose();
+            this._FilledTexture.Dispose();
+            this._BackgroundTexture.Dispose();
         }
     }
 
     public class ProgressContainer : Container
     {
-        const int PADDING = 2;
+        private const int PADDING = 2;
         public Texture2D Texture;
         public bool showBackground = true;
         public Color FrameColor = Color.Black;
@@ -113,32 +114,32 @@ namespace Kenedia.Modules.BuildsManager
 
         public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (showBackground && Texture != null)
+            if (this.showBackground && this.Texture != null)
             {
-                spriteBatch.DrawOnCtrl(this, Texture, bounds, new Rectangle(3, 4, _size.X, _size.Y), TextureColor * 0.98f);
+                spriteBatch.DrawOnCtrl(this, this.Texture, bounds, new Rectangle(3, 4, this._size.X, this._size.Y), this.TextureColor * 0.98f);
             }
 
             // Top
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 0, _size.X - 2, 3).Add(-PADDING, -PADDING, PADDING * 2, 0), FrameColor * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 1, _size.X - 2, 1).Add(-PADDING, -PADDING, PADDING * 2, 0), FrameColor * 0.6f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 0, this._size.X - 2, 3).Add(-PADDING, -PADDING, PADDING * 2, 0), this.FrameColor * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 1, this._size.X - 2, 1).Add(-PADDING, -PADDING, PADDING * 2, 0), this.FrameColor * 0.6f);
 
             // Right
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(_size.X - 3, 1, 3, _size.Y - 2).Add(PADDING, -PADDING, 0, PADDING * 2), FrameColor * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(_size.X - 2, 1, 1, _size.Y - 2).Add(PADDING, -PADDING, 0, PADDING * 2), FrameColor * 0.6f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(this._size.X - 3, 1, 3, this._size.Y - 2).Add(PADDING, -PADDING, 0, PADDING * 2), this.FrameColor * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(this._size.X - 2, 1, 1, this._size.Y - 2).Add(PADDING, -PADDING, 0, PADDING * 2), this.FrameColor * 0.6f);
 
             // Bottom
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, _size.Y - 4, _size.X - 2, 4).Add(-PADDING, PADDING, PADDING * 2, 0), FrameColor * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, _size.Y - 2, _size.X - 2, 1).Add(-PADDING, PADDING, PADDING * 2, 0), FrameColor * 0.6f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, this._size.Y - 4, this._size.X - 2, 4).Add(-PADDING, PADDING, PADDING * 2, 0), this.FrameColor * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, this._size.Y - 2, this._size.X - 2, 1).Add(-PADDING, PADDING, PADDING * 2, 0), this.FrameColor * 0.6f);
 
             // Left
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(0, 1, 3, _size.Y - 2).Add(-PADDING, -PADDING, 0, PADDING * 2), FrameColor * 0.5f);
-            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 1, 1, _size.Y - 2).Add(-PADDING, -PADDING, 0, PADDING * 2), FrameColor * 0.6f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(0, 1, 3, this._size.Y - 2).Add(-PADDING, -PADDING, 0, PADDING * 2), this.FrameColor * 0.5f);
+            spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(1, 1, 1, this._size.Y - 2).Add(-PADDING, -PADDING, 0, PADDING * 2), this.FrameColor * 0.6f);
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            Texture = null;
+            this.Texture = null;
         }
     }
 }

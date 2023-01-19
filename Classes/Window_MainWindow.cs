@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Blish_HUD;
-using Blish_HUD.Controls;
-using Microsoft.Xna.Framework;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using Color = Microsoft.Xna.Framework.Color;
-using Microsoft.Xna.Framework.Graphics;
-using Gw2Sharp.ChatLinks;
-using Blish_HUD.Input;
-using MonoGame.Extended.BitmapFonts;
-using System.Threading;
-using Blish_HUD.Content;
-
-namespace Kenedia.Modules.BuildsManager
+﻿namespace Kenedia.Modules.BuildsManager
 {
+    using System;
+    using System.Collections.Generic;
+    using Blish_HUD;
+    using Blish_HUD.Content;
+    using Blish_HUD.Controls;
+    using Blish_HUD.Input;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
+    using MonoGame.Extended.BitmapFonts;
+    using Color = Microsoft.Xna.Framework.Color;
+    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
     public class Tab
     {
         public Panel Panel;
@@ -28,78 +23,81 @@ namespace Kenedia.Modules.BuildsManager
         public bool Hovered;
     }
 
-    class Container_TabbedPanel : Container
+    internal class Container_TabbedPanel : Container
     {
         public Tab SelectedTab;
         public List<Tab> Tabs = new List<Tab>();
-        Texture2D _TabBarTexture;
+        private Texture2D _TabBarTexture;
         public TextBox TemplateBox;
         public TextBox GearBox;
+        private Texture2D _Copy;
+        private Texture2D _CopyHovered;
+        private int TabSize;
 
-        Texture2D _Copy;
-        Texture2D _CopyHovered;
-
-        int TabSize;
         public Container_TabbedPanel()
         {
-            _TabBarTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
+            this._TabBarTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.TabBar_FadeIn);
 
-            _Copy = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Copy);
-            _CopyHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Copy_Hovered);
+            this._Copy = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Copy);
+            this._CopyHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Copy_Hovered);
 
-            TemplateBox = new TextBox()
+            this.TemplateBox = new TextBox()
             {
                 Parent = this,
-                Width = Width,
-                Location = new Point(5, 45)
+                Width = this.Width,
+                Location = new Point(5, 45),
             };
-            TemplateBox.InputFocusChanged += TemplateBox_InputFocusChanged;
+            this.TemplateBox.InputFocusChanged += this.TemplateBox_InputFocusChanged;
 
-            GearBox = new TextBox()
+            this.GearBox = new TextBox()
             {
                 Parent = this,
-                Width = Width,
-                Location = new Point(5, 45 + 5 + TemplateBox.Height)
+                Width = this.Width,
+                Location = new Point(5, 45 + 5 + this.TemplateBox.Height),
             };
-            GearBox.InputFocusChanged += GearBox_InputFocusChanged;
+            this.GearBox.InputFocusChanged += this.GearBox_InputFocusChanged;
         }
 
         private void GearBox_InputFocusChanged(object sender, ValueEventArgs<bool> e)
         {
             if (e.Value)
             {
-                GearBox.SelectionStart = 0;
-                GearBox.SelectionEnd = GearBox.Text.Length;
+                this.GearBox.SelectionStart = 0;
+                this.GearBox.SelectionEnd = this.GearBox.Text.Length;
             }
             else
             {
-                GearBox.SelectionStart = 0;
-                GearBox.SelectionEnd = 0;
+                this.GearBox.SelectionStart = 0;
+                this.GearBox.SelectionEnd = 0;
             }
         }
+
         private void TemplateBox_InputFocusChanged(object sender, ValueEventArgs<bool> e)
         {
             if (e.Value)
             {
-                TemplateBox.SelectionStart = 0;
-                TemplateBox.SelectionEnd = TemplateBox.Text.Length;
+                this.TemplateBox.SelectionStart = 0;
+                this.TemplateBox.SelectionEnd = this.TemplateBox.Text.Length;
             }
             else
             {
-                TemplateBox.SelectionStart = 0;
-                TemplateBox.SelectionEnd = 0;
+                this.TemplateBox.SelectionStart = 0;
+                this.TemplateBox.SelectionEnd = 0;
             }
         }
 
         protected override void DisposeControl()
         {
-            foreach (Tab tab in Tabs)
+            foreach (Tab tab in this.Tabs)
             {
-                if (tab.Panel != null) tab.Panel.Dispose();
+                if (tab.Panel != null)
+                {
+                    tab.Panel.Dispose();
+                }
             }
 
-            TemplateBox.InputFocusChanged -= TemplateBox_InputFocusChanged;
-            GearBox.InputFocusChanged -= GearBox_InputFocusChanged;
+            this.TemplateBox.InputFocusChanged -= this.TemplateBox_InputFocusChanged;
+            this.GearBox.InputFocusChanged -= this.GearBox_InputFocusChanged;
 
             base.DisposeControl();
         }
@@ -110,13 +108,12 @@ namespace Kenedia.Modules.BuildsManager
 
             for (int i = 0; i < 2; i++)
             {
+                var rect = new Rectangle(this.LocalBounds.Width - this.TemplateBox.Height - 6, this.TemplateBox.LocalBounds.Y + (i * (this.TemplateBox.Height + 5)), this.TemplateBox.Height, this.TemplateBox.Height);
 
-               var rect = new Rectangle(LocalBounds.Width - TemplateBox.Height - 6, TemplateBox.LocalBounds.Y + (i * (TemplateBox.Height + 5)), TemplateBox.Height, TemplateBox.Height);
-
-                if (rect.Contains(RelativeMousePosition))
+                if (rect.Contains(this.RelativeMousePosition))
                 {
-                    var text = i == 0 ? TemplateBox.Text : GearBox.Text;
-                    if(text != "" && text != null)
+                    var text = i == 0 ? this.TemplateBox.Text : this.GearBox.Text;
+                    if (text != string.Empty && text != null)
                     {
                         try
                         {
@@ -128,7 +125,6 @@ namespace Kenedia.Modules.BuildsManager
                         }
                         catch
                         {
-
                         }
                     }
 
@@ -136,14 +132,14 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
-            foreach (Tab tab in Tabs)
+            foreach (Tab tab in this.Tabs)
             {
                 if (tab.Hovered)
                 {
-                    SelectedTab?.Panel?.Hide();
+                    this.SelectedTab?.Panel?.Hide();
 
-                    SelectedTab = tab;
-                    SelectedTab.Panel?.Show();
+                    this.SelectedTab = tab;
+                    this.SelectedTab.Panel?.Show();
                     return;
                 }
             }
@@ -152,39 +148,53 @@ namespace Kenedia.Modules.BuildsManager
         protected override void OnResized(ResizedEventArgs e)
         {
             base.OnResized(e);
-            TemplateBox.Width = Width - 10 - TemplateBox.Height - 3;
-            GearBox.Width = Width - 10 - GearBox.Height - 3;
+            this.TemplateBox.Width = this.Width - 10 - this.TemplateBox.Height - 3;
+            this.GearBox.Width = this.Width - 10 - this.GearBox.Height - 3;
 
-            foreach (Tab tab in Tabs)
+            foreach (Tab tab in this.Tabs)
             {
-                if (tab.Panel != null) tab.Panel.Size = new Point(Width, Height - 50);
+                if (tab.Panel != null)
+                {
+                    tab.Panel.Size = new Point(this.Width, this.Height - 50);
+                }
             }
         }
 
-        void UpdateLayout()
+        private void UpdateLayout()
         {
             int i = 0;
-            TabSize = (Width / Math.Max(1, Tabs.Count));
+            this.TabSize = this.Width / Math.Max(1, this.Tabs.Count);
 
-            foreach (Tab tab in Tabs)
+            foreach (Tab tab in this.Tabs)
             {
-                if (tab.Panel != null) tab.Panel.Size = new Point(Width, Height - 60);
-                if (tab.Panel?.Location.Y < GearBox.LocalBounds.Bottom + 5) tab.Panel.Location = new Point(tab.Panel.Location.X, GearBox.LocalBounds.Bottom + 5);
-                if (tab.Panel?.Location.X < 5) tab.Panel.Location = new Point(5, tab.Panel.Location.Y);
+                if (tab.Panel != null)
+                {
+                    tab.Panel.Size = new Point(this.Width, this.Height - 60);
+                }
 
-                tab.Bounds = new Rectangle(i * TabSize, 0, TabSize, 40);
+                if (tab.Panel?.Location.Y < this.GearBox.LocalBounds.Bottom + 5)
+                {
+                    tab.Panel.Location = new Point(tab.Panel.Location.X, this.GearBox.LocalBounds.Bottom + 5);
+                }
+
+                if (tab.Panel?.Location.X < 5)
+                {
+                    tab.Panel.Location = new Point(5, tab.Panel.Location.Y);
+                }
+
+                tab.Bounds = new Rectangle(i * this.TabSize, 0, this.TabSize, 40);
 
                 if (tab.Icon != null)
                 {
-                    tab.Icon_Bounds = new Rectangle(i * TabSize + 5, 5, 30, 30);
-                    tab.Text_Bounds = new Rectangle(i * TabSize + 45, 0, TabSize - 50, 40);
+                    tab.Icon_Bounds = new Rectangle((i * this.TabSize) + 5, 5, 30, 30);
+                    tab.Text_Bounds = new Rectangle((i * this.TabSize) + 45, 0, this.TabSize - 50, 40);
                 }
                 else
                 {
-                    tab.Text_Bounds = new Rectangle(i * TabSize, 0, TabSize, 40);
+                    tab.Text_Bounds = new Rectangle(i * this.TabSize, 0, this.TabSize, 40);
                 }
 
-                tab.Hovered = tab.Bounds.Contains(RelativeMousePosition);
+                tab.Hovered = tab.Bounds.Contains(this.RelativeMousePosition);
                 i++;
             }
         }
@@ -192,123 +202,121 @@ namespace Kenedia.Modules.BuildsManager
         public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
             base.PaintBeforeChildren(spriteBatch, bounds);
-            UpdateLayout();
+            this.UpdateLayout();
 
             var font = GameService.Content.DefaultFont16;
 
             Color color;
             Rectangle rect;
 
-            foreach (Tab tab in Tabs)
+            foreach (Tab tab in this.Tabs)
             {
-                var color2 = SelectedTab == tab ?  new Color(30, 30, 30, 10): tab.Hovered ? new Color(0, 0, 0, 50) : Color.Transparent;
+                var color2 = this.SelectedTab == tab ? new Color(30, 30, 30, 10) : tab.Hovered ? new Color(0, 0, 0, 50) : Color.Transparent;
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, tab.Bounds, tab.Bounds, color2);
 
-                spriteBatch.DrawOnCtrl(this,
-                                       _TabBarTexture,
-                                       tab.Bounds,
-                                      _TabBarTexture.Bounds,
-                                      Color.White,
-                                      0f,
-                                      default);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    this._TabBarTexture,
+                    tab.Bounds,
+                    this._TabBarTexture.Bounds,
+                    Color.White,
+                    0f,
+                    default);
 
                 if (tab.Icon != null)
                 {
-                    spriteBatch.DrawOnCtrl(this,
-                                          tab.Icon,
-                                          tab.Icon_Bounds,
-                                          tab.Icon.Bounds,
-                                          Color.White,
-                                          0f,
-                                          default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        tab.Icon,
+                        tab.Icon_Bounds,
+                        tab.Icon.Bounds,
+                        Color.White,
+                        0f,
+                        default);
                 }
 
-                spriteBatch.DrawStringOnCtrl(this,
-                                       tab.Name,
-                                       font,
-                                       tab.Text_Bounds,
-                                       SelectedTab == tab ? Color.White : Color.LightGray,
-                                       false,
-                                       HorizontalAlignment.Left
-                                       );
+                spriteBatch.DrawStringOnCtrl(
+                    this,
+                    tab.Name,
+                    font,
+                    tab.Text_Bounds,
+                    this.SelectedTab == tab ? Color.White : Color.LightGray,
+                    false,
+                    HorizontalAlignment.Left);
 
                 color = Color.Black;
                 rect = tab.Bounds;
 
-                //Top
+                // Top
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Bottom
+                // Bottom
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Left
+                // Left
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
 
-                //Right
+                // Right
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
             }
 
             for (int i = 0; i < 2; i++)
             {
-
-                rect = new Rectangle(bounds.Width - TemplateBox.Height - 6, TemplateBox.LocalBounds.Y + (i * (TemplateBox.Height + 5)), TemplateBox.Height, TemplateBox.Height);
-                var hovered = rect.Contains(RelativeMousePosition);
-                spriteBatch.DrawOnCtrl(this,
-                                       hovered ? _CopyHovered : _Copy,
-                                        rect,
-                                        _Copy.Bounds,
-                                        Color.White,
-                                        0f,
-                                        default);
-                BasicTooltipText = hovered ? Strings.common.Copy + " " + Strings.common.Template : null;
+                rect = new Rectangle(bounds.Width - this.TemplateBox.Height - 6, this.TemplateBox.LocalBounds.Y + (i * (this.TemplateBox.Height + 5)), this.TemplateBox.Height, this.TemplateBox.Height);
+                var hovered = rect.Contains(this.RelativeMousePosition);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    hovered ? this._CopyHovered : this._Copy,
+                    rect,
+                    this._Copy.Bounds,
+                    Color.White,
+                    0f,
+                    default);
+                this.BasicTooltipText = hovered ? Strings.common.Copy + " " + Strings.common.Template : null;
 
                 color = Color.Black;
                 rect = bounds;
 
-                //Top
+                // Top
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Bottom
+                // Bottom
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Left
+                // Left
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
 
-                //Right
+                // Right
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
             }
         }
     }
 
-   public class Window_MainWindow : StandardWindow
+    public class Window_MainWindow : StandardWindow
     {
-        Panel Templates_Panel;
-        Container_TabbedPanel Detail_Panel;
-
-        Control_Equipment Gear;
-        Control_Build Build;
+        private Panel Templates_Panel;
+        private Container_TabbedPanel Detail_Panel;
+        private Control_Equipment Gear;
+        private Control_Build Build;
         public Control_TemplateSelection _TemplateSelection;
-
-        Texture2D _EmptyTraitLine;
-        Texture2D _Delete;
-        Texture2D _DeleteHovered;
-        Texture2D ProfessionIcon;
-        Texture2D Disclaimer_Background;
-
-        SelectionPopUp ProfessionSelection;
-        List<SelectionPopUp.SelectionEntry> _Professions;
-
-        TextBox NameBox;
-        Label NameLabel;
-        Control_AddButton Add_Button;
+        private Texture2D _EmptyTraitLine;
+        private Texture2D _Delete;
+        private Texture2D _DeleteHovered;
+        private Texture2D ProfessionIcon;
+        private Texture2D Disclaimer_Background;
+        private SelectionPopUp ProfessionSelection;
+        private List<SelectionPopUp.SelectionEntry> _Professions;
+        private TextBox NameBox;
+        private Label NameLabel;
+        private Control_AddButton Add_Button;
         public Control_AddButton Import_Button;
 
         private BitmapFont Font;
@@ -316,47 +324,49 @@ namespace Kenedia.Modules.BuildsManager
         private void _TemplateSelection_TemplateChanged(object sender, TemplateChangedEvent e)
         {
             BuildsManager.ModuleInstance.Selected_Template = e.Template;
-            Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Build.TemplateCode;
-            NameLabel.Text = e.Template.Name;
+            this.Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Build.TemplateCode;
+            this.NameLabel.Text = e.Template.Name;
 
-            NameLabel.Show();
-            NameBox.Hide();
+            this.NameLabel.Show();
+            this.NameBox.Hide();
         }
 
-        public Window_MainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion) : base(background, windowRegion, contentRegion)
+        public Window_MainWindow(Texture2D background, Rectangle windowRegion, Rectangle contentRegion)
+            : base(background, windowRegion, contentRegion)
         {
-            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
-            _Delete = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Delete);
-            _DeleteHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Delete_Hovered);
+            this._EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            this._Delete = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Delete);
+            this._DeleteHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Delete_Hovered);
 
-            Disclaimer_Background = BuildsManager.ModuleInstance.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
+            this.Disclaimer_Background = BuildsManager.ModuleInstance.TextureManager._Controls[(int)_Controls.PlaceHolder_Traitline].GetRegion(0, 0, 647, 136);
 
-            Font = GameService.Content.DefaultFont18;
+            this.Font = GameService.Content.DefaultFont18;
 
-            Templates_Panel = new Panel()
+            this.Templates_Panel = new Panel()
             {
                 Parent = this,
                 Location = new Point(0, 0),
-                Size = new Point(260, ContentRegion.Height),
+                Size = new Point(260, this.ContentRegion.Height),
                 BackgroundColor = new Color(0, 0, 0, 50),
             };
 
-            Detail_Panel = new Container_TabbedPanel()
+            this.Detail_Panel = new Container_TabbedPanel()
             {
                 Parent = this,
-                Location = new Point(Templates_Panel.LocalBounds.Right, 40),
-                Size = new Point(ContentRegion.Width - Templates_Panel.LocalBounds.Right, ContentRegion.Height - 45),
-                //BackgroundColor = Color.Aqua,
+                Location = new Point(this.Templates_Panel.LocalBounds.Right, 40),
+                Size = new Point(this.ContentRegion.Width - this.Templates_Panel.LocalBounds.Right, this.ContentRegion.Height - 45),
+
+                // BackgroundColor = Color.Aqua,
             };
 
-           _Professions = new List<SelectionPopUp.SelectionEntry>();
-            ProfessionSelection = new SelectionPopUp(this)
+            this._Professions = new List<SelectionPopUp.SelectionEntry>();
+            this.ProfessionSelection = new SelectionPopUp(this)
             {
             };
 
             foreach (API.Profession profession in BuildsManager.ModuleInstance.Data.Professions)
             {
-                _Professions.Add(new SelectionPopUp.SelectionEntry()
+                this._Professions.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = profession,
                     Texture = profession.IconBig._AsyncTexture.Texture,
@@ -365,130 +375,130 @@ namespace Kenedia.Modules.BuildsManager
                     ContentTextures = new List<AsyncTexture2D>(),
                 });
             }
-            ProfessionSelection.List = _Professions;
-            ProfessionSelection.Changed += ProfessionSelection_Changed;
 
-            Import_Button = new Control_AddButton()
+            this.ProfessionSelection.List = this._Professions;
+            this.ProfessionSelection.Changed += this.ProfessionSelection_Changed;
+
+            this.Import_Button = new Control_AddButton()
             {
                 Texture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Import),
                 TextureHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Import_Hovered),
-                Parent = Templates_Panel,
-                Text = "",
-                Location = new Point(Templates_Panel.Width - 130 - 40, 0),
+                Parent = this.Templates_Panel,
+                Text = string.Empty,
+                Location = new Point(this.Templates_Panel.Width - 130 - 40, 0),
                 Size = new Point(35, 35),
                 BasicTooltipText = string.Format("Import 'BuildPad' builds from '{0}config.ini'", BuildsManager.ModuleInstance.Paths.builds),
                 Visible = false,
             };
-            Import_Button.Click += Import_Button_Click;
+            this.Import_Button.Click += this.Import_Button_Click;
 
-
-            Add_Button = new Control_AddButton()
+            this.Add_Button = new Control_AddButton()
             {
-                Parent = Templates_Panel,
+                Parent = this.Templates_Panel,
                 Text = Strings.common.Create,
-                Location = new Point(Templates_Panel.Width - 130, 0),
+                Location = new Point(this.Templates_Panel.Width - 130, 0),
                 Size = new Point(125, 35),
             };
-            Add_Button.Click += Button_Click;
-            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
+            this.Add_Button.Click += this.Button_Click;
+            BuildsManager.ModuleInstance.LanguageChanged += this.ModuleInstance_LanguageChanged;
 
-            _TemplateSelection = new Control_TemplateSelection(this)
+            this._TemplateSelection = new Control_TemplateSelection(this)
             {
                 Location = new Point(5, 40),
-                Parent = Templates_Panel,
+                Parent = this.Templates_Panel,
             };
-            _TemplateSelection.TemplateChanged += _TemplateSelection_TemplateChanged;
+            this._TemplateSelection.TemplateChanged += this._TemplateSelection_TemplateChanged;
 
-            Detail_Panel.Tabs = new List<Tab>()
+            this.Detail_Panel.Tabs = new List<Tab>()
             {
                 new Tab()
                 {
                     Name = Strings.common.Build,
                     Icon = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Template),
-                    Panel = new Panel(){ Parent = Detail_Panel, Visible = true },
+                    Panel = new Panel() { Parent = this.Detail_Panel, Visible = true },
                 },
                 new Tab()
                 {
                     Name = Strings.common.Gear,
                     Icon = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Helmet),
-                    Panel = new Panel(){ Parent = Detail_Panel, Visible = false },
+                    Panel = new Panel() { Parent = this.Detail_Panel, Visible = false },
                 },
             };
 
-            Detail_Panel.SelectedTab = Detail_Panel.Tabs[0];
-            Detail_Panel.Tabs[0].Panel.Resized += Panel_Resized;
+            this.Detail_Panel.SelectedTab = this.Detail_Panel.Tabs[0];
+            this.Detail_Panel.Tabs[0].Panel.Resized += this.Panel_Resized;
 
-            Build = new Control_Build(Detail_Panel.Tabs[0].Panel)
+            this.Build = new Control_Build(this.Detail_Panel.Tabs[0].Panel)
             {
-                Parent = Detail_Panel.Tabs[0].Panel,
-                Size = Detail_Panel.Tabs[0].Panel.Size,
+                Parent = this.Detail_Panel.Tabs[0].Panel,
+                Size = this.Detail_Panel.Tabs[0].Panel.Size,
                 Scale = 1,
             };
 
-            Gear = new Control_Equipment(Detail_Panel.Tabs[1].Panel)
+            this.Gear = new Control_Equipment(this.Detail_Panel.Tabs[1].Panel)
             {
-                Parent = Detail_Panel.Tabs[1].Panel,
-                Size = Detail_Panel.Tabs[1].Panel.Size,
+                Parent = this.Detail_Panel.Tabs[1].Panel,
+                Size = this.Detail_Panel.Tabs[1].Panel.Size,
                 Scale = 1,
             };
 
-            Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Build.ParseBuildCode();
-            Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
+            this.Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Build.ParseBuildCode();
+            this.Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
 
-            NameBox = new TextBox()
+            this.NameBox = new TextBox()
             {
                 Parent = this,
-                Location = new Point(Detail_Panel.Location.X + 5 + 32, 0),
+                Location = new Point(this.Detail_Panel.Location.X + 5 + 32, 0),
                 Height = 35,
-                Width = Detail_Panel.Width - 38 - 32 - 5,
-                Font = Font,
+                Width = this.Detail_Panel.Width - 38 - 32 - 5,
+                Font = this.Font,
                 Visible = false,
             };
-            NameBox.EnterPressed += NameBox_TextChanged;
+            this.NameBox.EnterPressed += this.NameBox_TextChanged;
 
-            NameLabel = new Label()
+            this.NameLabel = new Label()
             {
                 Text = "A Template Name",
                 Parent = this,
-                Location = new Point(Detail_Panel.Location.X + 5 + 32, 0),
+                Location = new Point(this.Detail_Panel.Location.X + 5 + 32, 0),
                 Height = 35,
-                Width = Detail_Panel.Width - 38 - 32 - 5,
-                Font = Font,
+                Width = this.Detail_Panel.Width - 38 - 32 - 5,
+                Font = this.Font,
             };
-            NameLabel.Click += NameLabel_Click;
+            this.NameLabel.Click += this.NameLabel_Click;
 
-            BuildsManager.ModuleInstance.Selected_Template_Edit += Selected_Template_Edit;
-            BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
-            BuildsManager.ModuleInstance.Templates_Loaded += Templates_Loaded;
-            BuildsManager.ModuleInstance.Selected_Template_Redraw += Selected_Template_Redraw;
+            BuildsManager.ModuleInstance.Selected_Template_Edit += this.Selected_Template_Edit;
+            BuildsManager.ModuleInstance.Selected_Template_Changed += this.ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.Templates_Loaded += this.Templates_Loaded;
+            BuildsManager.ModuleInstance.Selected_Template_Redraw += this.Selected_Template_Redraw;
 
-            Detail_Panel.TemplateBox.EnterPressed += TemplateBox_EnterPressed;
-            Detail_Panel.GearBox.EnterPressed += GearBox_EnterPressed;
+            this.Detail_Panel.TemplateBox.EnterPressed += this.TemplateBox_EnterPressed;
+            this.Detail_Panel.GearBox.EnterPressed += this.GearBox_EnterPressed;
 
-            Input.Mouse.LeftMouseButtonPressed += GlobalClick;
+            Input.Mouse.LeftMouseButtonPressed += this.GlobalClick;
 
-            GameService.Gw2Mumble.PlayerCharacter.NameChanged += PlayerCharacter_NameChanged;
+            GameService.Gw2Mumble.PlayerCharacter.NameChanged += this.PlayerCharacter_NameChanged;
         }
 
         private void Panel_Resized(object sender, ResizedEventArgs e)
         {
-            Gear.Size = Detail_Panel.Tabs[0].Panel.Size.Add(new Point(0, -Detail_Panel.GearBox.Bottom + 30));
+            this.Gear.Size = this.Detail_Panel.Tabs[0].Panel.Size.Add(new Point(0, -this.Detail_Panel.GearBox.Bottom + 30));
         }
 
         private void ProfessionSelection_Changed(object sender, EventArgs e)
         {
-            if (ProfessionSelection.SelectedProfession != null)
+            if (this.ProfessionSelection.SelectedProfession != null)
             {
                 var template = new Template();
-                template.Profession = ProfessionSelection.SelectedProfession;
-                template.Build.Profession = ProfessionSelection.SelectedProfession;
+                template.Profession = this.ProfessionSelection.SelectedProfession;
+                template.Build.Profession = this.ProfessionSelection.SelectedProfession;
                 BuildsManager.ModuleInstance.Selected_Template = template;
 
                 BuildsManager.ModuleInstance.Templates.Add(BuildsManager.ModuleInstance.Selected_Template);
                 BuildsManager.ModuleInstance.Selected_Template.SetChanged();
 
-                _TemplateSelection.RefreshList();
-                ProfessionSelection.SelectedProfession = null;
+                this._TemplateSelection.RefreshList();
+                this.ProfessionSelection.SelectedProfession = null;
             }
         }
 
@@ -496,43 +506,43 @@ namespace Kenedia.Modules.BuildsManager
         {
             if (BuildsManager.ModuleInstance.ShowCurrentProfession.Value)
             {
-                _TemplateSelection.SetSelection();
+                this._TemplateSelection.SetSelection();
             }
         }
 
         private void Import_Button_Click(object sender, MouseEventArgs e)
         {
             BuildsManager.ModuleInstance.ImportTemplates();
-            _TemplateSelection.Refresh();
-            Import_Button.Hide();
+            this._TemplateSelection.Refresh();
+            this.Import_Button.Hide();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
-            Add_Button.Text = Strings.common.Create;
-            Import_Button.Text = Strings.common.Create;
-            Detail_Panel.Tabs[0].Name = Strings.common.Build;
-            Detail_Panel.Tabs[1].Name = Strings.common.Gear;
+            this.Add_Button.Text = Strings.common.Create;
+            this.Import_Button.Text = Strings.common.Create;
+            this.Detail_Panel.Tabs[0].Name = Strings.common.Build;
+            this.Detail_Panel.Tabs[1].Name = Strings.common.Gear;
         }
 
         private void GlobalClick(object sender, MouseEventArgs e)
         {
-            if (!NameBox.MouseOver)
+            if (!this.NameBox.MouseOver)
             {
-                NameBox.Visible = false;
-                NameLabel.Visible = true;
+                this.NameBox.Visible = false;
+                this.NameLabel.Visible = true;
             }
         }
 
         private void Selected_Template_Redraw(object sender, EventArgs e)
         {
-            Build.SkillBar.ApplyBuild(sender, e);
-            Gear.UpdateLayout();
+            this.Build.SkillBar.ApplyBuild(sender, e);
+            this.Gear.UpdateLayout();
         }
 
         private void GearBox_EnterPressed(object sender, EventArgs e)
         {
-            var code = Detail_Panel.GearBox.Text;
+            var code = this.Detail_Panel.GearBox.Text;
             var gear = new GearTemplate(code);
 
             if (gear != null)
@@ -545,10 +555,10 @@ namespace Kenedia.Modules.BuildsManager
 
         private void TemplateBox_EnterPressed(object sender, EventArgs e)
         {
-            var code = Detail_Panel.TemplateBox.Text;
+            var code = this.Detail_Panel.TemplateBox.Text;
             var build = new BuildTemplate(code);
 
-            if(build != null && build.Profession != null)
+            if (build != null && build.Profession != null)
             {
                 BuildsManager.ModuleInstance.Selected_Template.Build = build;
                 BuildsManager.ModuleInstance.Selected_Template.Profession = build.Profession;
@@ -569,34 +579,34 @@ namespace Kenedia.Modules.BuildsManager
 
         private void NameBox_TextChanged(object sender, EventArgs e)
         {
-            BuildsManager.ModuleInstance.Selected_Template.Name = NameBox.Text;
+            BuildsManager.ModuleInstance.Selected_Template.Name = this.NameBox.Text;
             BuildsManager.ModuleInstance.Selected_Template.Save();
 
-            NameLabel.Visible = true;
-            NameBox.Visible = false;
-            NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
-            _TemplateSelection.RefreshList();
+            this.NameLabel.Visible = true;
+            this.NameBox.Visible = false;
+            this.NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
+            this._TemplateSelection.RefreshList();
         }
 
         private void NameLabel_Click(object sender, MouseEventArgs e)
         {
             if (BuildsManager.ModuleInstance.Selected_Template?.Path != null)
             {
-                NameLabel.Visible = false;
-                NameBox.Visible = true;
-                NameBox.Text = NameLabel.Text;
-                NameBox.SelectionStart = 0;
-                NameBox.SelectionEnd = NameBox.Text.Length;
-                NameBox.Focused = true;
+                this.NameLabel.Visible = false;
+                this.NameBox.Visible = true;
+                this.NameBox.Text = this.NameLabel.Text;
+                this.NameBox.SelectionStart = 0;
+                this.NameBox.SelectionEnd = this.NameBox.Text.Length;
+                this.NameBox.Focused = true;
             }
         }
 
         private void Button_Click(object sender, MouseEventArgs e)
         {
-            _Professions = new List<SelectionPopUp.SelectionEntry>();
+            this._Professions = new List<SelectionPopUp.SelectionEntry>();
             foreach (API.Profession profession in BuildsManager.ModuleInstance.Data.Professions)
             {
-                _Professions.Add(new SelectionPopUp.SelectionEntry()
+                this._Professions.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = profession,
                     Texture = profession.IconBig._AsyncTexture.Texture,
@@ -605,27 +615,28 @@ namespace Kenedia.Modules.BuildsManager
                     ContentTextures = new List<AsyncTexture2D>(),
                 });
             }
-            ProfessionSelection.List = _Professions;
 
-            ProfessionSelection.Show();
-            ProfessionSelection.Location = Add_Button.Location.Add(new Point(Add_Button.Width + 5, 0));
-            ProfessionSelection.SelectionType = SelectionPopUp.selectionType.Profession;
-            ProfessionSelection.SelectionTarget = BuildsManager.ModuleInstance.Selected_Template.Profession;
-            ProfessionSelection.Width = 175;
-            ProfessionSelection.SelectionTarget = null;
-            ProfessionSelection.List = _Professions;
+            this.ProfessionSelection.List = this._Professions;
+
+            this.ProfessionSelection.Show();
+            this.ProfessionSelection.Location = this.Add_Button.Location.Add(new Point(this.Add_Button.Width + 5, 0));
+            this.ProfessionSelection.SelectionType = SelectionPopUp.selectionType.Profession;
+            this.ProfessionSelection.SelectionTarget = BuildsManager.ModuleInstance.Selected_Template.Profession;
+            this.ProfessionSelection.Width = 175;
+            this.ProfessionSelection.SelectionTarget = null;
+            this.ProfessionSelection.List = this._Professions;
         }
 
         private void Templates_Loaded(object sender, EventArgs e)
         {
-            _TemplateSelection.Invalidate();
+            this._TemplateSelection.Invalidate();
         }
 
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
         {
-            NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
-            Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.TemplateCode;
-            Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template.Gear.TemplateCode;
+            this.NameLabel.Text = BuildsManager.ModuleInstance.Selected_Template.Name;
+            this.Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.TemplateCode;
+            this.Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template.Gear.TemplateCode;
         }
 
         private void Selected_Template_Edit(object sender, EventArgs e)
@@ -641,24 +652,25 @@ namespace Kenedia.Modules.BuildsManager
                 }
             }
 
-            Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.ParseBuildCode();
-            Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
-            _TemplateSelection.Refresh();
+            this.Detail_Panel.TemplateBox.Text = BuildsManager.ModuleInstance.Selected_Template.Build.ParseBuildCode();
+            this.Detail_Panel.GearBox.Text = BuildsManager.ModuleInstance.Selected_Template?.Gear.TemplateCode;
+            this._TemplateSelection.Refresh();
         }
 
         protected override void OnClick(MouseEventArgs e)
         {
             base.OnClick(e);
 
-            var rect = new Rectangle(Detail_Panel.LocalBounds.Right - 35, 44, 35, 35);
-            if (rect.Contains(RelativeMousePosition) && BuildsManager.ModuleInstance.Selected_Template.Path != null)
+            var rect = new Rectangle(this.Detail_Panel.LocalBounds.Right - 35, 44, 35, 35);
+            if (rect.Contains(this.RelativeMousePosition) && BuildsManager.ModuleInstance.Selected_Template.Path != null)
             {
                 BuildsManager.ModuleInstance.Selected_Template.Delete();
                 BuildsManager.ModuleInstance.Selected_Template = new Template();
             }
 
-            ProfessionSelection.Hide();
+            this.ProfessionSelection.Hide();
         }
+
         public override void PaintAfterChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
             base.PaintAfterChildren(spriteBatch, bounds);
@@ -667,92 +679,94 @@ namespace Kenedia.Modules.BuildsManager
 
             if (false && template != null && template.Profession != null && template.Profession.Id == "Revenant")
             {
-                var texture = Disclaimer_Background;
-                var rect = new Rectangle(Detail_Panel.LocalBounds.X + 5, Detail_Panel.LocalBounds.Y + Detail_Panel.LocalBounds.Height / 2 - 50, Detail_Panel.LocalBounds.Width - 10, Font.LineHeight + 100);
-                spriteBatch.DrawOnCtrl(this,
-                                       texture,
-                                        rect,
-                                        texture.Bounds,
-                                        new Color(0, 0, 0, 175),
-                                      0f,
-                                      default);
+                var texture = this.Disclaimer_Background;
+                var rect = new Rectangle(this.Detail_Panel.LocalBounds.X + 5, this.Detail_Panel.LocalBounds.Y + (this.Detail_Panel.LocalBounds.Height / 2) - 50, this.Detail_Panel.LocalBounds.Width - 10, this.Font.LineHeight + 100);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    texture,
+                    rect,
+                    texture.Bounds,
+                    new Color(0, 0, 0, 175),
+                    0f,
+                    default);
 
                 var color = Color.Black;
 
-                //Top
+                // Top
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Bottom
+                // Bottom
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Left
+                // Left
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
 
-                //Right
+                // Right
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
 
-                spriteBatch.DrawStringOnCtrl(this,
-                                        "Revenant is currently not supported! It is in development tho and hopefully comes soon!",
-                                        Font,
-                                        new Rectangle(Detail_Panel.LocalBounds.X + 10, Detail_Panel.LocalBounds.Y + Detail_Panel.LocalBounds.Height / 2, Detail_Panel.LocalBounds.Width, Font.LineHeight),
-                                        Color.Red,
-                                        false,
-                                        HorizontalAlignment.Left
-                                        );
+                spriteBatch.DrawStringOnCtrl(
+                    this,
+                    "Revenant is currently not supported! It is in development tho and hopefully comes soon!",
+                    this.Font,
+                    new Rectangle(this.Detail_Panel.LocalBounds.X + 10, this.Detail_Panel.LocalBounds.Y + (this.Detail_Panel.LocalBounds.Height / 2), this.Detail_Panel.LocalBounds.Width, this.Font.LineHeight),
+                    Color.Red,
+                    false,
+                    HorizontalAlignment.Left);
             }
         }
+
         public override void PaintBeforeChildren(SpriteBatch spriteBatch, Rectangle bounds)
         {
             base.PaintBeforeChildren(spriteBatch, bounds);
 
-            var rect = new Rectangle(Detail_Panel.Location.X, 44, Detail_Panel.Width - 38, 35);
+            var rect = new Rectangle(this.Detail_Panel.Location.X, 44, this.Detail_Panel.Width - 38, 35);
 
-            spriteBatch.DrawOnCtrl(this,
-                                   _EmptyTraitLine,
-                                   rect,
-                                    _EmptyTraitLine.Bounds,
-                                    new Color(135, 135, 135, 255),
-                                  0f,
-                                  default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                this._EmptyTraitLine,
+                rect,
+                this._EmptyTraitLine.Bounds,
+                new Color(135, 135, 135, 255),
+                0f,
+                default);
 
             var color = Color.Black;
 
-            //Top
+            // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Bottom
+            // Bottom
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 2, rect.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Left
+            // Left
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
 
-            //Right
+            // Right
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 2, rect.Top, 2, rect.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), Rectangle.Empty, color * 0.6f);
 
+            rect = new Rectangle(this.Detail_Panel.LocalBounds.Right - 35, 44, 35, 35);
+            var hovered = rect.Contains(this.RelativeMousePosition);
 
+            spriteBatch.DrawOnCtrl(
+                this,
+                hovered ? this._DeleteHovered : this._Delete,
+                rect,
+                this._Delete.Bounds,
+                Color.White,
+                0f,
+                default);
 
-            rect = new Rectangle(Detail_Panel.LocalBounds.Right - 35, 44, 35, 35);
-            var hovered = rect.Contains(RelativeMousePosition);
+            this.BasicTooltipText = hovered ? Strings.common.Delete + " " + Strings.common.Template : null;
 
-            spriteBatch.DrawOnCtrl(this,
-                                   hovered ? _DeleteHovered : _Delete,
-                                   rect,
-                                    _Delete.Bounds,
-                                    Color.White,
-                                  0f,
-                                  default);
-
-            BasicTooltipText = hovered ? Strings.common.Delete + " " + Strings.common.Template : null;
-
-            if(BuildsManager.ModuleInstance.Selected_Template.Profession != null)
+            if (BuildsManager.ModuleInstance.Selected_Template.Profession != null)
             {
                 var template = BuildsManager.ModuleInstance.Selected_Template;
                 Texture2D texture = BuildsManager.ModuleInstance.TextureManager._Icons[0];
@@ -766,51 +780,52 @@ namespace Kenedia.Modules.BuildsManager
                     texture = template.Build.Profession.IconBig._AsyncTexture.Texture;
                 }
 
-                rect = new Rectangle(Detail_Panel.Location.X + 2, 46, 30, 30);
+                rect = new Rectangle(this.Detail_Panel.Location.X + 2, 46, 30, 30);
 
-                spriteBatch.DrawOnCtrl(this,
-                                       texture,
-                                       rect,
-                                        texture.Bounds,
-                                        Color.White,
-                                      0f,
-                                      default);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    texture,
+                    rect,
+                    texture.Bounds,
+                    Color.White,
+                    0f,
+                    default);
             }
         }
 
         protected override void DisposeControl()
         {
-            Add_Button.Click -= Button_Click;
-            Add_Button.Dispose();
+            this.Add_Button.Click -= this.Button_Click;
+            this.Add_Button.Dispose();
 
-            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
-            BuildsManager.ModuleInstance.Selected_Template_Edit -= Selected_Template_Edit;
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
-            BuildsManager.ModuleInstance.Templates_Loaded -= Templates_Loaded;
-            BuildsManager.ModuleInstance.Selected_Template_Redraw -= Selected_Template_Redraw;
+            BuildsManager.ModuleInstance.LanguageChanged -= this.ModuleInstance_LanguageChanged;
+            BuildsManager.ModuleInstance.Selected_Template_Edit -= this.Selected_Template_Edit;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= this.ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.Templates_Loaded -= this.Templates_Loaded;
+            BuildsManager.ModuleInstance.Selected_Template_Redraw -= this.Selected_Template_Redraw;
 
-            Detail_Panel.Tabs[0].Panel.Resized -= Panel_Resized;
-            Detail_Panel.TemplateBox.EnterPressed -= TemplateBox_EnterPressed;
-            Detail_Panel.GearBox.EnterPressed -= GearBox_EnterPressed;
+            this.Detail_Panel.Tabs[0].Panel.Resized -= this.Panel_Resized;
+            this.Detail_Panel.TemplateBox.EnterPressed -= this.TemplateBox_EnterPressed;
+            this.Detail_Panel.GearBox.EnterPressed -= this.GearBox_EnterPressed;
 
-            Input.Mouse.LeftMouseButtonPressed -= GlobalClick;
+            Input.Mouse.LeftMouseButtonPressed -= this.GlobalClick;
 
-            GameService.Gw2Mumble.PlayerCharacter.NameChanged -= PlayerCharacter_NameChanged;
+            GameService.Gw2Mumble.PlayerCharacter.NameChanged -= this.PlayerCharacter_NameChanged;
 
-            _TemplateSelection.TemplateChanged -= _TemplateSelection_TemplateChanged;
-            _TemplateSelection.Dispose();
+            this._TemplateSelection.TemplateChanged -= this._TemplateSelection_TemplateChanged;
+            this._TemplateSelection.Dispose();
 
-            NameBox.EnterPressed -= NameBox_TextChanged;
-            NameBox.Dispose();
+            this.NameBox.EnterPressed -= this.NameBox_TextChanged;
+            this.NameBox.Dispose();
 
-            NameLabel.Click -= NameLabel_Click;
-            NameLabel.Dispose();
+            this.NameLabel.Click -= this.NameLabel_Click;
+            this.NameLabel.Dispose();
 
-            Import_Button.Click -= Import_Button_Click;
-            Import_Button.Dispose();
+            this.Import_Button.Click -= this.Import_Button_Click;
+            this.Import_Button.Dispose();
 
-            ProfessionSelection.Changed -= ProfessionSelection_Changed;
-            ProfessionSelection.Dispose();
+            this.ProfessionSelection.Changed -= this.ProfessionSelection_Changed;
+            this.ProfessionSelection.Dispose();
 
             base.DisposeControl();
         }
@@ -821,7 +836,7 @@ namespace Kenedia.Modules.BuildsManager
 
             if (BuildsManager.ModuleInstance.ShowCurrentProfession.Value)
             {
-                _TemplateSelection.SetSelection();
+                this._TemplateSelection.SetSelection();
             }
         }
     }

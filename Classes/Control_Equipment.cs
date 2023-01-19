@@ -1,193 +1,210 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Blish_HUD;
-using Blish_HUD.Controls;
-using Microsoft.Xna.Framework;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using Color = Microsoft.Xna.Framework.Color;
-using Microsoft.Xna.Framework.Graphics;
-using Gw2Sharp.ChatLinks;
-using Microsoft.Xna.Framework.Input;
-using Blish_HUD.Input;
-using System.Text.RegularExpressions;
-using MonoGame.Extended.BitmapFonts;
-using Blish_HUD.Controls.Extern;
-using System.Threading;
-using Blish_HUD.Content;
-
-namespace Kenedia.Modules.BuildsManager
+﻿namespace Kenedia.Modules.BuildsManager
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Blish_HUD;
+    using Blish_HUD.Content;
+    using Blish_HUD.Controls;
+    using Blish_HUD.Controls.Extern;
+    using Blish_HUD.Input;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
+    using Microsoft.Xna.Framework.Input;
+    using MonoGame.Extended.BitmapFonts;
+    using Color = Microsoft.Xna.Framework.Color;
+    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
     public class CustomTooltip : Control
     {
         private Texture2D Background;
         private int _Height;
         private object _CurrentObject;
+
         public object CurrentObject
         {
-            get => _CurrentObject;
+            get => this._CurrentObject;
             set
             {
-                _CurrentObject = value;
-                _Height = -1;
+                this._CurrentObject = value;
+                this._Height = -1;
             }
         }
+
         private string _Header;
+
         public string Header
         {
-            get => _Header;
+            get => this._Header;
             set
             {
-                _Header = value;
-                _Height = -1;
+                this._Header = value;
+                this._Height = -1;
             }
         }
 
         public Color HeaderColor = Color.Orange;
         public Color ContentColor = Color.Honeydew;
         private List<string> _Content;
-        public List<string> Content
+
+        public List<string> TooltipContent
         {
-            get => _Content;
+            get => this._Content;
             set
             {
-                _Content = value;
-                _Height = -1;
+                this._Content = value;
+                this._Height = -1;
             }
         }
+
         public CustomTooltip(Container parent)
         {
-            Parent = GameService.Graphics.SpriteScreen;
+            this.Parent = GameService.Graphics.SpriteScreen;
 
-            Size = new Point(225, 275);
-            Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
-            ZIndex = 1000;
-            Visible = false;
+            this.Size = new Point(225, 275);
+            this.Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
+            this.ZIndex = 1000;
+            this.Visible = false;
 
-            Input.Mouse.MouseMoved += Mouse_MouseMoved;
+            Input.Mouse.MouseMoved += this.Mouse_MouseMoved;
         }
 
         private void Mouse_MouseMoved(object sender, MouseEventArgs e)
         {
-            Location = Input.Mouse.Position.Add(new Point(20, -10));
+            this.Location = Input.Mouse.Position.Add(new Point(20, -10));
         }
 
-        void UpdateLayout()
+        private void UpdateLayout()
         {
-            if (Header == null || Content == null) return;
+            if (this.Header == null || this.TooltipContent == null)
+            {
+                return;
+            }
 
             var font = GameService.Content.DefaultFont14;
             var headerFont = GameService.Content.DefaultFont18;
 
-            var ItemNameSize = headerFont.GetStringRectangle(Header);
+            var ItemNameSize = headerFont.GetStringRectangle(this.Header);
 
             var width = (int)ItemNameSize.Width + 30;
-            //var height = 10 + (int)ItemNameSize.Height;
+
+            // var height = 10 + (int)ItemNameSize.Height;
             var height = 0;
 
             List<string> newStrings = new List<string>();
-            foreach (string s in Content)
+            foreach (string s in this.TooltipContent)
             {
                 var ss = s;
 
                 ss = Regex.Replace(ss, "<c=@reminder>", "\n\n");
-                ss = Regex.Replace(ss, "<c=@abilitytype>", "");
-                ss = Regex.Replace(ss, "</c>", "");
-                ss = Regex.Replace(ss, "<br>", "");
+                ss = Regex.Replace(ss, "<c=@abilitytype>", string.Empty);
+                ss = Regex.Replace(ss, "</c>", string.Empty);
+                ss = Regex.Replace(ss, "<br>", string.Empty);
                 ss = ss.Replace(Environment.NewLine, "\n");
                 newStrings.Add(ss);
 
                 var rect = font.GetStringRectangle(ss);
-                width = Math.Max(width, Math.Min((int) rect.Width + 20, 300));
+                width = Math.Max(width, Math.Min((int)rect.Width + 20, 300));
             }
 
             foreach (string s in newStrings)
             {
                 var yRect = font.CalculateTextRectangle(s, new Rectangle(0, 0, width, 0));
-                height += (int) yRect.Height;                
+                height += (int)yRect.Height;
             }
 
-            Content = newStrings;
-            var hRect = headerFont.CalculateTextRectangle(Header, new Rectangle(0, 0, width, 0));
+            this.TooltipContent = newStrings;
+            var hRect = headerFont.CalculateTextRectangle(this.Header, new Rectangle(0, 0, width, 0));
 
-            Height = 10 + hRect.Height + 15 + height + 5;
-            Width = width + 20;
-            _Height = Height;
+            this.Height = 10 + hRect.Height + 15 + height + 5;
+            this.Width = width + 20;
+            this._Height = this.Height;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (Header == null || Content == null) return;
-            if (_Height == -1) UpdateLayout();
-           // UpdateLayout();
+            if (this.Header == null || this.TooltipContent == null)
+            {
+                return;
+            }
+
+            if (this._Height == -1)
+            {
+                this.UpdateLayout();
+            }
+
+            // UpdateLayout();
             var font = GameService.Content.DefaultFont14;
             var headerFont = GameService.Content.DefaultFont18;
 
-            var hRect = headerFont.CalculateTextRectangle(Header, new Rectangle(0, 0, Width - 20, 0));
+            var hRect = headerFont.CalculateTextRectangle(this.Header, new Rectangle(0, 0, this.Width - 20, 0));
 
-            var rect = font.GetStringRectangle(Header);
+            var rect = font.GetStringRectangle(this.Header);
 
-            spriteBatch.DrawOnCtrl(this,
-                                    ContentService.Textures.Pixel,
-                                    bounds,
-                                    bounds,
-                                    new Color(55, 55, 55, 255),
-                                    0f,
-                                    default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                ContentService.Textures.Pixel,
+                bounds,
+                bounds,
+                new Color(55, 55, 55, 255),
+                0f,
+                default);
 
-            spriteBatch.DrawOnCtrl(this,
-                                    Background,
-                                    bounds,
-                                    bounds,
-                                    Color.White,
-                                    0f,
-                                    default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                this.Background,
+                bounds,
+                bounds,
+                Color.White,
+                0f,
+                default);
 
             var color = Color.Black;
-            //Top
+
+            // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Bottom
+            // Bottom
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Left
+            // Left
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
-            //Right
+            // Right
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
+            spriteBatch.DrawStringOnCtrl(
+                this,
+                this.Header,
+                headerFont,
+                new Rectangle(10, 10, 0, (int)rect.Height),
+                this.HeaderColor,
+                false,
+                HorizontalAlignment.Left);
 
-            spriteBatch.DrawStringOnCtrl(this,
-                                   Header,
-                                   headerFont,
-                                   new Rectangle(10, 10, 0, (int)rect.Height),
-                                   HeaderColor,
-                                   false,
-                                   HorizontalAlignment.Left
-                                   );
-
-            spriteBatch.DrawStringOnCtrl(this,
-                                   string.Join(Environment.NewLine, Content),
-                                   font,
-                                   new Rectangle(10, 10 + (int)rect.Height + 15, Width - 20, Height - (10 + (int)rect.Height + 15)),
-                                   ContentColor,
-                                   true,
-                                   HorizontalAlignment.Left,
-                                   VerticalAlignment.Top
-                                   );
+            spriteBatch.DrawStringOnCtrl(
+                this,
+                string.Join(Environment.NewLine, this.TooltipContent),
+                font,
+                new Rectangle(10, 10 + (int)rect.Height + 15, this.Width - 20, this.Height - (10 + (int)rect.Height + 15)),
+                this.ContentColor,
+                true,
+                HorizontalAlignment.Left,
+                VerticalAlignment.Top);
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            Background = null;
-            Input.Mouse.MouseMoved -= Mouse_MouseMoved;
+            this.Background = null;
+            Input.Mouse.MouseMoved -= this.Mouse_MouseMoved;
         }
     }
 
@@ -196,16 +213,17 @@ namespace Kenedia.Modules.BuildsManager
         public class SelectionEntry : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Texture?.Dispose();
-                    Texture = null;
+                    this.disposed = true;
+                    this.Texture?.Dispose();
+                    this.Texture = null;
 
-                    ContentTextures?.DisposeAll();
-                    ContentTextures = null;
+                    this.ContentTextures?.DisposeAll();
+                    this.ContentTextures = null;
                 }
             }
 
@@ -222,6 +240,7 @@ namespace Kenedia.Modules.BuildsManager
             public Rectangle AbsolutBounds;
             public bool Hovered;
         }
+
         public enum selectionType
         {
             Runes,
@@ -236,32 +255,41 @@ namespace Kenedia.Modules.BuildsManager
         private Texture2D Background;
         private TextBox FilterBox;
         private selectionType _SelectionType;
+
         public selectionType SelectionType
         {
-            get => _SelectionType;
+            get => this._SelectionType;
             set
             {
-                if (_SelectionType != value && FilterBox != null) FilterBox.Text = "";
-                _SelectionType = value;
+                if (this._SelectionType != value && this.FilterBox != null)
+                {
+                    this.FilterBox.Text = string.Empty;
+                }
+
+                this._SelectionType = value;
             }
         }
+
         public List<SelectionEntry> List = new List<SelectionEntry>();
         public List<SelectionEntry> FilteredList = new List<SelectionEntry>();
         private object _SelectionTarget;
+
         public object SelectionTarget
         {
-            get => _SelectionTarget;
+            get => this._SelectionTarget;
             set
             {
-                FilteredList = new List<SelectionEntry>();
-                _SelectionTarget = value;
-                UpdateLayouts = true;
+                this.FilteredList = new List<SelectionEntry>();
+                this._SelectionTarget = value;
+                this.UpdateLayouts = true;
             }
         }
+
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
         }
+
         public _EquipmentSlots Slot = _EquipmentSlots.Unkown;
         public int UpgradeIndex = 0;
 
@@ -274,146 +302,164 @@ namespace Kenedia.Modules.BuildsManager
 
         public SelectionPopUp(Container parent)
         {
-            Parent = parent;
-            Visible = false;
-            ZIndex = 997;
-            Size = new Point(300, 500);
-            Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
-            //BackgroundColor = Color.Red;
-            FilterBox = new TextBox()
+            this.Parent = parent;
+            this.Visible = false;
+            this.ZIndex = 997;
+            this.Size = new Point(300, 500);
+            this.Background = BuildsManager.ModuleInstance.TextureManager._Backgrounds[(int)_Backgrounds.Tooltip];
+
+            // BackgroundColor = Color.Red;
+            this.FilterBox = new TextBox()
             {
-                Parent = Parent,
+                Parent = this.Parent,
                 PlaceholderText = Strings.common.Search + " ...",
-                Width = Width - 6,
+                Width = this.Width - 6,
                 ZIndex = 998,
                 Visible = false,
             };
-            FilterBox.TextChanged += FilterBox_TextChanged;
-            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
+            this.FilterBox.TextChanged += this.FilterBox_TextChanged;
+            BuildsManager.ModuleInstance.LanguageChanged += this.ModuleInstance_LanguageChanged;
 
-            Font = GameService.Content.DefaultFont14;
+            this.Font = GameService.Content.DefaultFont14;
 
-            Input.Mouse.LeftMouseButtonPressed += Mouse_LeftMouseButtonPressed;            
+            Input.Mouse.LeftMouseButtonPressed += this.Mouse_LeftMouseButtonPressed;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            CustomTooltip?.Dispose();
-            FilterBox?.Dispose();
-            if (FilterBox != null) FilterBox.TextChanged -= FilterBox_TextChanged;
-            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
-            Input.Mouse.LeftMouseButtonPressed -= Mouse_LeftMouseButtonPressed;
+            this.CustomTooltip?.Dispose();
+            this.FilterBox?.Dispose();
+            if (this.FilterBox != null)
+            {
+                this.FilterBox.TextChanged -= this.FilterBox_TextChanged;
+            }
 
-            FilteredList?.DisposeAll();
-            List?.DisposeAll();
-            _SelectionTarget = null;
+            BuildsManager.ModuleInstance.LanguageChanged -= this.ModuleInstance_LanguageChanged;
+            Input.Mouse.LeftMouseButtonPressed -= this.Mouse_LeftMouseButtonPressed;
 
-            SelectedProfession?.Dispose();
-            SelectedProfession = null;
+            this.FilteredList?.DisposeAll();
+            this.List?.DisposeAll();
+            this._SelectionTarget = null;
+
+            this.SelectedProfession?.Dispose();
+            this.SelectedProfession = null;
         }
 
         protected override void OnHidden(EventArgs e)
         {
             base.OnHidden(e);
-            FilterBox?.Hide();
-            Clicked = false;
+            this.FilterBox?.Hide();
+            this.Clicked = false;
         }
 
         protected override void OnResized(ResizedEventArgs e)
         {
             base.OnResized(e);
-            if(FilterBox!=null) FilterBox.Width = Width - 6;
+            if (this.FilterBox != null)
+            {
+                this.FilterBox.Width = this.Width - 6;
+            }
         }
+
         protected override void OnMoved(MovedEventArgs e)
         {
             base.OnMoved(e);
 
-            if (FilterBox != null) FilterBox.Location = Location.Add(new Point(3, 4));
+            if (this.FilterBox != null)
+            {
+                this.FilterBox.Location = this.Location.Add(new Point(3, 4));
+            }
         }
 
         private void Mouse_LeftMouseButtonPressed(object sender, MouseEventArgs e)
         {
-            OnChanged();
+            this.OnChanged();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
-            FilterBox.PlaceholderText = Strings.common.Search + " ...";
+            this.FilterBox.PlaceholderText = Strings.common.Search + " ...";
         }
 
         private void FilterBox_TextChanged(object sender, EventArgs e)
         {
-            UpdateLayout();
+            this.UpdateLayout();
         }
 
         public API.Profession SelectedProfession;
 
         public event EventHandler Changed;
+
         private void OnChanged()
         {
-            if (List == null || List.Count == 0 || !Visible) return;
+            if (this.List == null || this.List.Count == 0 || !this.Visible)
+            {
+                return;
+            }
 
-            var list = new List<SelectionEntry>(FilteredList);
+            var list = new List<SelectionEntry>(this.FilteredList);
             foreach (SelectionEntry entry in list)
             {
                 if (entry.Hovered)
                 {
-                    switch (SelectionType)
+                    switch (this.SelectionType)
                     {
                         case selectionType.Runes:
                             var rune = (API.RuneItem)entry.Object;
-                            var armor = (Armor_TemplateItem)SelectionTarget;
+                            var armor = (Armor_TemplateItem)this.SelectionTarget;
                             armor.Rune = rune;
                             this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Sigils:
                             var sigil = (API.SigilItem)entry.Object;
-                            var weapon = (Weapon_TemplateItem)SelectionTarget;
+                            var weapon = (Weapon_TemplateItem)this.SelectionTarget;
                             weapon.Sigil = sigil;
                             this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.AquaticSigils:
                             var aquaSigil = (API.SigilItem)entry.Object;
-                            var aquaWeapon = (AquaticWeapon_TemplateItem)SelectionTarget;
-                            aquaWeapon.Sigils[UpgradeIndex] = aquaSigil;
+                            var aquaWeapon = (AquaticWeapon_TemplateItem)this.SelectionTarget;
+                            aquaWeapon.Sigils[this.UpgradeIndex] = aquaSigil;
                             this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Profession:
-                            SelectedProfession = (API.Profession)entry.Object;
-                            FilterBox.Text = null;
+                            this.SelectedProfession = (API.Profession)entry.Object;
+                            this.FilterBox.Text = null;
                             this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Stats:
                             var stat = (API.Stat)entry.Object;
-                            var item = (TemplateItem)SelectionTarget;
+                            var item = (TemplateItem)this.SelectionTarget;
                             item.Stat = stat;
                             this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
 
                         case selectionType.Weapons:
                             var selectedWeapon = (API.WeaponItem)entry.Object;
-                            var iWeapon = (Weapon_TemplateItem)SelectionTarget;
+                            var iWeapon = (Weapon_TemplateItem)this.SelectionTarget;
                             iWeapon.WeaponType = selectedWeapon.WeaponType;
 
-                            switch (Slot)
+                            switch (this.Slot)
                             {
                                 case _EquipmentSlots.Weapon1_MainHand:
-                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType != API.weaponType.Unkown)
+                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType != API.weaponType.Unkown)
                                     {
-                                        Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType = API.weaponType.Unkown;
+                                        this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_OffHand].WeaponType = API.weaponType.Unkown;
                                     }
+
                                     break;
 
                                 case _EquipmentSlots.Weapon2_MainHand:
-                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType != API.weaponType.Unkown)
+                                    if ((int)selectedWeapon.Slot == (int)API.weaponHand.TwoHand && this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType != API.weaponType.Unkown)
                                     {
-                                        Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType = API.weaponType.Unkown;
+                                        this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_OffHand].WeaponType = API.weaponType.Unkown;
                                     }
+
                                     break;
                             }
 
@@ -422,74 +468,89 @@ namespace Kenedia.Modules.BuildsManager
 
                         case selectionType.AquaticWeapons:
                             var selectedAquaWeapon = (API.WeaponItem)entry.Object;
-                            var AquaWeapon = (AquaticWeapon_TemplateItem)SelectionTarget;
+                            var AquaWeapon = (AquaticWeapon_TemplateItem)this.SelectionTarget;
                             AquaWeapon.WeaponType = selectedAquaWeapon.WeaponType;
                             this.Changed?.Invoke(this, EventArgs.Empty);
                             break;
                     }
 
-                    LastClick = DateTime.Now;
-                    List = new List<SelectionEntry>();
-                    FilteredList = new List<SelectionEntry>();
+                    this.LastClick = DateTime.Now;
+                    this.List = new List<SelectionEntry>();
+                    this.FilteredList = new List<SelectionEntry>();
 
-                    Clicked = true;
-                    Hide();
+                    this.Clicked = true;
+                    this.Hide();
                     break;
                 }
             }
         }
 
-        class filterTag
+        private class filterTag
         {
             public string text;
             public bool match;
         }
+
         private void UpdateLayout()
         {
-            if (List == null || List.Count == 0) return;
+            if (this.List == null || this.List.Count == 0)
+            {
+                return;
+            }
 
             int i = 0;
             int size = 42;
 
-            FilteredList = new List<SelectionEntry>();
-            if ((SelectionType == selectionType.Weapons || SelectionType == selectionType.AquaticWeapons) && Template != null && Template.Build != null && Template.Build.Profession != null)
+            this.FilteredList = new List<SelectionEntry>();
+            if ((this.SelectionType == selectionType.Weapons || this.SelectionType == selectionType.AquaticWeapons) && this.Template != null && this.Template.Build != null && this.Template.Build.Profession != null)
             {
-
                 List<string> weapons = new List<string>();
 
-                foreach (API.ProfessionWeapon weapon in Template.Build.Profession.Weapons)
+                foreach (API.ProfessionWeapon weapon in this.Template.Build.Profession.Weapons)
                 {
-                    if (weapon.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == weapon.Specialization) != null)
+                    if (weapon.Specialization == 0 || this.Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == weapon.Specialization) != null)
                     {
-                        switch (Slot)
+                        switch (this.Slot)
                         {
                             case _EquipmentSlots.Weapon1_MainHand:
                             case _EquipmentSlots.Weapon2_MainHand:
-                                if (!weapon.Wielded.Contains(API.weaponHand.Aquatic) && (weapon.Wielded.Contains(API.weaponHand.Mainhand) || weapon.Wielded.Contains(API.weaponHand.TwoHand) || weapon.Wielded.Contains(API.weaponHand.DualWielded))) weapons.Add(weapon.Weapon.getLocalName());
+                                if (!weapon.Wielded.Contains(API.weaponHand.Aquatic) && (weapon.Wielded.Contains(API.weaponHand.Mainhand) || weapon.Wielded.Contains(API.weaponHand.TwoHand) || weapon.Wielded.Contains(API.weaponHand.DualWielded)))
+                                {
+                                    weapons.Add(weapon.Weapon.getLocalName());
+                                }
+
                                 break;
 
                             case _EquipmentSlots.Weapon1_OffHand:
                             case _EquipmentSlots.Weapon2_OffHand:
-                                if (weapon.Wielded.Contains(API.weaponHand.Offhand) || weapon.Wielded.Contains(API.weaponHand.DualWielded)) weapons.Add(weapon.Weapon.getLocalName());
+                                if (weapon.Wielded.Contains(API.weaponHand.Offhand) || weapon.Wielded.Contains(API.weaponHand.DualWielded))
+                                {
+                                    weapons.Add(weapon.Weapon.getLocalName());
+                                }
+
                                 break;
 
                             case _EquipmentSlots.AquaticWeapon1:
                             case _EquipmentSlots.AquaticWeapon2:
-                                if (weapon.Wielded.Contains(API.weaponHand.Aquatic)) weapons.Add(weapon.Weapon.getLocalName());
+                                if (weapon.Wielded.Contains(API.weaponHand.Aquatic))
+                                {
+                                    weapons.Add(weapon.Weapon.getLocalName());
+                                }
+
                                 break;
                         }
                     }
                 }
 
-                List = List.Where(e => weapons.Contains(e.Header)).ToList();
+                this.List = this.List.Where(e => weapons.Contains(e.Header)).ToList();
             }
 
-            if (FilterBox.Text != null && FilterBox.Text != "")
+            if (this.FilterBox.Text != null && this.FilterBox.Text != string.Empty)
             {
-                List<string> tags = FilterBox.Text.ToLower().Split(' ').ToList();
+                List<string> tags = this.FilterBox.Text.ToLower().Split(' ').ToList();
                 var filteredTags = tags.Where(e => e.Trim().Length > 0);
 
-                foreach (SelectionEntry entry in List)
+                foreach (SelectionEntry entry in this.List)
                 {
                     List<filterTag> Tags = new List<filterTag>();
 
@@ -504,7 +565,7 @@ namespace Kenedia.Modules.BuildsManager
 
                         if (entry.Header.ToLower().Contains(tag.text))
                         {
-                            FilteredList.Add(entry);
+                            this.FilteredList.Add(entry);
                             tag.match = true;
                         }
 
@@ -513,32 +574,38 @@ namespace Kenedia.Modules.BuildsManager
                             var lower = s.ToLower();
 
                             tag.match = tag.match ? tag.match : lower.Contains(tag.text);
-                            if (tag.match) break;
+                            if (tag.match)
+                            {
+                                break;
+                            }
                         }
                     }
 
-                    if (!FilteredList.Contains(entry) && (Tags.Count == Tags.Where(e => e.match == true).ToList().Count)) FilteredList.Add(entry);
+                    if (!this.FilteredList.Contains(entry) && (Tags.Count == Tags.Where(e => e.match == true).ToList().Count))
+                    {
+                        this.FilteredList.Add(entry);
+                    }
                 }
             }
             else
             {
-                FilteredList = new List<SelectionEntry>(List);
+                this.FilteredList = new List<SelectionEntry>(this.List);
             }
 
-            foreach (SelectionEntry entry in FilteredList)
+            foreach (SelectionEntry entry in this.FilteredList)
             {
-                entry.AbsolutBounds = new Rectangle(0, FilterBox.Height + 5 + i * (size + 5), Width, size);
-                entry.TextureBounds = new Rectangle(2, FilterBox.Height + 5 + i * (size + 5), size, size);
-                entry.TextBounds = new Rectangle(2 + size + 5, FilterBox.Height + i * (size + 5), size, size);
+                entry.AbsolutBounds = new Rectangle(0, this.FilterBox.Height + 5 + (i * (size + 5)), this.Width, size);
+                entry.TextureBounds = new Rectangle(2, this.FilterBox.Height + 5 + (i * (size + 5)), size, size);
+                entry.TextBounds = new Rectangle(2 + size + 5, this.FilterBox.Height + (i * (size + 5)), size, size);
                 entry.ContentBounds = new List<Rectangle>();
 
                 int j = 0;
-                int statSize = Font.LineHeight;
+                int statSize = this.Font.LineHeight;
                 if (entry.ContentTextures != null && entry.ContentTextures.Count > 0)
                 {
                     foreach (AsyncTexture2D texture in entry.ContentTextures)
                     {
-                        entry.ContentBounds.Add(new Rectangle(size + j * statSize, FilterBox.Height + Font.LineHeight + 12 + i * (size + 5), statSize, statSize));
+                        entry.ContentBounds.Add(new Rectangle(size + (j * statSize), this.FilterBox.Height + this.Font.LineHeight + 12 + (i * (size + 5)), statSize, statSize));
                         j++;
                     }
                 }
@@ -546,21 +613,21 @@ namespace Kenedia.Modules.BuildsManager
                 i++;
             }
 
-            Height = FilterBox.Height + 5 + Math.Min(10, Math.Max(FilteredList.Count, 1)) * (size + 5);
+            this.Height = this.FilterBox.Height + 5 + (Math.Min(10, Math.Max(this.FilteredList.Count, 1)) * (size + 5));
         }
 
         private void UpdateStates()
         {
-            var list = new List<SelectionEntry>(FilteredList);
+            var list = new List<SelectionEntry>(this.FilteredList);
             foreach (SelectionEntry entry in list)
             {
-                entry.Hovered = entry.AbsolutBounds.Contains(RelativeMousePosition);
+                entry.Hovered = entry.AbsolutBounds.Contains(this.RelativeMousePosition);
 
-                if (entry.Hovered && SelectionType != selectionType.Weapons && CustomTooltip != null)
+                if (entry.Hovered && this.SelectionType != selectionType.Weapons && this.CustomTooltip != null)
                 {
-                    CustomTooltip.Visible = true;
-                    CustomTooltip.Header = entry.Header;
-                    CustomTooltip.Content = entry.Content;
+                    this.CustomTooltip.Visible = true;
+                    this.CustomTooltip.Header = entry.Header;
+                    this.CustomTooltip.TooltipContent = entry.Content;
                 }
             }
         }
@@ -569,77 +636,81 @@ namespace Kenedia.Modules.BuildsManager
         {
             base.OnShown(e);
 
-            UpdateLayout();
-            FilterBox.Show();
-            Clicked = false;
+            this.UpdateLayout();
+            this.FilterBox.Show();
+            this.Clicked = false;
 
-            FilterBox.Focused = true;
-            FilterBox.SelectionStart = 0;
-            FilterBox.SelectionEnd = FilterBox.Length;
+            this.FilterBox.Focused = true;
+            this.FilterBox.SelectionStart = 0;
+            this.FilterBox.SelectionEnd = this.FilterBox.Length;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            Clicked = false;
-            if (UpdateLayouts)
+            this.Clicked = false;
+            if (this.UpdateLayouts)
             {
-                UpdateLayout();
-                UpdateLayouts = false;
+                this.UpdateLayout();
+                this.UpdateLayouts = false;
             }
 
-            UpdateStates();
+            this.UpdateStates();
 
-            spriteBatch.DrawOnCtrl(this,
-                                    ContentService.Textures.Pixel,
-                                    bounds,
-                                    bounds,
-                                    new Color(75, 75, 75, 255),
-                                    0f,
-                                    default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                ContentService.Textures.Pixel,
+                bounds,
+                bounds,
+                new Color(75, 75, 75, 255),
+                0f,
+                default);
 
-            spriteBatch.DrawOnCtrl(this,
-                                    Background,
-                                    bounds.Add(-2, 0, 0, 0),
-                                    bounds,
-                                    Color.White,
-                                    0f,
-                                    default);
-
+            spriteBatch.DrawOnCtrl(
+                this,
+                this.Background,
+                bounds.Add(-2, 0, 0, 0),
+                bounds,
+                Color.White,
+                0f,
+                default);
 
             int i = 0;
             int size = 42;
-            var list = new List<SelectionEntry>(FilteredList);
+            var list = new List<SelectionEntry>(this.FilteredList);
             foreach (SelectionEntry entry in list)
             {
-                spriteBatch.DrawOnCtrl(this,
-                                        entry.Texture,
-                                        entry.TextureBounds,
-                                        entry.Texture.Texture.Bounds,
-                                       entry.Hovered ? Color.Orange : Color.White,
-                                        0f,
-                                        default);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    entry.Texture,
+                    entry.TextureBounds,
+                    entry.Texture.Texture.Bounds,
+                    entry.Hovered ? Color.Orange : Color.White,
+                    0f,
+                    default);
 
-                spriteBatch.DrawStringOnCtrl(this,
-                                        entry.Header,
-                                        Font,
-                                        entry.TextBounds,
-                                       entry.Hovered ? Color.Orange : Color.White,
-                                        false,
-                                        HorizontalAlignment.Left);
+                spriteBatch.DrawStringOnCtrl(
+                    this,
+                    entry.Header,
+                    this.Font,
+                    entry.TextBounds,
+                    entry.Hovered ? Color.Orange : Color.White,
+                    false,
+                    HorizontalAlignment.Left);
 
                 if (entry.ContentTextures != null && entry.ContentTextures.Count > 0)
                 {
                     int j = 0;
-                    int statSize = Font.LineHeight;
+                    int statSize = this.Font.LineHeight;
                     foreach (AsyncTexture2D texture in entry.ContentTextures)
                     {
-                        spriteBatch.DrawOnCtrl(this,
-                                                texture,
-                                                entry.ContentBounds[j],
-                                                texture.Texture.Bounds,
-                                                entry.Hovered ? Color.Orange : Color.White,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            texture,
+                            entry.ContentBounds[j],
+                            texture.Texture.Bounds,
+                            entry.Hovered ? Color.Orange : Color.White,
+                            0f,
+                            default);
                         j++;
                     }
                 }
@@ -654,42 +725,45 @@ namespace Kenedia.Modules.BuildsManager
                         {
                             ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
 
-                            //if (CurrentObject != null && CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
-                            //ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
+                            // if (CurrentObject != null && CurrentObject.GetType().Name == "Trait_Control") height += (font.LineHeight * Regex.Matches(s, "<c=@reminder>").Count);
+                            // ss = Regex.Replace(s, "<c=@reminder>", Environment.NewLine + Environment.NewLine);
                         }
 
-                        ss = Regex.Replace(ss, "<c=@abilitytype>", "");
-                        ss = Regex.Replace(ss, "</c>", "");
-                        ss = Regex.Replace(ss, "<br>", "");
+                        ss = Regex.Replace(ss, "<c=@abilitytype>", string.Empty);
+                        ss = Regex.Replace(ss, "</c>", string.Empty);
+                        ss = Regex.Replace(ss, "<br>", string.Empty);
                         strings.Add(ss);
                     }
 
-                    spriteBatch.DrawStringOnCtrl(this,
-                                            string.Join("; ", strings).Replace(Environment.NewLine, ""),
-                                            Font,
-                                            new Rectangle(2 + size + 5, Font.LineHeight + FilterBox.Height + i * (size + 5) + Font.LineHeight -5, size, Font.LineHeight),
-                                            Color.LightGray,
-                                            false,
-                                            HorizontalAlignment.Left,
-                                            VerticalAlignment.Top);
+                    spriteBatch.DrawStringOnCtrl(
+                        this,
+                        string.Join("; ", strings).Replace(Environment.NewLine, string.Empty),
+                        this.Font,
+                        new Rectangle(2 + size + 5, this.Font.LineHeight + this.FilterBox.Height + (i * (size + 5)) + this.Font.LineHeight - 5, size, this.Font.LineHeight),
+                        Color.LightGray,
+                        false,
+                        HorizontalAlignment.Left,
+                        VerticalAlignment.Top);
                 }
+
                 i++;
             }
 
             var color = Color.Black;
-            //Top
+
+            // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Bottom
+            // Bottom
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Left
+            // Left
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
-            //Right
+            // Right
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
         }
@@ -723,18 +797,18 @@ namespace Kenedia.Modules.BuildsManager
 
         public Control_Equipment(Container parent)
         {
-            Parent = parent;
-            
-            // BackgroundColor = Color.Aqua;
-            _RuneTexture = BuildsManager.ModuleInstance.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
+            this.Parent = parent;
 
-            Trinkets = new List<API.TrinketItem>();
+            // BackgroundColor = Color.Aqua;
+            this._RuneTexture = BuildsManager.ModuleInstance.TextureManager.getEquipTexture(_EquipmentTextures.Rune).GetRegion(37, 37, 54, 54);
+
+            this.Trinkets = new List<API.TrinketItem>();
             foreach (API.TrinketItem item in BuildsManager.ModuleInstance.Data.Trinkets)
             {
-                Trinkets.Add(item);
+                this.Trinkets.Add(item);
             }
 
-            WeaponSlots = new List<Texture2D>()
+            this.WeaponSlots = new List<Texture2D>()
             {
                 BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon1_MainHand],
                 BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon1_OffHand],
@@ -743,33 +817,34 @@ namespace Kenedia.Modules.BuildsManager
                 BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.Weapon2_OffHand],
             };
 
-            AquaticWeaponSlots = new List<Texture2D>()
+            this.AquaticWeaponSlots = new List<Texture2D>()
             {
                 BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.AquaticWeapon1],
                 BuildsManager.ModuleInstance.TextureManager._EquipSlotTextures[(int)_EquipSlotTextures.AquaticWeapon2],
             };
 
-            Weapons = new List<API.WeaponItem>() { };
-            foreach (API.WeaponItem weapon in BuildsManager.ModuleInstance.Data.Weapons) { Weapons.Add(weapon); }
+            this.Weapons = new List<API.WeaponItem>() { };
+            foreach (API.WeaponItem weapon in BuildsManager.ModuleInstance.Data.Weapons) { this.Weapons.Add(weapon); }
 
-            Click += OnClick;
-            RightMouseButtonPressed += OnRightClick;
-            Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
+            this.Click += this.OnClick;
+            this.RightMouseButtonPressed += this.OnRightClick;
+            Input.Mouse.LeftMouseButtonPressed += this.OnGlobalClick;
 
-            CustomTooltip = new CustomTooltip(Parent)
+            this.CustomTooltip = new CustomTooltip(this.Parent)
             {
                 ClipsBounds = false,
             };
-            SelectionPopUp = new SelectionPopUp(GameService.Graphics.SpriteScreen)
+            this.SelectionPopUp = new SelectionPopUp(GameService.Graphics.SpriteScreen)
             {
-                CustomTooltip = CustomTooltip,
-                //Template = Template,
+                CustomTooltip = this.CustomTooltip,
+
+                // Template = Template,
             };
-            SelectionPopUp.Changed += SelectionPopUp_Changed;
+            this.SelectionPopUp.Changed += this.SelectionPopUp_Changed;
 
             foreach (API.RuneItem item in BuildsManager.ModuleInstance.Data.Runes)
             {
-                Runes_Selection.Add(new SelectionPopUp.SelectionEntry()
+                this.Runes_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
                     Texture = item.Icon._AsyncTexture,
@@ -780,7 +855,7 @@ namespace Kenedia.Modules.BuildsManager
 
             foreach (API.SigilItem item in BuildsManager.ModuleInstance.Data.Sigils)
             {
-                Sigils_Selection.Add(new SelectionPopUp.SelectionEntry()
+                this.Sigils_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
                     Texture = item.Icon._AsyncTexture,
@@ -789,20 +864,20 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            foreach (API.WeaponItem item in Weapons)
+            foreach (API.WeaponItem item in this.Weapons)
             {
-                Weapons_Selection.Add(new SelectionPopUp.SelectionEntry()
+                this.Weapons_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
                     Texture = item.Icon._AsyncTexture,
                     Header = item.WeaponType.getLocalName(),
-                    Content = new List<string>() { "" },
+                    Content = new List<string>() { string.Empty },
                 });
             }
 
             foreach (API.Stat item in BuildsManager.ModuleInstance.Data.Stats)
             {
-                Stats_Selection.Add(new SelectionPopUp.SelectionEntry()
+                this.Stats_Selection.Add(new SelectionPopUp.SelectionEntry()
                 {
                     Object = item,
                     Texture = item.Icon._AsyncTexture,
@@ -812,82 +887,83 @@ namespace Kenedia.Modules.BuildsManager
                 });
             }
 
-            Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
-            BuildsManager.ModuleInstance.LanguageChanged += ModuleInstance_LanguageChanged;
+            this.Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
+            BuildsManager.ModuleInstance.LanguageChanged += this.ModuleInstance_LanguageChanged;
 
-            ProfessionChanged();
-            UpdateLayout();
+            this.ProfessionChanged();
+            this.UpdateLayout();
 
-            BuildsManager.ModuleInstance.Selected_Template_Changed += ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.Selected_Template_Changed += this.ModuleInstance_Selected_Template_Changed;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
 
-            CustomTooltip?.Dispose();
-            SelectionPopUp?.Dispose();
+            this.CustomTooltip?.Dispose();
+            this.SelectionPopUp?.Dispose();
 
-            Click -= OnClick;
-            RightMouseButtonPressed -= OnRightClick;
-            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
-            SelectionPopUp.Changed -= SelectionPopUp_Changed;
+            this.Click -= this.OnClick;
+            this.RightMouseButtonPressed -= this.OnRightClick;
+            Input.Mouse.LeftMouseButtonPressed -= this.OnGlobalClick;
+            this.SelectionPopUp.Changed -= this.SelectionPopUp_Changed;
 
-            Runes_Selection.DisposeAll();
-            Sigils_Selection.DisposeAll();
-            Weapons.DisposeAll();
-            Weapons_Selection.DisposeAll();
-            Stats_Selection.DisposeAll();
+            this.Runes_Selection.DisposeAll();
+            this.Sigils_Selection.DisposeAll();
+            this.Weapons.DisposeAll();
+            this.Weapons_Selection.DisposeAll();
+            this.Stats_Selection.DisposeAll();
 
-            BuildsManager.ModuleInstance.LanguageChanged -= ModuleInstance_LanguageChanged;
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= ModuleInstance_Selected_Template_Changed;
+            BuildsManager.ModuleInstance.LanguageChanged -= this.ModuleInstance_LanguageChanged;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= this.ModuleInstance_Selected_Template_Changed;
         }
 
         protected override void OnShown(EventArgs e)
         {
-            UpdateLayout();
+            this.UpdateLayout();
         }
 
         private void SelectionPopUp_Changed(object sender, EventArgs e)
         {
-            OnChanged();
+            this.OnChanged();
         }
 
         private void ModuleInstance_LanguageChanged(object sender, EventArgs e)
         {
-            Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
+            this.Instructions = Strings.common.GearTab_Tips.Split('\n').ToList();
 
-            foreach(SelectionPopUp.SelectionEntry entry in Weapons_Selection)
+            foreach (SelectionPopUp.SelectionEntry entry in this.Weapons_Selection)
             {
                 var item = (API.WeaponItem)entry.Object;
                 entry.Header = item.WeaponType.getLocalName();
             }
 
-            foreach(SelectionPopUp.SelectionEntry entry in Stats_Selection)
+            foreach (SelectionPopUp.SelectionEntry entry in this.Stats_Selection)
             {
-                var stat = (API.Stat) entry.Object;
+                var stat = (API.Stat)entry.Object;
                 entry.Header = stat.Name;
             }
 
-            foreach(SelectionPopUp.SelectionEntry entry in Runes_Selection)
+            foreach (SelectionPopUp.SelectionEntry entry in this.Runes_Selection)
             {
-                var stat = (API.RuneItem) entry.Object;
+                var stat = (API.RuneItem)entry.Object;
                 entry.Header = stat.Name;
             }
 
-            foreach(SelectionPopUp.SelectionEntry entry in Sigils_Selection)
+            foreach (SelectionPopUp.SelectionEntry entry in this.Sigils_Selection)
             {
-                var stat = (API.SigilItem) entry.Object;
+                var stat = (API.SigilItem)entry.Object;
                 entry.Header = stat.Name;
             }
         }
 
         private void ModuleInstance_Selected_Template_Changed(object sender, EventArgs e)
         {
-            UpdateLayout();
+            this.UpdateLayout();
         }
 
         public EventHandler Changed;
+
         private void OnChanged()
         {
             BuildsManager.ModuleInstance.Selected_Template.SetChanged();
@@ -895,12 +971,15 @@ namespace Kenedia.Modules.BuildsManager
 
         private void OnGlobalClick(object sender, MouseEventArgs m)
         {
-            if (!MouseOver && !SelectionPopUp.MouseOver) SelectionPopUp.Hide();
+            if (!this.MouseOver && !this.SelectionPopUp.MouseOver)
+            {
+                this.SelectionPopUp.Hide();
+            }
         }
 
         private void SetClipboard(string text)
         {
-            if (text != "" && text != null)
+            if (text != string.Empty && text != null)
             {
                 try
                 {
@@ -912,119 +991,131 @@ namespace Kenedia.Modules.BuildsManager
                 }
                 catch
                 {
-
                 }
             }
         }
+
         private void OnRightClick(object sender, MouseEventArgs mouse)
         {
-            if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
-            SelectionPopUp.Hide();
+            if (DateTime.Now.Subtract(this.SelectionPopUp.LastClick).TotalMilliseconds < 250)
+            {
+                return;
+            }
+
+            this.SelectionPopUp.Hide();
 
             if (Input.Keyboard.ActiveModifiers.HasFlag(ModifierKeys.Alt))
             {
-                foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+                foreach (Weapon_TemplateItem item in this.Template.Gear.Weapons)
                 {
                     if (item.Hovered)
                     {
                         bool canSelect = true;
                         if (item.Slot == _EquipmentSlots.Weapon1_OffHand)
                         {
-                            canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                            canSelect = this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
                         }
+
                         if (item.Slot == _EquipmentSlots.Weapon2_OffHand)
                         {
-                            canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                            canSelect = this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
                         }
 
                         if (canSelect)
                         {
-                            SelectionPopUp.Show();
-                            SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                            SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Weapons;
-                            SelectionPopUp.List = Weapons_Selection;
-                            SelectionPopUp.Slot = item.Slot;
-                            SelectionPopUp.SelectionTarget = item;
+                            this.SelectionPopUp.Show();
+                            this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                            this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Weapons;
+                            this.SelectionPopUp.List = this.Weapons_Selection;
+                            this.SelectionPopUp.Slot = item.Slot;
+                            this.SelectionPopUp.SelectionTarget = item;
                         }
                     }
                 }
 
-                foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+                foreach (AquaticWeapon_TemplateItem item in this.Template.Gear.AquaticWeapons)
                 {
                     if (item.Hovered)
                     {
-                        SelectionPopUp.Show();
-                        SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                        SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticWeapons;
-                        SelectionPopUp.List = Weapons_Selection;
-                        SelectionPopUp.Slot = item.Slot;
-                        SelectionPopUp.SelectionTarget = item;
+                        this.SelectionPopUp.Show();
+                        this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                        this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticWeapons;
+                        this.SelectionPopUp.List = this.Weapons_Selection;
+                        this.SelectionPopUp.Slot = item.Slot;
+                        this.SelectionPopUp.SelectionTarget = item;
                     }
                 }
             }
             else
             {
-                var text = "";
-                foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+                var text = string.Empty;
+                foreach (Weapon_TemplateItem item in this.Template.Gear.Weapons)
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        SetClipboard(item.Stat.Name);
+                        this.SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
-                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Sigil != null)
+
+                    if (item.UpgradeBounds.Contains(this.RelativeMousePosition) && item.Sigil != null)
                     {
-                        SetClipboard(item.Sigil.Name);
+                        this.SetClipboard(item.Sigil.Name);
                         text = item.Sigil.Name;
                     }
                 }
 
-                foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+                foreach (AquaticWeapon_TemplateItem item in this.Template.Gear.AquaticWeapons)
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        SetClipboard(item.Stat.Name);
+                        this.SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
+
                     if (item.Sigils != null)
                     {
                         for (int i = 0; i < item.Sigils.Count; i++)
                         {
-                            if (item.Sigils[i] != null && item.SigilsBounds[i].Contains(RelativeMousePosition))
+                            if (item.Sigils[i] != null && item.SigilsBounds[i].Contains(this.RelativeMousePosition))
                             {
-                                SetClipboard(item.Sigils[i].Name);
+                                this.SetClipboard(item.Sigils[i].Name);
                                 text = item.Sigils[i].Name;
                             }
                         }
                     }
                 }
 
-                foreach (Armor_TemplateItem item in Template.Gear.Armor)
+                foreach (Armor_TemplateItem item in this.Template.Gear.Armor)
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        SetClipboard(item.Stat.Name);
+                        this.SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
-                    if (item.UpgradeBounds.Contains(RelativeMousePosition) && item.Rune != null)
+
+                    if (item.UpgradeBounds.Contains(this.RelativeMousePosition) && item.Rune != null)
                     {
-                        SetClipboard(item.Rune.Name);
+                        this.SetClipboard(item.Rune.Name);
                         text = item.Rune.Name;
                     }
                 }
 
-                foreach (TemplateItem item in Template.Gear.Trinkets)
+                foreach (TemplateItem item in this.Template.Gear.Trinkets)
                 {
                     if (item.Hovered && item.Stat != null)
                     {
-                        SetClipboard(item.Stat.Name);
+                        this.SetClipboard(item.Stat.Name);
                         text = item.Stat.Name;
                     }
                 }
 
-                if (BuildsManager.ModuleInstance.PasteOnCopy.Value) Paste(text);
+                if (BuildsManager.ModuleInstance.PasteOnCopy.Value)
+                {
+                    this.Paste(text);
+                }
             }
         }
+
         public async void Paste(string text)
         {
             byte[] prevClipboardContent = await ClipboardUtil.WindowsClipboardService.GetAsUnicodeBytesAsync();
@@ -1032,11 +1123,12 @@ namespace Kenedia.Modules.BuildsManager
                                .ContinueWith(clipboardResult =>
                                {
                                    if (clipboardResult.IsFaulted)
+                                   {
                                        BuildsManager.Logger.Warn(clipboardResult.Exception, "Failed to set clipboard text to {text}!", text);
+                                   }
                                    else
                                        Task.Run(() =>
                                        {
-
                                            Blish_HUD.Controls.Intern.Keyboard.Press(VirtualKeyShort.LCONTROL, true);
                                            Blish_HUD.Controls.Intern.Keyboard.Stroke(VirtualKeyShort.KEY_A, true);
                                            Thread.Sleep(50);
@@ -1057,105 +1149,110 @@ namespace Kenedia.Modules.BuildsManager
 
         private void OnClick(object sender, MouseEventArgs m)
         {
-            if (DateTime.Now.Subtract(SelectionPopUp.LastClick).TotalMilliseconds < 250) return;
-            SelectionPopUp.Hide();
+            if (DateTime.Now.Subtract(this.SelectionPopUp.LastClick).TotalMilliseconds < 250)
+            {
+                return;
+            }
 
-            foreach (TemplateItem item in Template.Gear.Trinkets)
+            this.SelectionPopUp.Hide();
+
+            foreach (TemplateItem item in this.Template.Gear.Trinkets)
             {
                 if (item.Hovered)
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Stats_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Stats_Selection;
                 }
             }
 
-            foreach (Armor_TemplateItem item in Template.Gear.Armor)
+            foreach (Armor_TemplateItem item in this.Template.Gear.Armor)
             {
                 if (item.Hovered)
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Stats_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Stats_Selection;
                 }
 
-                if (item.UpgradeBounds.Contains(RelativeMousePosition))
+                if (item.UpgradeBounds.Contains(this.RelativeMousePosition))
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Runes;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Runes_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Runes;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Runes_Selection;
                 }
             }
 
-            foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+            foreach (Weapon_TemplateItem item in this.Template.Gear.Weapons)
             {
                 if (item.Hovered)
                 {
                     bool canSelect = true;
                     if (item.Slot == _EquipmentSlots.Weapon1_OffHand)
                     {
-                        canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                        canSelect = this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
                     }
+
                     if (item.Slot == _EquipmentSlots.Weapon2_OffHand)
                     {
-                        canSelect = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
+                        canSelect = this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType == API.weaponType.Unkown || (int)Enum.Parse(typeof(API.weaponSlot), this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) != (int)API.weaponHand.TwoHand;
                     }
 
                     if (canSelect)
                     {
-                        SelectionPopUp.Show();
-                        SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                        SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
-                        SelectionPopUp.SelectionTarget = item;
-                        SelectionPopUp.List = Stats_Selection;
+                        this.SelectionPopUp.Show();
+                        this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                        this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
+                        this.SelectionPopUp.SelectionTarget = item;
+                        this.SelectionPopUp.List = this.Stats_Selection;
                     }
                 }
 
-                if (item.UpgradeBounds.Contains(RelativeMousePosition))
+                if (item.UpgradeBounds.Contains(this.RelativeMousePosition))
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Sigils;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Sigils_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Sigils;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Sigils_Selection;
                 }
             }
 
-            foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+            foreach (AquaticWeapon_TemplateItem item in this.Template.Gear.AquaticWeapons)
             {
                 if (item.Hovered)
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.Bounds.Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Stats_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.Bounds.Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.Bounds.Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.Stats;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Stats_Selection;
                 }
 
-                if (item.SigilsBounds[0].Contains(RelativeMousePosition))
+                if (item.SigilsBounds[0].Contains(this.RelativeMousePosition))
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.SigilsBounds[1].Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.SigilsBounds[0].Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticSigils;
-                    SelectionPopUp.UpgradeIndex = 0;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Sigils_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.SigilsBounds[1].Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.SigilsBounds[0].Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticSigils;
+                    this.SelectionPopUp.UpgradeIndex = 0;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Sigils_Selection;
                 }
 
-                if (item.SigilsBounds[1].Contains(RelativeMousePosition))
+                if (item.SigilsBounds[1].Contains(this.RelativeMousePosition))
                 {
-                    SelectionPopUp.Show();
-                    SelectionPopUp.Location = new Point(Input.Mouse.Position.X - RelativeMousePosition.X + item.SigilsBounds[1].Right + 3, Input.Mouse.Position.Y - RelativeMousePosition.Y + item.SigilsBounds[1].Y - 1);
-                    SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticSigils;
-                    SelectionPopUp.UpgradeIndex = 1;
-                    SelectionPopUp.SelectionTarget = item;
-                    SelectionPopUp.List = Sigils_Selection;
+                    this.SelectionPopUp.Show();
+                    this.SelectionPopUp.Location = new Point(Input.Mouse.Position.X - this.RelativeMousePosition.X + item.SigilsBounds[1].Right + 3, Input.Mouse.Position.Y - this.RelativeMousePosition.Y + item.SigilsBounds[1].Y - 1);
+                    this.SelectionPopUp.SelectionType = SelectionPopUp.selectionType.AquaticSigils;
+                    this.SelectionPopUp.UpgradeIndex = 1;
+                    this.SelectionPopUp.SelectionTarget = item;
+                    this.SelectionPopUp.List = this.Sigils_Selection;
                 }
             }
 
@@ -1163,18 +1260,18 @@ namespace Kenedia.Modules.BuildsManager
 
         private void UpdateTemplate()
         {
-
         }
 
         private void ProfessionChanged()
         {
             var id = "Unkown";
 
-            if (Template.Build.Profession != null)
+            if (this.Template.Build.Profession != null)
             {
-                _Profession = Template.Build.Profession.Id;
-                id = Template.Build.Profession.Id;
+                this._Profession = this.Template.Build.Profession.Id;
+                id = this.Template.Build.Profession.Id;
             }
+
             var armorWeight = API.armorWeight.Heavy;
 
             switch (id)
@@ -1196,7 +1293,7 @@ namespace Kenedia.Modules.BuildsManager
                     break;
             }
 
-            Armors = new List<API.ArmorItem>()
+            this.Armors = new List<API.ArmorItem>()
             {
                 new API.ArmorItem(),
                 new API.ArmorItem(),
@@ -1209,115 +1306,133 @@ namespace Kenedia.Modules.BuildsManager
             {
                 if (armor.ArmorWeight == armorWeight)
                 {
-                    Armors[(int)armor.Slot] = armor;
+                    this.Armors[(int)armor.Slot] = armor;
                 }
             }
 
-            //SelectionPopUp.Template = Template;
+            // SelectionPopUp.Template = Template;
         }
 
         public void UpdateLayout()
         {
-            Point mPos = RelativeMousePosition;
+            Point mPos = this.RelativeMousePosition;
             int i;
             int offset = 1;
             int size = 48;
             int statSize = (int)(size / 1.5);
 
-            if (CustomTooltip.Visible) CustomTooltip.Visible = false;
+            if (this.CustomTooltip.Visible)
+            {
+                this.CustomTooltip.Visible = false;
+            }
 
             i = 0;
-            foreach (TemplateItem item in Template.Gear.Trinkets)
+            foreach (TemplateItem item in this.Template.Gear.Trinkets)
             {
                 if (item != null)
                 {
-                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                    item.Bounds = new Rectangle(offset, 5 + (i * (size + 6)), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + (i * (size + 6)), size, size);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + (i * (size + 6)) + (size - statSize), statSize, statSize);
                 }
+
                 i++;
             }
 
             i = 0;
             offset += 90;
-            foreach (Armor_TemplateItem item in Template.Gear.Armor)
+            foreach (Armor_TemplateItem item in this.Template.Gear.Armor)
             {
                 if (item != null)
                 {
-                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                    item.Bounds = new Rectangle(offset, 5 + (i * (size + 6)), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + (i * (size + 6)), size, size);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + (i * (size + 6)) + (size - statSize), statSize, statSize);
                 }
+
                 i++;
             }
 
             i = 0;
             offset += 150;
-            foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+            foreach (Weapon_TemplateItem item in this.Template.Gear.Weapons)
             {
                 if (item != null)
                 {
-                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
-                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                    item.Bounds = new Rectangle(offset, 5 + (i * (size + 6)), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + (i * (size + 6)), size, size);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + (i * (size + 6)) + (size - statSize), statSize, statSize);
                 }
-                if (i == 1) i++;
+
+                if (i == 1)
+                {
+                    i++;
+                }
+
                 i++;
             }
 
             i = 0;
             offset += 150;
-            foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+            foreach (AquaticWeapon_TemplateItem item in this.Template.Gear.AquaticWeapons)
             {
                 if (item != null)
                 {
-                    item.Bounds = new Rectangle(offset, 5 + i * (size + 6), size, size);
-                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + i * (size + 6), size, size);
+                    item.Bounds = new Rectangle(offset, 5 + (i * (size + 6)), size, size);
+                    item.UpgradeBounds = new Rectangle(offset + size + 8, 5 + (i * (size + 6)), size, size);
 
                     for (int j = 0; j < 2; j++)
                     {
-                        item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
+                        item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), (item.UpgradeBounds.Width / 2) - 2, (item.UpgradeBounds.Height / 2) - 2);
                     }
 
-                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + i * (size + 6) + (size - statSize), statSize, statSize);
+                    item.StatBounds = new Rectangle(offset + (size - statSize), 5 + (i * (size + 6)) + (size - statSize), statSize, statSize);
                 }
 
-                if (i == 0) i = i + 2;
+                if (i == 0)
+                {
+                    i = i + 2;
+                }
+
                 i++;
             }
         }
 
         private void UpdateStates()
         {
-            Point mPos = RelativeMousePosition;
+            Point mPos = this.RelativeMousePosition;
             int i;
             int offset = 1;
             int size = 48;
             int statSize = (int)(size / 1.5);
 
-            if (CustomTooltip.Visible) CustomTooltip.Visible = false;
+            if (this.CustomTooltip.Visible)
+            {
+                this.CustomTooltip.Visible = false;
+            }
 
             i = 0;
-            foreach (TemplateItem item in Template.Gear.Trinkets)
+            foreach (TemplateItem item in this.Template.Gear.Trinkets)
             {
                 if (item != null)
                 {
                     item.Hovered = item.Bounds.Contains(mPos);
-                    if (item.Hovered && item.Stat != null && (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver))
+                    if (item.Hovered && item.Stat != null && (!this.SelectionPopUp.Visible || !this.SelectionPopUp.MouseOver))
                     {
-                        CustomTooltip.Visible = true;
+                        this.CustomTooltip.Visible = true;
 
-                        if (CustomTooltip.CurrentObject != item)
+                        if (this.CustomTooltip.CurrentObject != item)
                         {
-                            CustomTooltip.CurrentObject = item;
-                            CustomTooltip.Header = item.Stat.Name;
-                            CustomTooltip.Content = new List<string>();
+                            this.CustomTooltip.CurrentObject = item;
+                            this.CustomTooltip.Header = item.Stat.Name;
+                            this.CustomTooltip.TooltipContent = new List<string>();
                             foreach (API.StatAttribute attribute in item.Stat.Attributes)
                             {
-                                CustomTooltip.Content.Add("+ " + (attribute.Value + Math.Round(attribute.Multiplier * Trinkets[i].AttributeAdjustment)) + " " + attribute.Name);
+                                this.CustomTooltip.TooltipContent.Add("+ " + (attribute.Value + Math.Round(attribute.Multiplier * this.Trinkets[i].AttributeAdjustment)) + " " + attribute.Name);
                             }
                         }
-                    };
+                    }
+;
                 }
 
                 i++;
@@ -1325,35 +1440,35 @@ namespace Kenedia.Modules.BuildsManager
 
             i = 0;
             offset += 90;
-            foreach (Armor_TemplateItem item in Template.Gear.Armor)
+            foreach (Armor_TemplateItem item in this.Template.Gear.Armor)
             {
                 if (item != null)
                 {
                     item.Hovered = item.Bounds.Contains(mPos);
 
-                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                    if (!this.SelectionPopUp.Visible || !this.SelectionPopUp.MouseOver)
                     {
                         if (item.UpgradeBounds.Contains(mPos) && item.Rune != null)
                         {
-                            CustomTooltip.Visible = true;
-                            if (CustomTooltip.CurrentObject != item.Rune)
+                            this.CustomTooltip.Visible = true;
+                            if (this.CustomTooltip.CurrentObject != item.Rune)
                             {
-                                CustomTooltip.CurrentObject = item.Rune;
-                                CustomTooltip.Header = item.Rune.Name;
-                                CustomTooltip.Content = item.Rune.Bonuses;
+                                this.CustomTooltip.CurrentObject = item.Rune;
+                                this.CustomTooltip.Header = item.Rune.Name;
+                                this.CustomTooltip.TooltipContent = item.Rune.Bonuses;
                             }
                         }
                         else if (item.Hovered && item.Stat != null)
                         {
-                            CustomTooltip.Visible = true;
-                            if (CustomTooltip.CurrentObject != item)
+                            this.CustomTooltip.Visible = true;
+                            if (this.CustomTooltip.CurrentObject != item)
                             {
-                                CustomTooltip.CurrentObject = item;
-                                CustomTooltip.Header = item.Stat.Name;
-                                CustomTooltip.Content = new List<string>();
+                                this.CustomTooltip.CurrentObject = item;
+                                this.CustomTooltip.Header = item.Stat.Name;
+                                this.CustomTooltip.TooltipContent = new List<string>();
                                 foreach (API.StatAttribute attribute in item.Stat.Attributes)
                                 {
-                                    CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * Armors[i].AttributeAdjustment) + " " + attribute.Name);
+                                    this.CustomTooltip.TooltipContent.Add("+ " + Math.Round(attribute.Multiplier * this.Armors[i].AttributeAdjustment) + " " + attribute.Name);
                                 }
                             }
                         }
@@ -1365,51 +1480,52 @@ namespace Kenedia.Modules.BuildsManager
 
             i = 0;
             offset += 150;
-            foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+            foreach (Weapon_TemplateItem item in this.Template.Gear.Weapons)
             {
                 if (item != null)
                 {
                     item.Hovered = item.Bounds.Contains(mPos);
 
-                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                    if (!this.SelectionPopUp.Visible || !this.SelectionPopUp.MouseOver)
                     {
                         if (item.UpgradeBounds.Contains(mPos) && item.Sigil != null)
                         {
-                            CustomTooltip.Visible = true;
+                            this.CustomTooltip.Visible = true;
 
-                            if (CustomTooltip.CurrentObject != item.Sigil)
+                            if (this.CustomTooltip.CurrentObject != item.Sigil)
                             {
-                                CustomTooltip.CurrentObject = item.Sigil;
-                                CustomTooltip.Header = item.Sigil.Name;
-                                CustomTooltip.Content = new List<string>() { item.Sigil.Description };
+                                this.CustomTooltip.CurrentObject = item.Sigil;
+                                this.CustomTooltip.Header = item.Sigil.Name;
+                                this.CustomTooltip.TooltipContent = new List<string>() { item.Sigil.Description };
                             }
                         }
                         else if (item.Hovered && item.Stat != null)
                         {
-                            CustomTooltip.Visible = true;
+                            this.CustomTooltip.Visible = true;
 
-                            if (CustomTooltip.CurrentObject != item)
+                            if (this.CustomTooltip.CurrentObject != item)
                             {
-                                CustomTooltip.CurrentObject = item;
-                                CustomTooltip.Header = item.Stat.Name;
-                                CustomTooltip.Content = new List<string>();
+                                this.CustomTooltip.CurrentObject = item;
+                                this.CustomTooltip.Header = item.Stat.Name;
+                                this.CustomTooltip.TooltipContent = new List<string>();
 
                                 bool twoHanded = false;
                                 if (item.Slot == _EquipmentSlots.Weapon1_MainHand || item.Slot == _EquipmentSlots.Weapon1_OffHand)
                                 {
-                                    twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
-                                }
-                                if (item.Slot == _EquipmentSlots.Weapon2_MainHand || item.Slot == _EquipmentSlots.Weapon2_OffHand)
-                                {
-                                    twoHanded = Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
+                                    twoHanded = this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon1_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
                                 }
 
-                                var weapon = twoHanded ? Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword) : Weapons.Find(e => e.WeaponType == API.weaponType.Axe);
+                                if (item.Slot == _EquipmentSlots.Weapon2_MainHand || item.Slot == _EquipmentSlots.Weapon2_OffHand)
+                                {
+                                    twoHanded = this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType != API.weaponType.Unkown && (int)Enum.Parse(typeof(API.weaponSlot), this.Template.Gear.Weapons[(int)Template._WeaponSlots.Weapon2_MainHand].WeaponType.ToString()) == (int)API.weaponHand.TwoHand;
+                                }
+
+                                var weapon = twoHanded ? this.Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword) : this.Weapons.Find(e => e.WeaponType == API.weaponType.Axe);
                                 if (weapon != null)
                                 {
                                     foreach (API.StatAttribute attribute in item.Stat.Attributes)
                                     {
-                                        CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                        this.CustomTooltip.TooltipContent.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
                                     }
                                 }
                             }
@@ -1417,54 +1533,58 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                if (i == 1) i++;
+                if (i == 1)
+                {
+                    i++;
+                }
+
                 i++;
             }
 
             i = 0;
             offset += 150;
-            foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+            foreach (AquaticWeapon_TemplateItem item in this.Template.Gear.AquaticWeapons)
             {
                 if (item != null)
                 {
                     for (int j = 0; j < 2; j++)
                     {
-                        item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), item.UpgradeBounds.Width / 2 - 2, item.UpgradeBounds.Height / 2 - 2);
+                        item.SigilsBounds[j] = new Rectangle(item.UpgradeBounds.X, item.UpgradeBounds.Y + 1 + (item.UpgradeBounds.Height / 2 * j), (item.UpgradeBounds.Width / 2) - 2, (item.UpgradeBounds.Height / 2) - 2);
 
-                        if ((!SelectionPopUp.Visible || !SelectionPopUp.MouseOver) && item.Sigils != null)
+                        if ((!this.SelectionPopUp.Visible || !this.SelectionPopUp.MouseOver) && item.Sigils != null)
                         {
                             if (item.SigilsBounds[j].Contains(mPos) && item.Sigils.Count > j && item.Sigils[j] != null)
                             {
-                                CustomTooltip.Visible = true;
+                                this.CustomTooltip.Visible = true;
 
-                                if (CustomTooltip.CurrentObject != item.Sigils[j])
+                                if (this.CustomTooltip.CurrentObject != item.Sigils[j])
                                 {
-                                    CustomTooltip.CurrentObject = item.Sigils[j];
-                                    CustomTooltip.Header = item.Sigils[j].Name;
-                                    CustomTooltip.Content = new List<string>() { item.Sigils[j].Description };
+                                    this.CustomTooltip.CurrentObject = item.Sigils[j];
+                                    this.CustomTooltip.Header = item.Sigils[j].Name;
+                                    this.CustomTooltip.TooltipContent = new List<string>() { item.Sigils[j].Description };
                                 }
                             }
                         }
                     }
 
                     item.Hovered = item.Bounds.Contains(mPos);
-                    if (!SelectionPopUp.Visible || !SelectionPopUp.MouseOver)
+                    if (!this.SelectionPopUp.Visible || !this.SelectionPopUp.MouseOver)
                     {
                         if (item.Hovered && item.Stat != null)
                         {
-                            CustomTooltip.Visible = true;
-                            if (CustomTooltip.CurrentObject != item)
+                            this.CustomTooltip.Visible = true;
+                            if (this.CustomTooltip.CurrentObject != item)
                             {
-                                CustomTooltip.CurrentObject = item;
-                                CustomTooltip.Header = item.Stat.Name;
-                                CustomTooltip.Content = new List<string>();
+                                this.CustomTooltip.CurrentObject = item;
+                                this.CustomTooltip.Header = item.Stat.Name;
+                                this.CustomTooltip.TooltipContent = new List<string>();
 
-                                var weapon = Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword);
+                                var weapon = this.Weapons.Find(e => e.WeaponType == API.weaponType.Greatsword);
                                 if (weapon != null)
                                 {
                                     foreach (API.StatAttribute attribute in item.Stat.Attributes)
                                     {
-                                        CustomTooltip.Content.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
+                                        this.CustomTooltip.TooltipContent.Add("+ " + Math.Round(attribute.Multiplier * weapon.AttributeAdjustment) + " " + attribute.Name);
                                     }
                                 }
                             }
@@ -1472,106 +1592,123 @@ namespace Kenedia.Modules.BuildsManager
                     }
                 }
 
-                if (i == 0) i = i + 2;
+                if (i == 0)
+                {
+                    i = i + 2;
+                }
+
                 i++;
             }
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (Template == null) return;
-            if (Template.Build.Profession != null && _Profession != Template.Build.Profession.Id) ProfessionChanged();
+            if (this.Template == null)
+            {
+                return;
+            }
 
-            UpdateStates();
+            if (this.Template.Build.Profession != null && this._Profession != this.Template.Build.Profession.Id)
+            {
+                this.ProfessionChanged();
+            }
+
+            this.UpdateStates();
 
             int i;
             Color itemColor = new Color(75, 75, 75, 255);
             Color frameColor = new Color(125, 125, 125, 255);
 
             i = 0;
-            foreach (Armor_TemplateItem item in Template.Gear.Armor)
+            foreach (Armor_TemplateItem item in this.Template.Gear.Armor)
             {
                 if (item != null)
                 {
-                    spriteBatch.DrawOnCtrl(this,
-                                        ContentService.Textures.Pixel,
-                                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                        Rectangle.Empty,
-                                        frameColor,
-                                        0f,
-                                        default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        ContentService.Textures.Pixel,
+                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
+                        Rectangle.Empty,
+                        frameColor,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture : BuildsManager.ModuleInstance.TextureManager._Icons[0],
-                                            item.Bounds,
-                                            Armors.Count > i ? Armors[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.ModuleInstance.TextureManager._Icons[0].Bounds,
-                                            itemColor,
-                                            0f,
-                                            default);
-
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        this.Armors.Count > i ? this.Armors[i].Icon._AsyncTexture.Texture : BuildsManager.ModuleInstance.TextureManager._Icons[0],
+                        item.Bounds,
+                        this.Armors.Count > i ? this.Armors[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.ModuleInstance.TextureManager._Icons[0].Bounds,
+                        itemColor,
+                        0f,
+                        default);
 
                     if (item.Stat != null)
                     {
-                        spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon._AsyncTexture,
-                                                item.StatBounds,
-                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
-                                                Color.White,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            item.Stat.Icon._AsyncTexture,
+                            item.StatBounds,
+                            item.Stat.Icon._AsyncTexture.Texture.Bounds,
+                            Color.White,
+                            0f,
+                            default);
                     }
 
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        ContentService.Textures.Pixel,
+                        item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
+                        Rectangle.Empty,
+                        item.Rune == null ? Color.Transparent : frameColor,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            ContentService.Textures.Pixel,
-                                            item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                            Rectangle.Empty,
-                                            item.Rune == null ? Color.Transparent : frameColor,
-                                            0f,
-                                            default);
-
-                    spriteBatch.DrawOnCtrl(this,
-                                            item.Rune == null ? _RuneTexture : item.Rune.Icon._AsyncTexture.Texture,
-                                            item.UpgradeBounds,
-                                            item.Rune == null ? _RuneTexture.Bounds : item.Rune.Icon._AsyncTexture.Texture.Bounds,
-                                            Color.White,
-                                            0f,
-                                            default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        item.Rune == null ? this._RuneTexture : item.Rune.Icon._AsyncTexture.Texture,
+                        item.UpgradeBounds,
+                        item.Rune == null ? this._RuneTexture.Bounds : item.Rune.Icon._AsyncTexture.Texture.Bounds,
+                        Color.White,
+                        0f,
+                        default);
                 }
 
                 i++;
             }
 
             i = 0;
-            foreach (TemplateItem item in Template.Gear.Trinkets)
+            foreach (TemplateItem item in this.Template.Gear.Trinkets)
             {
                 if (item != null)
                 {
-                    spriteBatch.DrawOnCtrl(this,
-                                        ContentService.Textures.Pixel,
-                                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                        Rectangle.Empty,
-                                        frameColor,
-                                        0f,
-                                        default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        ContentService.Textures.Pixel,
+                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
+                        Rectangle.Empty,
+                        frameColor,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture : BuildsManager.ModuleInstance.TextureManager._Icons[0],
-                                            item.Bounds,
-                                            Trinkets.Count > i ? Trinkets[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.ModuleInstance.TextureManager._Icons[0].Bounds,
-                                            itemColor,
-                                            0f,
-                                            default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        this.Trinkets.Count > i ? this.Trinkets[i].Icon._AsyncTexture.Texture : BuildsManager.ModuleInstance.TextureManager._Icons[0],
+                        item.Bounds,
+                        this.Trinkets.Count > i ? this.Trinkets[i].Icon._AsyncTexture.Texture.Bounds : BuildsManager.ModuleInstance.TextureManager._Icons[0].Bounds,
+                        itemColor,
+                        0f,
+                        default);
 
                     if (item.Stat != null)
                     {
-                        spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon._AsyncTexture,
-                                                item.StatBounds,
-                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
-                                                Color.White,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            item.Stat.Icon._AsyncTexture,
+                            item.StatBounds,
+                            item.Stat.Icon._AsyncTexture.Texture.Bounds,
+                            Color.White,
+                            0f,
+                            default);
                     }
                 }
 
@@ -1579,152 +1716,160 @@ namespace Kenedia.Modules.BuildsManager
             }
 
             i = 0;
-            foreach (Weapon_TemplateItem item in Template.Gear.Weapons)
+            foreach (Weapon_TemplateItem item in this.Template.Gear.Weapons)
             {
                 if (item != null)
                 {
-                    spriteBatch.DrawOnCtrl(this,
-                                        ContentService.Textures.Pixel,
-                                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                        Rectangle.Empty,
-                                        item.WeaponType != API.weaponType.Unkown ? frameColor : Color.Transparent,
-                                        0f,
-                                        default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        ContentService.Textures.Pixel,
+                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
+                        Rectangle.Empty,
+                        item.WeaponType != API.weaponType.Unkown ? frameColor : Color.Transparent,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture : WeaponSlots[i],
-                                            item.Bounds,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture.Bounds : WeaponSlots[i].Bounds,
-                                            item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
-                                            0f,
-                                            default);
-
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        item.WeaponType != API.weaponType.Unkown ? this.Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture : this.WeaponSlots[i],
+                        item.Bounds,
+                        item.WeaponType != API.weaponType.Unkown ? this.Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture.Bounds : this.WeaponSlots[i].Bounds,
+                        item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
+                        0f,
+                        default);
 
                     if (item.Stat != null)
                     {
-                        spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon._AsyncTexture,
-                                                item.StatBounds,
-                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
-                                                Color.White,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            item.Stat.Icon._AsyncTexture,
+                            item.StatBounds,
+                            item.Stat.Icon._AsyncTexture.Texture.Bounds,
+                            Color.White,
+                            0f,
+                            default);
                     }
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            ContentService.Textures.Pixel,
-                                            item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                            Rectangle.Empty,
-                                            item.Sigil == null ? Color.Transparent : frameColor,
-                                            0f,
-                                            default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        ContentService.Textures.Pixel,
+                        item.UpgradeBounds.Add(new Rectangle(-1, -1, 2, 2)),
+                        Rectangle.Empty,
+                        item.Sigil == null ? Color.Transparent : frameColor,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            item.Sigil == null ? _RuneTexture : item.Sigil.Icon._AsyncTexture.Texture,
-                                            item.UpgradeBounds,
-                                            item.Sigil == null ? _RuneTexture.Bounds : item.Sigil.Icon._AsyncTexture.Texture.Bounds,
-                                            Color.White,
-                                            0f,
-                                            default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        item.Sigil == null ? this._RuneTexture : item.Sigil.Icon._AsyncTexture.Texture,
+                        item.UpgradeBounds,
+                        item.Sigil == null ? this._RuneTexture.Bounds : item.Sigil.Icon._AsyncTexture.Texture.Bounds,
+                        Color.White,
+                        0f,
+                        default);
                 }
 
                 i++;
             }
 
             i = 0;
-            foreach (AquaticWeapon_TemplateItem item in Template.Gear.AquaticWeapons)
+            foreach (AquaticWeapon_TemplateItem item in this.Template.Gear.AquaticWeapons)
             {
                 if (item != null)
                 {
-                    spriteBatch.DrawOnCtrl(this,
-                                        ContentService.Textures.Pixel,
-                                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
-                                        Rectangle.Empty,
-                                        item.WeaponType != API.weaponType.Unkown ? frameColor : Color.Transparent,
-                                        0f,
-                                        default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        ContentService.Textures.Pixel,
+                        item.Bounds.Add(new Rectangle(-1, -1, 2, 2)),
+                        Rectangle.Empty,
+                        item.WeaponType != API.weaponType.Unkown ? frameColor : Color.Transparent,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawOnCtrl(this,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture: AquaticWeaponSlots[i],
-                                            item.Bounds,
-                                            item.WeaponType != API.weaponType.Unkown ? Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture.Bounds : AquaticWeaponSlots[i].Bounds,
-                                            item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
-                                            0f,
-                                            default);
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        item.WeaponType != API.weaponType.Unkown ? this.Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture : this.AquaticWeaponSlots[i],
+                        item.Bounds,
+                        item.WeaponType != API.weaponType.Unkown ? this.Weapons[(int)item.WeaponType].Icon._AsyncTexture.Texture.Bounds : this.AquaticWeaponSlots[i].Bounds,
+                        item.WeaponType != API.weaponType.Unkown ? itemColor : Color.White,
+                        0f,
+                        default);
 
                     if (item.Stat != null)
                     {
-                        spriteBatch.DrawOnCtrl(this,
-                                                item.Stat.Icon._AsyncTexture,
-                                                item.StatBounds,
-                                                item.Stat.Icon._AsyncTexture.Texture.Bounds,
-                                                Color.White,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            item.Stat.Icon._AsyncTexture,
+                            item.StatBounds,
+                            item.Stat.Icon._AsyncTexture.Texture.Bounds,
+                            Color.White,
+                            0f,
+                            default);
                     }
 
                     for (int j = 0; j < 2; j++)
                     {
                         var sigil = item.Sigils != null && item.Sigils.Count > j && item.Sigils[j] != null && item.Sigils[j].Id > 0 ? item.Sigils[j] : null;
 
-                        spriteBatch.DrawOnCtrl(this,
-                                                ContentService.Textures.Pixel,
-                                                item.SigilsBounds[j].Add(new Rectangle(-1, -1, 2, 2)),
-                                                Rectangle.Empty,
-                                                sigil == null ? Color.Transparent : frameColor,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            ContentService.Textures.Pixel,
+                            item.SigilsBounds[j].Add(new Rectangle(-1, -1, 2, 2)),
+                            Rectangle.Empty,
+                            sigil == null ? Color.Transparent : frameColor,
+                            0f,
+                            default);
 
-                        spriteBatch.DrawOnCtrl(this,
-                                                sigil == null ? _RuneTexture : sigil.Icon._AsyncTexture.Texture,
-                                                item.SigilsBounds[j],
-                                                sigil == null ? _RuneTexture.Bounds : sigil.Icon._AsyncTexture.Texture.Bounds,
-                                                Color.White,
-                                                0f,
-                                                default);
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            sigil == null ? this._RuneTexture : sigil.Icon._AsyncTexture.Texture,
+                            item.SigilsBounds[j],
+                            sigil == null ? this._RuneTexture.Bounds : sigil.Icon._AsyncTexture.Texture.Bounds,
+                            Color.White,
+                            0f,
+                            default);
                     }
                 }
 
                 i++;
             }
 
-
             var font = GameService.Content.DefaultFont14;
 
-            var lastTrinket = Template.Gear.Trinkets[Template.Gear.Trinkets.Count - 1];
+            var lastTrinket = this.Template.Gear.Trinkets[this.Template.Gear.Trinkets.Count - 1];
             var texture = BuildsManager.ModuleInstance.TextureManager.getEmblem(_Emblems.QuestionMark);
             var mTexture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Mouse);
             if (lastTrinket != null)
             {
-                spriteBatch.DrawOnCtrl(this,
-                                        texture,
-                                        new Rectangle(lastTrinket.Bounds.Left, LocalBounds.Bottom - (font.LineHeight * 3), (font.LineHeight * 3), (font.LineHeight * 3)),
-                                        texture.Bounds,
-                                        Color.White,
-                                        0f,
-                                        default
-                                        );
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    texture,
+                    new Rectangle(lastTrinket.Bounds.Left, this.LocalBounds.Bottom - (font.LineHeight * 3), font.LineHeight * 3, font.LineHeight * 3),
+                    texture.Bounds,
+                    Color.White,
+                    0f,
+                    default);
 
                 i = 0;
-                foreach (string s in Instructions)
+                foreach (string s in this.Instructions)
                 {
-                    spriteBatch.DrawOnCtrl(this,
-                                            mTexture,
-                                            new Rectangle(lastTrinket.Bounds.Left + (font.LineHeight * 3), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), font.LineHeight, font.LineHeight),
-                                            mTexture.Bounds,
-                                            Color.White,
-                                            0f,
-                                            default
-                                            );
+                    spriteBatch.DrawOnCtrl(
+                        this,
+                        mTexture,
+                        new Rectangle(lastTrinket.Bounds.Left + (font.LineHeight * 3), this.LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), font.LineHeight, font.LineHeight),
+                        mTexture.Bounds,
+                        Color.White,
+                        0f,
+                        default);
 
-                    spriteBatch.DrawStringOnCtrl(this,
-                                            s,
-                                            font,
-                                            new Rectangle(lastTrinket.Bounds.Left + 5 + (font.LineHeight * 4), LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), 100, font.LineHeight),
-                                            Color.White,
-                                            false,
-                                            HorizontalAlignment.Left
-                                            );
+                    spriteBatch.DrawStringOnCtrl(
+                        this,
+                        s,
+                        font,
+                        new Rectangle(lastTrinket.Bounds.Left + 5 + (font.LineHeight * 4), this.LocalBounds.Bottom - (font.LineHeight * 3) + (i * font.LineHeight), 100, font.LineHeight),
+                        Color.White,
+                        false,
+                        HorizontalAlignment.Left);
                     i++;
                 }
             }

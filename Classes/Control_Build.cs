@@ -1,41 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Blish_HUD;
-using Blish_HUD.Controls;
-using Microsoft.Xna.Framework;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
-using Color = Microsoft.Xna.Framework.Color;
-using Microsoft.Xna.Framework.Graphics;
-using Gw2Sharp.ChatLinks;
-using Blish_HUD.Input;
-using MonoGame.Extended.BitmapFonts;
-using System.Threading;
-
-namespace Kenedia.Modules.BuildsManager
+﻿namespace Kenedia.Modules.BuildsManager
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using Blish_HUD;
+    using Blish_HUD.Controls;
+    using Blish_HUD.Input;
+    using Microsoft.Xna.Framework;
+    using Microsoft.Xna.Framework.Graphics;
+    using MonoGame.Extended.BitmapFonts;
+    using Color = Microsoft.Xna.Framework.Color;
+    using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
     public class ConnectorLine
     {
         public Rectangle Bounds;
         public float Rotation = 0;
     }
+
     public class Trait_Control : Control
     {
         private double _Scale = 1;
         private int _LineThickness = 5;
+
         public double Scale
         {
-            get => _Scale;
+            get => this._Scale;
             set
             {
-                _Scale = value;
-                UpdateLayout();
+                this._Scale = value;
+                this.UpdateLayout();
             }
         }
+
         private const int _TraitSize = 38;
         private Texture2D _Line;
+
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -49,20 +50,21 @@ namespace Kenedia.Modules.BuildsManager
 
         private CustomTooltip CustomTooltip;
         private Specialization_Control Specialization_Control;
+
         public Trait_Control(Container parent, Point p, API.Trait trait, CustomTooltip customTooltip, Specialization_Control specialization_Control)
         {
-            Parent = parent;
-            CustomTooltip = customTooltip;
-            Specialization_Control = specialization_Control;
-            DefaultPoint = p;
-            Location = p;
-            DefaultBounds = new Rectangle(0, 0, _TraitSize, _TraitSize);
-            _Trait = trait;
-            Size = new Point(_TraitSize, _TraitSize);
-            _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            this.Parent = parent;
+            this.CustomTooltip = customTooltip;
+            this.Specialization_Control = specialization_Control;
+            this.DefaultPoint = p;
+            this.Location = p;
+            this.DefaultBounds = new Rectangle(0, 0, _TraitSize, _TraitSize);
+            this._Trait = trait;
+            this.Size = new Point(_TraitSize, _TraitSize);
+            this._Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
 
-            ClipsBounds = false;
-            UpdateLayout();
+            this.ClipsBounds = false;
+            this.UpdateLayout();
         }
 
         protected override void OnMouseEntered(MouseEventArgs e)
@@ -71,14 +73,14 @@ namespace Kenedia.Modules.BuildsManager
 
             if (this.Trait != null)
             {
-                CustomTooltip.Visible = true;
+                this.CustomTooltip.Visible = true;
 
-                if (CustomTooltip.CurrentObject != this)
+                if (this.CustomTooltip.CurrentObject != this)
                 {
-                    CustomTooltip.CurrentObject = this;
-                    CustomTooltip.Header = this.Trait.Name;
-                    CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
-                    CustomTooltip.Content = new List<string>() { this.Trait.Description == "" ? "No Description in API" : this.Trait.Description };
+                    this.CustomTooltip.CurrentObject = this;
+                    this.CustomTooltip.Header = this.Trait.Name;
+                    this.CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
+                    this.CustomTooltip.TooltipContent = new List<string>() { this.Trait.Description == string.Empty ? "No Description in API" : this.Trait.Description };
                 }
             }
         }
@@ -87,50 +89,55 @@ namespace Kenedia.Modules.BuildsManager
         {
             base.OnMouseLeft(e);
 
-            if (CustomTooltip.CurrentObject == this) CustomTooltip.Visible = false;
+            if (this.CustomTooltip.CurrentObject == this)
+            {
+                this.CustomTooltip.Visible = false;
+            }
         }
+
         protected override void OnClick(MouseEventArgs mouse)
         {
             base.OnClick(mouse);
 
-            if (this.Trait != null && Trait.Type == API.traitType.Major && Template != null && MouseOver)
+            if (this.Trait != null && this.Trait.Type == API.traitType.Major && this.Template != null && this.MouseOver)
             {
-                if (Template.Build.SpecLines[Specialization_Control.Index].Traits.Contains(Trait))
+                if (this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Contains(this.Trait))
                 {
-                    Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(Trait);
+                    this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Remove(this.Trait);
                 }
                 else
                 {
-                    foreach (API.Trait t in Template.Build.SpecLines[Specialization_Control.Index].Traits.Where(e => e.Tier == Trait.Tier).ToList())
+                    foreach (API.Trait t in this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Where(e => e.Tier == this.Trait.Tier).ToList())
                     {
-                        Template.Build.SpecLines[Specialization_Control.Index].Traits.Remove(t);
+                        this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Remove(t);
                     }
 
-                    Template.Build.SpecLines[Specialization_Control.Index].Traits.Add(Trait);
+                    this.Template.Build.SpecLines[this.Specialization_Control.Index].Traits.Add(this.Trait);
                 }
 
-                Template.SetChanged();
+                this.Template.SetChanged();
             }
         }
 
         private API.Trait _Trait;
+
         public API.Trait Trait
         {
-            get => TraitType != null ? TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex] : null;
+            get => this.TraitType != null ? this.TraitType == API.traitType.Major ? this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MajorTraits[this.TraitIndex] : this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MinorTraits[this.TraitIndex] : null;
             set
             {
-
             }
         }
 
         public bool Hovered;
+
         public bool Selected
         {
             get
             {
-                var trait = TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
+                var trait = this.TraitType == API.traitType.Major ? this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MajorTraits[this.TraitIndex] : this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MinorTraits[this.TraitIndex];
 
-                return Template != null && trait != null && (trait.Type == API.traitType.Minor || Template.Build.SpecLines[SpecIndex].Traits.Contains(trait));
+                return this.Template != null && trait != null && (trait.Type == API.traitType.Minor || this.Template.Build.SpecLines[this.SpecIndex].Traits.Contains(trait));
             }
         }
 
@@ -144,59 +151,68 @@ namespace Kenedia.Modules.BuildsManager
         public ConnectorLine PostLine = new ConnectorLine();
         public EventHandler Changed;
 
-        private List<Point>_MinorTraits = new List<Point>()
+        private List<Point> _MinorTraits = new List<Point>()
         {
             new Point(215, (133 - 38) / 2),
             new Point(360, (133 - 38) / 2),
             new Point(505, (133 - 38) / 2),
         };
 
-private void UpdateLayout()
+        private void UpdateLayout()
         {
-            Bounds = DefaultBounds.Scale(Scale);
-            Location = DefaultPoint.Scale(Scale);
+            this.Bounds = this.DefaultBounds.Scale(this.Scale);
+            this.Location = this.DefaultPoint.Scale(this.Scale);
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            if (Template == null || Bounds == null) return;                        
-            var trait = TraitType == API.traitType.Major ? Template.Build.SpecLines[SpecIndex].Specialization?.MajorTraits[TraitIndex] : Template.Build.SpecLines[SpecIndex].Specialization?.MinorTraits[TraitIndex];
+            if (this.Template == null || this.Bounds == null)
+            {
+                return;
+            }
+
+            var trait = this.TraitType == API.traitType.Major ? this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MajorTraits[this.TraitIndex] : this.Template.Build.SpecLines[this.SpecIndex].Specialization?.MinorTraits[this.TraitIndex];
 
             if (trait != null)
             {
-                spriteBatch.DrawOnCtrl(this,
-                                        trait.Icon._AsyncTexture,
-                                        Bounds,
-                                        trait.Icon._AsyncTexture.Texture.Bounds,
-                                        Selected ? Color.White : (MouseOver ? Color.LightGray : Color.Gray),
-                                        0f,
-                                        default);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    trait.Icon._AsyncTexture,
+                    this.Bounds,
+                    trait.Icon._AsyncTexture.Texture.Bounds,
+                    this.Selected ? Color.White : (this.MouseOver ? Color.LightGray : Color.Gray),
+                    0f,
+                    default);
 
             }
         }
+
         public void SetTemplate()
         {
             var template = BuildsManager.ModuleInstance.Selected_Template;
 
         }
     }
+
     public class SpecializationSelector_Control : Control
     {
         public Specialization_Control Specialization_Control;
         public int Index;
         public bool Elite;
         private API.Specialization _Specialization;
+
         public API.Specialization Specialization
         {
-            get => _Specialization;
+            get => this._Specialization;
             set
             {
                 if (value != null)
                 {
-                    _Specialization = value;
+                    this._Specialization = value;
                 }
             }
         }
+
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -204,13 +220,16 @@ private void UpdateLayout()
 
         public SpecializationSelector_Control()
         {
-            BuildsManager.ModuleInstance.Selected_Template_Changed += ClosePopUp;
-            Input.Mouse.LeftMouseButtonPressed += ClosePopUp;
+            BuildsManager.ModuleInstance.Selected_Template_Changed += this.ClosePopUp;
+            Input.Mouse.LeftMouseButtonPressed += this.ClosePopUp;
         }
 
         private void ClosePopUp(object sender, EventArgs e)
         {
-            if(!MouseOver) Hide();
+            if (!this.MouseOver)
+            {
+                this.Hide();
+            }
         }
 
         protected override void OnClick(MouseEventArgs e)
@@ -219,51 +238,52 @@ private void UpdateLayout()
 
             var i = 0;
             var size = 64;
-            if (Template.Build.Profession != null)
+            if (this.Template.Build.Profession != null)
             {
-                foreach (API.Specialization spec in Template.Build.Profession.Specializations)
+                foreach (API.Specialization spec in this.Template.Build.Profession.Specializations)
                 {
-                    if (!spec.Elite || Elite)
+                    if (!spec.Elite || this.Elite)
                     {
-                        var rect = new Rectangle(20 + i * size, (Height - size) / 2, size, size);
+                        var rect = new Rectangle(20 + (i * size), (this.Height - size) / 2, size, size);
 
-                        if (rect.Contains(RelativeMousePosition))
+                        if (rect.Contains(this.RelativeMousePosition))
                         {
-                            var sp = Template.Build.SpecLines.Find(x => x.Specialization != null && x.Specialization.Id == spec.Id);
+                            var sp = this.Template.Build.SpecLines.Find(x => x.Specialization != null && x.Specialization.Id == spec.Id);
 
-                            if (sp != null && sp != Template.Build.SpecLines[Index])
+                            if (sp != null && sp != this.Template.Build.SpecLines[this.Index])
                             {
-                                //var traits = new List<API.Trait>(sp.Traits);
-                                Template.Build.SpecLines[Index].Specialization = sp.Specialization;
-                                Template.Build.SpecLines[Index].Traits = sp.Traits;
-                                //Template.Build.SpecLines[Index].Control.UpdateLayout();
-                                Template.SetChanged();
+                                // var traits = new List<API.Trait>(sp.Traits);
+                                this.Template.Build.SpecLines[this.Index].Specialization = sp.Specialization;
+                                this.Template.Build.SpecLines[this.Index].Traits = sp.Traits;
+
+                                // Template.Build.SpecLines[Index].Control.UpdateLayout();
+                                this.Template.SetChanged();
 
                                 sp.Specialization = null;
                                 sp.Traits = new List<API.Trait>();
                             }
                             else
                             {
-                                if (Template.Build.SpecLines[Index] != null)
+                                if (this.Template.Build.SpecLines[this.Index] != null)
                                 {
-                                    foreach (SpecLine specLine in Template.Build.SpecLines)
+                                    foreach (SpecLine specLine in this.Template.Build.SpecLines)
                                     {
-                                        if (spec != Specialization && specLine.Specialization == spec)
+                                        if (spec != this.Specialization && specLine.Specialization == spec)
                                         {
                                             specLine.Specialization = null;
                                             specLine.Traits = new List<API.Trait>();
                                         }
                                     }
 
-                                    if(Template.Build.SpecLines[Index].Specialization != spec)
+                                    if (this.Template.Build.SpecLines[this.Index].Specialization != spec)
                                     {
-                                        Template.Build.SpecLines[Index].Specialization = spec;
-                                        Template.SetChanged();
+                                        this.Template.Build.SpecLines[this.Index].Specialization = spec;
+                                        this.Template.SetChanged();
                                     }
                                 }
                             }
 
-                            Hide();
+                            this.Hide();
                             return;
                         }
 
@@ -272,52 +292,55 @@ private void UpdateLayout()
                 }
             }
 
-            Hide();
+            this.Hide();
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            spriteBatch.DrawOnCtrl(Parent,
-                                    ContentService.Textures.Pixel,
-                                    bounds.Add(Location),
-                                    bounds,
-                                    new Color(0, 0, 0, 205),
-                                    0f,
-                                    Vector2.Zero
-                                    );
+            spriteBatch.DrawOnCtrl(
+                this.Parent,
+                ContentService.Textures.Pixel,
+                bounds.Add(this.Location),
+                bounds,
+                new Color(0, 0, 0, 205),
+                0f,
+                Vector2.Zero);
 
-            if (Template.Build.Profession != null)
+            if (this.Template.Build.Profession != null)
             {
-                string text = "";
+                string text = string.Empty;
 
                 var i = 0;
                 var size = 64;
-                foreach (API.Specialization spec in Template.Build.Profession.Specializations)
+                foreach (API.Specialization spec in this.Template.Build.Profession.Specializations)
                 {
-                    if (!spec.Elite || Elite)
+                    if (!spec.Elite || this.Elite)
                     {
-                        var rect = new Rectangle(20 + i * size, (Height - size) / 2, size, size);
-                        if (rect.Contains(RelativeMousePosition)) text = spec.Name;
+                        var rect = new Rectangle(20 + (i * size), (this.Height - size) / 2, size, size);
+                        if (rect.Contains(this.RelativeMousePosition))
+                        {
+                            text = spec.Name;
+                        }
 
-                        spriteBatch.DrawOnCtrl(Parent,
-                                                spec.Icon._AsyncTexture,
-                                                rect.Add(Location),
-                                                spec.Icon._AsyncTexture.Texture.Bounds,
-                                                Specialization == spec || rect.Contains(RelativeMousePosition) ? Color.White : Color.Gray,
-                                                0f,
-                                                Vector2.Zero
-                                                );
+                        spriteBatch.DrawOnCtrl(
+                            this.Parent,
+                            spec.Icon._AsyncTexture,
+                            rect.Add(this.Location),
+                            spec.Icon._AsyncTexture.Texture.Bounds,
+                            this.Specialization == spec || rect.Contains(this.RelativeMousePosition) ? Color.White : Color.Gray,
+                            0f,
+                            Vector2.Zero);
                         i++;
                     }
                 }
 
-                if(text != "")
+                if (text != string.Empty)
                 {
-                    BasicTooltipText = text;
+                    this.BasicTooltipText = text;
                 }
                 else
                 {
-                    BasicTooltipText = null;
+                    this.BasicTooltipText = null;
                 }
             }
         }
@@ -325,13 +348,14 @@ private void UpdateLayout()
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= ClosePopUp;
-            Input.Mouse.LeftMouseButtonPressed -= ClosePopUp;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= this.ClosePopUp;
+            Input.Mouse.LeftMouseButtonPressed -= this.ClosePopUp;
         }
     }
+
     public class Specialization_Control : Control
     {
-    private const int _FrameWidth = 1;
+        private const int _FrameWidth = 1;
         private const int _LineThickness = 5;
         public const int _Width = 643;
         public const int _Height = 133;
@@ -343,29 +367,30 @@ private void UpdateLayout()
         private double _Scale = 1;
         public bool SelectorActive;
         public bool Elite;
+
         public double Scale
         {
-            get => _Scale;
+            get => this._Scale;
             set
             {
-                _Scale = value;
+                this._Scale = value;
 
-                foreach (Trait_Control trait in _MajorTraits)
+                foreach (Trait_Control trait in this._MajorTraits)
                 {
                     trait.Scale = value;
                 }
 
-                foreach (Trait_Control trait in _MinorTraits)
+                foreach (Trait_Control trait in this._MinorTraits)
                 {
                     trait.Scale = value;
                 }
 
-                //Width = (int)(_Width * value);
-                //Height = (int)(_Height * value);
-                Location = DefaultLocation.Scale(value);
-                Size = new Point(_Width, _Height).Scale(value);
+                // Width = (int)(_Width * value);
+                // Height = (int)(_Height * value);
+                this.Location = this.DefaultLocation.Scale(value);
+                this.Size = new Point(_Width, _Height).Scale(value);
 
-                UpdateLayout();
+                this.UpdateLayout();
             }
         }
 
@@ -373,12 +398,15 @@ private void UpdateLayout()
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
         }
+
         public int Index;
         private API.Specialization _Specialization;
+
         public API.Specialization Specialization
         {
-            get => Template != null ? Template.Build.SpecLines[Index].Specialization : null;
+            get => this.Template != null ? this.Template.Build.SpecLines[this.Index].Specialization : null;
         }
+
         public EventHandler Changed;
 
         private Texture2D _SpecSideSelector_Hovered;
@@ -407,103 +435,105 @@ private void UpdateLayout()
 
         public Specialization_Control(Container parent, int index, Point p, CustomTooltip customTooltip)
         {
-            Parent = parent;
-            CustomTooltip = customTooltip;
-            Index = index;
-            Size = new Point(_Width, _Height);
-            DefaultLocation = p;
-            Location = p;
+            this.Parent = parent;
+            this.CustomTooltip = customTooltip;
+            this.Index = index;
+            this.Size = new Point(_Width, _Height);
+            this.DefaultLocation = p;
+            this.Location = p;
 
-            //BackgroundColor = Color.Magenta;
+            // BackgroundColor = Color.Magenta;
 
-            _SpecSideSelector_Hovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
-            _SpecSideSelector = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector);
+            this._SpecSideSelector_Hovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
+            this._SpecSideSelector = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector);
 
-            _EliteFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
-            _SpecHighlightFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
-            _SpecFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
-            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
-            _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            this._EliteFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
+            this._SpecHighlightFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
+            this._SpecFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
+            this._EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            this._Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
 
-            _MinorTraits = new List<Trait_Control>()
+            this._MinorTraits = new List<Trait_Control>()
                 {
-                    new Trait_Control(Parent, new Point(215, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[0] : null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Minor},
-                    new Trait_Control(Parent, new Point(360, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[1]: null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Minor},
-                    new Trait_Control(Parent, new Point(505, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MinorTraits[2]: null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(this.Parent, new Point(215, (133 - 38) / 2).Add(this.Location), this.Specialization != null ? this.Specialization.MinorTraits[0] : null, this.CustomTooltip, this) {ZIndex = this.ZIndex + 1, TraitIndex = 0, SpecIndex = this.Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(this.Parent, new Point(360, (133 - 38) / 2).Add(this.Location), this.Specialization != null ? this.Specialization.MinorTraits[1]: null, this.CustomTooltip, this) {ZIndex = this.ZIndex + 1, TraitIndex = 1, SpecIndex = this.Index, TraitType = API.traitType.Minor},
+                    new Trait_Control(this.Parent, new Point(505, (133 - 38) / 2).Add(this.Location), this.Specialization != null ? this.Specialization.MinorTraits[2]: null, this.CustomTooltip, this) {ZIndex = this.ZIndex + 1, TraitIndex = 2, SpecIndex = this.Index, TraitType = API.traitType.Minor},
                 };
-            _MajorTraits = new List<Trait_Control>()
+            this._MajorTraits = new List<Trait_Control>()
                 {
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[0]: null, CustomTooltip, this){ZIndex = ZIndex + 1, TraitIndex = 0, SpecIndex = Index, TraitType = API.traitType.Major },
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[1]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 1, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(285, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[2]: null, CustomTooltip, this){ZIndex= ZIndex + 1 , TraitIndex = 2, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[3]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 3, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[4]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 4, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(430, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[5]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 5, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 - 3 - 38).Add(Location), Specialization != null ? Specialization.MajorTraits[6]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 6, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2).Add(Location), Specialization != null ? Specialization.MajorTraits[7]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 7, SpecIndex = Index, TraitType = API.traitType.Major},
-                    new Trait_Control(Parent, new Point(575, (133 - 38) / 2 + 3 + 38).Add(Location), Specialization != null ? Specialization.MajorTraits[8]: null, CustomTooltip, this){ZIndex= ZIndex + 1, TraitIndex = 8, SpecIndex = Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(285, ((133 - 38) / 2) - 3 - 38).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[0]: null, this.CustomTooltip, this) {ZIndex = this.ZIndex + 1, TraitIndex = 0, SpecIndex = this.Index, TraitType = API.traitType.Major },
+                    new Trait_Control(this.Parent, new Point(285, (133 - 38) / 2).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[1]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 1, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(285, ((133 - 38) / 2) + 3 + 38).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[2]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1 , TraitIndex = 2, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(430, ((133 - 38) / 2) - 3 - 38).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[3]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 3, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(430, (133 - 38) / 2).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[4]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 4, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(430, ((133 - 38) / 2) + 3 + 38).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[5]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 5, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(575, ((133 - 38) / 2) - 3 - 38).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[6]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 6, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(575, (133 - 38) / 2).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[7]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 7, SpecIndex = this.Index, TraitType = API.traitType.Major},
+                    new Trait_Control(this.Parent, new Point(575, ((133 - 38) / 2) + 3 + 38).Add(this.Location), this.Specialization != null ? this.Specialization.MajorTraits[8]: null, this.CustomTooltip, this) {ZIndex= this.ZIndex + 1, TraitIndex = 8, SpecIndex = this.Index, TraitType = API.traitType.Major},
                 };
 
-            var TemplateSpecLine = Template.Build.SpecLines.Find(e => e.Specialization == Specialization);
+            var TemplateSpecLine = this.Template.Build.SpecLines.Find(e => e.Specialization == this.Specialization);
 
-            foreach (Trait_Control trait in _MajorTraits)
+            foreach (Trait_Control trait in this._MajorTraits)
             {
-                trait.Click += Trait_Click;
+                trait.Click += this.Trait_Click;
             }
 
-            Selector = new SpecializationSelector_Control()
+            this.Selector = new SpecializationSelector_Control()
             {
-                Index = Index,
+                Index = this.Index,
                 Specialization_Control = this,
-                Parent = Parent,
+                Parent = this.Parent,
                 Visible = false,
-                ZIndex = ZIndex + 2,
-                Elite = Elite,
+                ZIndex = this.ZIndex + 2,
+                Elite = this.Elite,
             };
 
-            _Created = true;
-            UpdateLayout();
+            this._Created = true;
+            this.UpdateLayout();
         }
 
         protected override void OnMoved(MovedEventArgs e)
         {
             base.OnMoved(e);
-            UpdateLayout();
+            this.UpdateLayout();
         }
+
         protected override void OnResized(ResizedEventArgs e)
         {
             base.OnResized(e);
-            UpdateLayout();
+            this.UpdateLayout();
         }
+
         private void Trait_Click(object sender, MouseEventArgs e)
         {
-            UpdateLayout();
+            this.UpdateLayout();
         }
 
         protected override void OnClick(MouseEventArgs e)
         {
             base.OnClick(e);
 
-            if (MouseOver)
+            if (this.MouseOver)
             {
-                var highlight = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
-                var selector = SelectorBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
+                var highlight = this.HighlightBounds.Add(new Point(-this.Location.X, -this.Location.Y)).Contains(this.RelativeMousePosition);
+                var selector = this.SelectorBounds.Add(new Point(-this.Location.X, -this.Location.Y)).Contains(this.RelativeMousePosition);
 
                 if (selector || highlight)
                 {
-                    if (Selector.Visible)
+                    if (this.Selector.Visible)
                     {
-                        Selector.Visible = false;
+                        this.Selector.Visible = false;
                     }
                     else
                     {
-                        Selector.Visible = true;
+                        this.Selector.Visible = true;
 
-                        Selector.Location = LocalBounds.Location.Add(new Point(SelectorBounds.Width, 0));
-                        Selector.Size = LocalBounds.Size.Add(new Point(-SelectorBounds.Width, 0));
+                        this.Selector.Location = this.LocalBounds.Location.Add(new Point(this.SelectorBounds.Width, 0));
+                        this.Selector.Size = this.LocalBounds.Size.Add(new Point(-this.SelectorBounds.Width, 0));
 
-                        Selector.Elite = Elite;
-                        Selector.Specialization = Specialization;
+                        this.Selector.Elite = this.Elite;
+                        this.Selector.Specialization = this.Specialization;
                     }
                 }
             }
@@ -511,35 +541,34 @@ private void UpdateLayout()
 
         public void UpdateLayout()
         {
-            if (_Created)
+            if (this._Created)
             {
-                AbsoluteBounds = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2)).Scale(Scale).Add(Location);
+                this.AbsoluteBounds = new Rectangle(0, 0, _Width + (_FrameWidth * 2), _Height + (_FrameWidth * 2)).Scale(this.Scale).Add(this.Location);
 
-                ContentBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(Scale).Add(Location);
-                SelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, 15, _Height).Scale(Scale).Add(Location);
+                this.ContentBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(this.Scale).Add(this.Location);
+                this.SelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, 15, _Height).Scale(this.Scale).Add(this.Location);
 
-                HighlightBounds = new Rectangle(_Width - _HighlightLeft, (_Height - _SpecHighlightFrame.Height) / 2, _SpecHighlightFrame.Width, _SpecHighlightFrame.Height).Scale(Scale).Add(Location);
-                SpecSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(Scale).Add(Location);
+                this.HighlightBounds = new Rectangle(_Width - _HighlightLeft, (_Height - this._SpecHighlightFrame.Height) / 2, this._SpecHighlightFrame.Width, this._SpecHighlightFrame.Height).Scale(this.Scale).Add(this.Location);
+                this.SpecSelectorBounds = new Rectangle(_FrameWidth, _FrameWidth, _Width, _Height).Scale(this.Scale).Add(this.Location);
 
-                FirstLine.Bounds = new Rectangle(HighlightBounds.Right - 5.Scale(_Scale), HighlightBounds.Center.Y, 225 - HighlightBounds.Right, _LineThickness.Scale(_Scale));
-                WeaponTraitBounds = new Rectangle(HighlightBounds.Right - _TraitSize - 6, (_Height + HighlightBounds.Height - 165), _TraitSize, _TraitSize).Scale(Scale).Add(Location);
+                this.FirstLine.Bounds = new Rectangle(this.HighlightBounds.Right - 5.Scale(this._Scale), this.HighlightBounds.Center.Y, 225 - this.HighlightBounds.Right, _LineThickness.Scale(this._Scale));
+                this.WeaponTraitBounds = new Rectangle(this.HighlightBounds.Right - _TraitSize - 6, _Height + this.HighlightBounds.Height - 165, _TraitSize, _TraitSize).Scale(this.Scale).Add(this.Location);
 
-                SpecHovered = HighlightBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition);
-                if (SpecHovered)
+                this.SpecHovered = this.HighlightBounds.Add(new Point(-this.Location.X, -this.Location.Y)).Contains(this.RelativeMousePosition);
+                if (this.SpecHovered)
                 {
-                    BasicTooltipText = Specialization?.Name;
+                    this.BasicTooltipText = this.Specialization?.Name;
                 }
                 else
                 {
-                    BasicTooltipText = null;
+                    this.BasicTooltipText = null;
                 }
 
-                foreach (Trait_Control trait in _MajorTraits)
+                foreach (Trait_Control trait in this._MajorTraits)
                 {
                     if (trait.Selected)
                     {
-
-                        var minor = _MinorTraits[trait.Trait.Tier - 1];
+                        var minor = this._MinorTraits[trait.Trait.Tier - 1];
                         float rotation = 0f;
                         switch (trait.Trait.Order)
                         {
@@ -561,12 +590,12 @@ private void UpdateLayout()
 
                         var minor_Pos = minor.LocalBounds.Center;
                         var majorPos = trait.LocalBounds.Center;
-                        trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor.AbsoluteBounds.Center.Distance2D(trait.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
+                        trait.PreLine.Bounds = new Rectangle(minor_Pos.X, minor_Pos.Y, minor.AbsoluteBounds.Center.Distance2D(trait.AbsoluteBounds.Center), _LineThickness.Scale(this._Scale));
 
                         if (trait.Selected && trait.Trait.Tier != 3)
                         {
-                            minor = _MinorTraits[trait.Trait.Tier];
-                            trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, trait.AbsoluteBounds.Center.Distance2D(minor.AbsoluteBounds.Center), _LineThickness.Scale(_Scale));
+                            minor = this._MinorTraits[trait.Trait.Tier];
+                            trait.PostLine.Bounds = new Rectangle(majorPos.X, majorPos.Y, trait.AbsoluteBounds.Center.Distance2D(minor.AbsoluteBounds.Center), _LineThickness.Scale(this._Scale));
                         }
                     }
                     else
@@ -580,176 +609,176 @@ private void UpdateLayout()
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            UpdateLayout();
+            this.UpdateLayout();
 
-            spriteBatch.DrawOnCtrl(Parent,
-                                   ContentService.Textures.Pixel,
-                                   AbsoluteBounds,
-                                   AbsoluteBounds,
-                                   Color.Black,
-                                   0f,
-                                   Vector2.Zero
-                                   );
+            spriteBatch.DrawOnCtrl(
+                this.Parent,
+                ContentService.Textures.Pixel,
+                this.AbsoluteBounds,
+                this.AbsoluteBounds,
+                Color.Black,
+                0f,
+                Vector2.Zero);
 
-            spriteBatch.DrawOnCtrl(Parent,
-                                   _EmptyTraitLine,
-                                   ContentBounds,
-                                   _EmptyTraitLine.Bounds,
-                                    new Color(135, 135, 135, 255),
-                                   0f,
-                                   Vector2.Zero
-                                   );
+            spriteBatch.DrawOnCtrl(
+                this.Parent,
+                this._EmptyTraitLine,
+                this.ContentBounds,
+                this._EmptyTraitLine.Bounds,
+                new Color(135, 135, 135, 255),
+                0f,
+                Vector2.Zero);
 
-
-            if (Specialization != null)
+            if (this.Specialization != null)
             {
+                // Background
+                spriteBatch.DrawOnCtrl(
+                    this.Parent,
+                    this.Specialization.Background._AsyncTexture,
+                    this.ContentBounds,
+                    this.Specialization.Background._AsyncTexture.Texture.Bounds,
+                    Color.White,
+                    0f,
+                    Vector2.Zero);
 
-                //Background
-                spriteBatch.DrawOnCtrl(Parent,
-                                    Specialization.Background._AsyncTexture,
-                                    ContentBounds,
-                                    Specialization.Background._AsyncTexture.Texture.Bounds,
-                                    Color.White,
-                                    0f,
-                                    Vector2.Zero
-                                    );
-
-
-
-                //Lines
-                if (FirstLine.Bounds != null)
+                // Lines
+                if (this.FirstLine.Bounds != null)
                 {
-                    spriteBatch.DrawOnCtrl(Parent,
-                                           _Line,
-                                           FirstLine.Bounds,
-                                           _Line.Bounds,
-                                           Color.White,
-                                           FirstLine.Rotation,
-                                           Vector2.Zero);
+                    spriteBatch.DrawOnCtrl(
+                        this.Parent,
+                        this._Line,
+                        this.FirstLine.Bounds,
+                        this._Line.Bounds,
+                        Color.White,
+                        this.FirstLine.Rotation,
+                        Vector2.Zero);
 
                 }
 
-                foreach (Trait_Control trait in _MajorTraits)
+                foreach (Trait_Control trait in this._MajorTraits)
                 {
-
                     if (trait.PreLine.Bounds != null)
                     {
-                        //ScreenNotification.ShowNotification(trait.Trait.Name, ScreenNotification.NotificationType.Error);
-                        spriteBatch.DrawOnCtrl(Parent,
-                                               _Line,
-                                               trait.PreLine.Bounds,
-                                               _Line.Bounds,
-                                               Color.White,
-                                               trait.PreLine.Rotation,
-                                               Vector2.Zero);
+                        // ScreenNotification.ShowNotification(trait.Trait.Name, ScreenNotification.NotificationType.Error);
+                        spriteBatch.DrawOnCtrl(
+                            this.Parent,
+                            this._Line,
+                            trait.PreLine.Bounds,
+                            this._Line.Bounds,
+                            Color.White,
+                            trait.PreLine.Rotation,
+                            Vector2.Zero);
 
                     }
 
                     if (trait.PostLine.Bounds != null)
                     {
-                        //ScreenNotification.ShowNotification("PostLine", ScreenNotification.NotificationType.Error);
-                        spriteBatch.DrawOnCtrl(Parent,
-                                               _Line,
-                                               trait.PostLine.Bounds,
-                                               _Line.Bounds,
-                                               Color.White,
-                                               trait.PostLine.Rotation,
-                                               Vector2.Zero);
+                        // ScreenNotification.ShowNotification("PostLine", ScreenNotification.NotificationType.Error);
+                        spriteBatch.DrawOnCtrl(
+                            this.Parent,
+                            this._Line,
+                            trait.PostLine.Bounds,
+                            this._Line.Bounds,
+                            Color.White,
+                            trait.PostLine.Rotation,
+                            Vector2.Zero);
 
                     }
                 }
             }
 
-            spriteBatch.DrawOnCtrl(Parent,
-                                    _SpecFrame,
-                                    ContentBounds,
-                                    _SpecFrame.Bounds,
-                                    Color.Black,
-                                    0f,
-                                    Vector2.Zero
-                                    );
+            spriteBatch.DrawOnCtrl(
+                this.Parent,
+                this._SpecFrame,
+                this.ContentBounds,
+                this._SpecFrame.Bounds,
+                Color.Black,
+                0f,
+                Vector2.Zero);
 
-            //Spec Highlighter
-            spriteBatch.DrawOnCtrl(Parent,
-                                   _SpecHighlightFrame,
-                                   HighlightBounds,
-                                   _SpecHighlightFrame.Bounds,
-                                   Specialization != null ? Color.White : new Color(32, 32, 32, 125),
-                                   0f,
-                                   Vector2.Zero
-                                   );
+            // Spec Highlighter
+            spriteBatch.DrawOnCtrl(
+                this.Parent,
+                this._SpecHighlightFrame,
+                this.HighlightBounds,
+                this._SpecHighlightFrame.Bounds,
+                this.Specialization != null ? Color.White : new Color(32, 32, 32, 125),
+                0f,
+                Vector2.Zero);
 
-            if (Elite)
+            if (this.Elite)
             {
-                spriteBatch.DrawOnCtrl(Parent,
-                                       _EliteFrame,
-                                       ContentBounds,
-                                       _EliteFrame.Bounds,
-                                        Color.White,
-                                       0f,
-                                       Vector2.Zero
-                                       );
+                spriteBatch.DrawOnCtrl(
+                    this.Parent,
+                    this._EliteFrame,
+                    this.ContentBounds,
+                    this._EliteFrame.Bounds,
+                    Color.White,
+                    0f,
+                    Vector2.Zero);
 
-                if(Specialization != null && Specialization.WeaponTrait != null)
+                if (this.Specialization != null && this.Specialization.WeaponTrait != null)
                 {
-                    spriteBatch.DrawOnCtrl(Parent,
-                                           Specialization.WeaponTrait.Icon._AsyncTexture,
-                                           WeaponTraitBounds,
-                                           Specialization.WeaponTrait.Icon._AsyncTexture.Texture.Bounds,
-                                            Color.White,
-                                           0f,
-                                           Vector2.Zero
-                                           );
+                    spriteBatch.DrawOnCtrl(
+                        this.Parent,
+                        this.Specialization.WeaponTrait.Icon._AsyncTexture,
+                        this.WeaponTraitBounds,
+                        this.Specialization.WeaponTrait.Icon._AsyncTexture.Texture.Bounds,
+                        Color.White,
+                        0f,
+                        Vector2.Zero);
                 }
             }
 
-            if (Selector.Visible)
+            if (this.Selector.Visible)
             {
-                spriteBatch.DrawOnCtrl(Parent,
-                                        ContentService.Textures.Pixel,
-                                        SelectorBounds,
-                                        _SpecSideSelector.Bounds,
-                                        new Color(0, 0, 0, 205),
-                                        0f,
-                                        Vector2.Zero
-                                        );
+                spriteBatch.DrawOnCtrl(
+                    this.Parent,
+                    ContentService.Textures.Pixel,
+                    this.SelectorBounds,
+                    this._SpecSideSelector.Bounds,
+                    new Color(0, 0, 0, 205),
+                    0f,
+                    Vector2.Zero);
             }
 
-            spriteBatch.DrawOnCtrl(Parent,
-                                    SelectorBounds.Add(new Point(-Location.X, -Location.Y)).Contains(RelativeMousePosition) ? _SpecSideSelector_Hovered : _SpecSideSelector,
-                                    SelectorBounds,
-                                    _SpecSideSelector.Bounds,
-                                    Color.White,
-                                    0f,
-                                    Vector2.Zero
-                                    );
+            spriteBatch.DrawOnCtrl(
+                this.Parent,
+                this.SelectorBounds.Add(new Point(-this.Location.X, -this.Location.Y)).Contains(this.RelativeMousePosition) ? this._SpecSideSelector_Hovered : this._SpecSideSelector,
+                this.SelectorBounds,
+                this._SpecSideSelector.Bounds,
+                Color.White,
+                0f,
+                Vector2.Zero);
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
 
-            foreach (Trait_Control trait in _MajorTraits)
+            foreach (Trait_Control trait in this._MajorTraits)
             {
-                trait.Click -= Trait_Click;
+                trait.Click -= this.Trait_Click;
             }
-            _MajorTraits?.DisposeAll();
-            _MajorTraits.Clear();
 
-            _MinorTraits?.DisposeAll();
-            _MinorTraits.Clear();
+            this._MajorTraits?.DisposeAll();
+            this._MajorTraits.Clear();
 
-            Selector?.Dispose();
-            _Specialization?.Dispose();
-            //Specialization?.Dispose();
+            this._MinorTraits?.DisposeAll();
+            this._MinorTraits.Clear();
 
-            _SpecSideSelector_Hovered = null;
-            _SpecSideSelector = null;
-            _EliteFrame = null;
-            _SpecHighlightFrame = null;
-            _SpecFrame = null;
-            _EmptyTraitLine = null;
-            _Line = null;
+            this.Selector?.Dispose();
+            this._Specialization?.Dispose();
+
+            // Specialization?.Dispose();
+
+            this._SpecSideSelector_Hovered = null;
+            this._SpecSideSelector = null;
+            this._EliteFrame = null;
+            this._SpecHighlightFrame = null;
+            this._SpecFrame = null;
+            this._EmptyTraitLine = null;
+            this._Line = null;
         }
     }
 
@@ -765,6 +794,7 @@ private void UpdateLayout()
         TerrestrialLegend1,
         TerrestrialLegend2,
     }
+
     public class Skill_Control : Control
     {
         public Template Template
@@ -773,12 +803,13 @@ private void UpdateLayout()
         }
 
         private API.Skill _Skill;
+
         public API.Skill Skill
         {
-            get => _Skill;
+            get => this._Skill;
             set
             {
-                _Skill = value;
+                this._Skill = value;
 
             }
         }
@@ -792,44 +823,46 @@ private void UpdateLayout()
         private CustomTooltip CustomTooltip;
 
         private double _Scale = 1;
+
         public double Scale
         {
-            get => _Scale;
+            get => this._Scale;
             set
             {
-                _Scale = value;
-                Size = new Point(_SkillSize, _SkillSize + 15).Scale(value);
-                Location = Location.Scale(value);
+                this._Scale = value;
+                this.Size = new Point(this._SkillSize, this._SkillSize + 15).Scale(value);
+                this.Location = this.Location.Scale(value);
             }
         }
 
         public Skill_Control(Container parent)
         {
-            Parent = parent;
-            Size = new Point(_SkillSize, _SkillSize + 15);
+            this.Parent = parent;
+            this.Size = new Point(this._SkillSize, this._SkillSize + 15);
 
-            _SelectorTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SkillSelector).GetRegion(0, 2, 64, 12);
-            _SelectorTextureHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SkillSelector_Hovered);
-            _SkillPlaceHolder = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
+            this._SelectorTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SkillSelector).GetRegion(0, 2, 64, 12);
+            this._SelectorTextureHovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SkillSelector_Hovered);
+            this._SkillPlaceHolder = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 128, 128);
 
-            CustomTooltip = new CustomTooltip(Parent)
+            this.CustomTooltip = new CustomTooltip(this.Parent)
             {
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
-            //BackgroundColor = Color.OldLace;
+            // BackgroundColor = Color.OldLace;
         }
+
         protected override void OnMouseEntered(MouseEventArgs e)
         {
             base.OnMouseEntered(e);
 
-            if (Skill != null && Skill.Id > 0)
+            if (this.Skill != null && this.Skill.Id > 0)
             {
-                CustomTooltip.Visible = true;
-                CustomTooltip.Header = Skill.Name;
-                CustomTooltip.Content = new List<string>() { Skill.Description };
-                CustomTooltip.CurrentObject = Skill;
+                this.CustomTooltip.Visible = true;
+                this.CustomTooltip.Header = this.Skill.Name;
+                this.CustomTooltip.TooltipContent = new List<string>() { this.Skill.Description };
+                this.CustomTooltip.CurrentObject = this.Skill;
             }
         }
 
@@ -837,45 +870,47 @@ private void UpdateLayout()
         {
             base.OnMouseLeft(e);
 
-            CustomTooltip.Visible = false;
+            this.CustomTooltip.Visible = false;
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            var skillRect = new Rectangle(new Point(0, 12), new Point(Width, Height - 12)).Scale(Scale);
-            spriteBatch.DrawOnCtrl(this,
-                                    MouseOver ? _SelectorTextureHovered : _SelectorTexture,
-                                    new Rectangle(new Point(0, 0), new Point(Width, 12)).Scale(Scale),
-                                    _SelectorTexture.Bounds,
-                                    Color.White,
-                                    0f,
-                                    default);
+            var skillRect = new Rectangle(new Point(0, 12), new Point(this.Width, this.Height - 12)).Scale(this.Scale);
+            spriteBatch.DrawOnCtrl(
+                this,
+                this.MouseOver ? this._SelectorTextureHovered : this._SelectorTexture,
+                new Rectangle(new Point(0, 0), new Point(this.Width, 12)).Scale(this.Scale),
+                this._SelectorTexture.Bounds,
+                Color.White,
+                0f,
+                default);
 
-            spriteBatch.DrawOnCtrl(this,
-                                    (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Skill.Icon._AsyncTexture.Texture : _SkillPlaceHolder,
-                                    skillRect,
-                                    (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Skill.Icon._AsyncTexture.Texture.Bounds : _SkillPlaceHolder.Bounds,
-                                    (Skill != null && Skill.Icon != null && Skill.Icon._AsyncTexture != null) ? Color.White : new Color(0,0,0,155),
-                                    0f,
-                                    default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                (this.Skill != null && this.Skill.Icon != null && this.Skill.Icon._AsyncTexture != null) ? this.Skill.Icon._AsyncTexture.Texture : this._SkillPlaceHolder,
+                skillRect,
+                (this.Skill != null && this.Skill.Icon != null && this.Skill.Icon._AsyncTexture != null) ? this.Skill.Icon._AsyncTexture.Texture.Bounds : this._SkillPlaceHolder.Bounds,
+                (this.Skill != null && this.Skill.Icon != null && this.Skill.Icon._AsyncTexture != null) ? Color.White : new Color(0, 0, 0, 155),
+                0f,
+                default);
 
-            if (MouseOver)
+            if (this.MouseOver)
             {
                 var color = Color.Honeydew;
 
-                //Top
+                // Top
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Top, skillRect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Top, skillRect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Bottom
+                // Bottom
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Bottom - 2, skillRect.Width, 2), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Bottom - 1, skillRect.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                //Left
+                // Left
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Top, 2, skillRect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Left, skillRect.Top, 1, skillRect.Height), Rectangle.Empty, color * 0.6f);
 
-                //Right
+                // Right
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Right - 2, skillRect.Top, 2, skillRect.Height), Rectangle.Empty, color * 0.5f);
                 spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(skillRect.Right - 1, skillRect.Top, 1, skillRect.Height), Rectangle.Empty, color * 0.6f);
             }
@@ -884,9 +919,9 @@ private void UpdateLayout()
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            _SelectorTexture = null;
-            _SelectorTextureHovered = null;
-            _SkillPlaceHolder = null;
+            this._SelectorTexture = null;
+            this._SelectorTextureHovered = null;
+            this._SkillPlaceHolder = null;
         }
     }
 
@@ -894,21 +929,24 @@ private void UpdateLayout()
     {
         public API.Skill Skill;
         public Skill_Control Skill_Control;
+
         public SkillChangedEvent(API.Skill skill, Skill_Control skill_Control)
         {
-            Skill = skill;
-            Skill_Control = skill_Control;
+            this.Skill = skill;
+            this.Skill_Control = skill_Control;
         }
     }
+
     public class SkillSelector_Control : Control
     {
-        class SelectionSkill
+        private class SelectionSkill
         {
             public API.Skill Skill;
             public Rectangle Bounds;
             public Rectangle SelectorBounds;
             public bool Hovered;
         }
+
         public Object currentObject;
         private CustomTooltip CustomTooltip;
         private Texture2D _NoWaterTexture;
@@ -917,27 +955,29 @@ private void UpdateLayout()
         public List<API.Skill> _Skills = new List<API.Skill>();
         private List<SelectionSkill> _SelectionSkills = new List<SelectionSkill>();
         public bool Aquatic;
+
         public List<API.Skill> Skills
         {
-            get => _Skills;
+            get => this._Skills;
             set
             {
-                _Skills = value;
+                this._Skills = value;
                 if (value != null)
                 {
-                    _SelectionSkills = new List<SelectionSkill>();
+                    this._SelectionSkills = new List<SelectionSkill>();
                     foreach (API.Skill skill in value)
                     {
-                        _SelectionSkills.Add(new SelectionSkill()
+                        this._SelectionSkills.Add(new SelectionSkill()
                         {
                             Skill = skill,
                         });
                     }
 
-                    UpdateLayout();
+                    this.UpdateLayout();
                 }
             }
         }
+
         private BitmapFont Font;
 
         public event EventHandler<SkillChangedEvent> SkillChanged;
@@ -949,43 +989,43 @@ private void UpdateLayout()
 
         public SkillSelector_Control()
         {
-            CustomTooltip = new CustomTooltip(Parent)
+            this.CustomTooltip = new CustomTooltip(this.Parent)
             {
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
-            Font = GameService.Content.DefaultFont18; 
-            Size = new Point(20 + 4 * _SkillSize, _SkillSize * (int)Math.Ceiling(Skills.Count / (double)4));
-            ClipsBounds = false;
+            this.Font = GameService.Content.DefaultFont18;
+            this.Size = new Point(20 + (4 * this._SkillSize), this._SkillSize * (int)Math.Ceiling(this.Skills.Count / (double)4));
+            this.ClipsBounds = false;
 
-            _NoWaterTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.NoWaterTexture).GetRegion(16, 16, 96, 96);
+            this._NoWaterTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.NoWaterTexture).GetRegion(16, 16, 96, 96);
 
-            Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
+            Input.Mouse.LeftMouseButtonPressed += this.OnGlobalClick;
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
-            CustomTooltip.Dispose();
+            this.CustomTooltip.Dispose();
 
-            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
+            Input.Mouse.LeftMouseButtonPressed -= this.OnGlobalClick;
         }
 
-        void OnGlobalClick(object sender, MouseEventArgs e)
+        private void OnGlobalClick(object sender, MouseEventArgs e)
         {
-            if (Visible)
+            if (this.Visible)
             {
-                foreach (SelectionSkill entry in _SelectionSkills)
+                foreach (SelectionSkill entry in this._SelectionSkills)
                 {
                     if (entry.Hovered)
                     {
-                        var noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
+                        var noUnderwater = this.Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
                         if (!noUnderwater)
                         {
-                            OnSkillChanged(entry.Skill, Skill_Control);
-                            CustomTooltip.Hide();
-                            Hide();
+                            this.OnSkillChanged(entry.Skill, this.Skill_Control);
+                            this.CustomTooltip.Hide();
+                            this.Hide();
                             Thread.Sleep(100);
                             return;
                         }
@@ -996,60 +1036,62 @@ private void UpdateLayout()
 
         private void UpdateLayout()
         {
-            Size = new Point(20 + 4 * _SkillSize, 40 + _SkillSize * (int)Math.Ceiling(Skills.Count / (double)4));
+            this.Size = new Point(20 + (4 * this._SkillSize), 40 + (this._SkillSize * (int)Math.Ceiling(this.Skills.Count / (double)4)));
             var row = 0;
             var col = 0;
 
-            var baseRect = new Rectangle(0, 0, Width, Height);
-            foreach (SelectionSkill entry in _SelectionSkills)
+            var baseRect = new Rectangle(0, 0, this.Width, this.Height);
+            foreach (SelectionSkill entry in this._SelectionSkills)
             {
-                var rect = new Rectangle(10 + col * _SkillSize, 30 + row * _SkillSize, _SkillSize, _SkillSize);
+                var rect = new Rectangle(10 + (col * this._SkillSize), 30 + (row * this._SkillSize), this._SkillSize, this._SkillSize);
                 if (!baseRect.Contains(rect))
                 {
                     col = 0;
                     row++;
-                    rect = new Rectangle(10 + col * _SkillSize, 30 + row * _SkillSize, _SkillSize, _SkillSize);
+                    rect = new Rectangle(10 + (col * this._SkillSize), 30 + (row * this._SkillSize), this._SkillSize, this._SkillSize);
                 }
 
                 entry.Bounds = rect;
-                entry.Hovered = entry.Bounds.Contains(RelativeMousePosition);
+                entry.Hovered = entry.Bounds.Contains(this.RelativeMousePosition);
                 col++;
             }
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            UpdateLayout();
+            this.UpdateLayout();
 
-            spriteBatch.DrawOnCtrl(this,
-                                    ContentService.Textures.Pixel,
-                                    bounds,
-                                    bounds,
-                                    new Color(0, 0, 0, 230),
-                                    0f,
-                                    default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                ContentService.Textures.Pixel,
+                bounds,
+                bounds,
+                new Color(0, 0, 0, 230),
+                0f,
+                default);
 
             var color = Color.Black;
-            //Top
+
+            // Top
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Bottom
+            // Bottom
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 2, bounds.Width, 2), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Bottom - 1, bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-            //Left
+            // Left
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Left, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
-            //Right
+            // Right
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 2, bounds.Top, 2, bounds.Height), Rectangle.Empty, color * 0.5f);
             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(bounds.Right - 1, bounds.Top, 1, bounds.Height), Rectangle.Empty, color * 0.6f);
 
-            if (Skill_Control != null)
+            if (this.Skill_Control != null)
             {
-                var text = "";
-                switch (Skill_Control.Slot)
+                var text = string.Empty;
+                switch (this.Skill_Control.Slot)
                 {
                     case SkillSlots.Heal:
                         text = "Healing Skills";
@@ -1071,66 +1113,68 @@ private void UpdateLayout()
                         break;
                 }
 
+                var sRect = this.Font.GetStringRectangle(text);
+                spriteBatch.DrawStringOnCtrl(
+                    this,
+                    text,
+                    this.Font,
+                    new Rectangle((bounds.Width - (int)sRect.Width) / 2, 0, (int)sRect.Width, 20),
+                    Color.White,
+                    false,
+                    HorizontalAlignment.Left);
 
-                var sRect = Font.GetStringRectangle(text);
-                spriteBatch.DrawStringOnCtrl(this,
-                                        text,
-                                        Font,
-                                        new Rectangle((bounds.Width - (int)sRect.Width) / 2, 0, (int)sRect.Width, 20),
-                                        Color.White,
-                                        false,
-                                        HorizontalAlignment.Left
-                                        );
-
-                CustomTooltip.Visible = false;
-                foreach (SelectionSkill entry in _SelectionSkills)
+                this.CustomTooltip.Visible = false;
+                foreach (SelectionSkill entry in this._SelectionSkills)
                 {
                     if (entry.Skill != null)
                     {
-                        var noUnderwater = Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
-                        spriteBatch.DrawOnCtrl(this,
-                                                entry.Skill.Icon._AsyncTexture,
-                                                entry.Bounds,
-                                                entry.Skill.Icon._AsyncTexture.Texture.Bounds,
-                                                noUnderwater ? Color.Gray : Color.White,
-                                                0f,
-                                                default);
+                        var noUnderwater = this.Aquatic && entry.Skill.Flags.Contains("NoUnderwater");
+                        spriteBatch.DrawOnCtrl(
+                            this,
+                            entry.Skill.Icon._AsyncTexture,
+                            entry.Bounds,
+                            entry.Skill.Icon._AsyncTexture.Texture.Bounds,
+                            noUnderwater ? Color.Gray : Color.White,
+                            0f,
+                            default);
 
                         if (noUnderwater)
                         {
-                            spriteBatch.DrawOnCtrl(this,
-                                                    _NoWaterTexture,
-                                                    entry.Bounds,
-                                                    _NoWaterTexture.Bounds,
-                                                    Color.White,
-                                                    0f,
-                                                    default);
+                            spriteBatch.DrawOnCtrl(
+                                this,
+                                this._NoWaterTexture,
+                                entry.Bounds,
+                                this._NoWaterTexture.Bounds,
+                                Color.White,
+                                0f,
+                                default);
                         }
 
                         if (!noUnderwater && entry.Hovered)
                         {
                             color = Color.Honeydew;
-                            //Top
+
+                            // Top
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, entry.Bounds.Width, 2), Rectangle.Empty, color * 0.5f);
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, entry.Bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                            //Bottom
+                            // Bottom
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Bottom - 2, entry.Bounds.Width, 2), Rectangle.Empty, color * 0.5f);
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Bottom - 1, entry.Bounds.Width, 1), Rectangle.Empty, color * 0.6f);
 
-                            //Left
+                            // Left
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Left, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
 
-                            //Right
+                            // Right
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 2, entry.Bounds.Top, 2, entry.Bounds.Height), Rectangle.Empty, color * 0.5f);
                             spriteBatch.DrawOnCtrl(this, ContentService.Textures.Pixel, new Rectangle(entry.Bounds.Right - 1, entry.Bounds.Top, 1, entry.Bounds.Height), Rectangle.Empty, color * 0.6f);
 
-                            CustomTooltip.CurrentObject = entry.Skill;
-                            CustomTooltip.Header = entry.Skill.Name;
-                            CustomTooltip.Content = new List<string>() { entry.Skill.Description };
-                            CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
-                            CustomTooltip.Visible = true;
+                            this.CustomTooltip.CurrentObject = entry.Skill;
+                            this.CustomTooltip.Header = entry.Skill.Name;
+                            this.CustomTooltip.TooltipContent = new List<string>() { entry.Skill.Description };
+                            this.CustomTooltip.HeaderColor = new Color(255, 204, 119, 255);
+                            this.CustomTooltip.Visible = true;
                         }
                     }
                 }
@@ -1141,6 +1185,7 @@ private void UpdateLayout()
     public class SkillBar_Control : Control
     {
         private CustomTooltip CustomTooltip;
+
         public Template Template
         {
             get => BuildsManager.ModuleInstance.Selected_Template;
@@ -1164,23 +1209,24 @@ private void UpdateLayout()
         private bool ShowProfessionSkills = false;
 
         private double _Scale = 1;
+
         public double Scale
         {
-            get => _Scale;
+            get => this._Scale;
             set
             {
-                _Scale = value;
-                foreach(Skill_Control skill in _Skills_Aquatic)
+                this._Scale = value;
+                foreach (Skill_Control skill in this._Skills_Aquatic)
                 {
                     skill.Scale = value;
                 }
-                foreach(Skill_Control skill in _Skills_Terrestrial)
+
+                foreach (Skill_Control skill in this._Skills_Terrestrial)
                 {
                     skill.Scale = value;
                 }
             }
         }
-
 
         private int _SkillSize = 55;
         public int _Width = 643;
@@ -1188,141 +1234,148 @@ private void UpdateLayout()
 
         public Point _Location
         {
-            get => Location;
+            get => this.Location;
             set
             {
-                if (Location == null || Location == Point.Zero) _OGLocation = value;
-                Location = value;
+                if (this.Location == null || this.Location == Point.Zero)
+                {
+                    this._OGLocation = value;
+                }
+
+                this.Location = value;
             }
         }
 
         public SkillBar_Control(Container parent)
         {
-            Parent = parent;
-            CustomTooltip = new CustomTooltip(Parent)
+            this.Parent = parent;
+            this.CustomTooltip = new CustomTooltip(this.Parent)
             {
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
-        };
+            };
 
-            _TerrestrialTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Land);
-            _AquaTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Water);
-            _SwapTexture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Refresh);
+            this._TerrestrialTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Land);
+            this._AquaTexture = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Water);
+            this._SwapTexture = BuildsManager.ModuleInstance.TextureManager.getIcon(_Icons.Refresh);
 
             var slots = Enum.GetValues(typeof(SkillSlots));
-            //BackgroundColor = Color.Magenta;
 
-            _Skills_Aquatic = new List<Skill_Control>();
-            foreach (API.Skill skill in Template.Build.Skills_Aquatic)
+            // BackgroundColor = Color.Magenta;
+
+            this._Skills_Aquatic = new List<Skill_Control>();
+            foreach (API.Skill skill in this.Template.Build.Skills_Aquatic)
             {
-                _Skills_Aquatic.Add(new Skill_Control(Parent)
+                this._Skills_Aquatic.Add(new Skill_Control(this.Parent)
                 {
-                    Location = new Point(27 + _Skills_Aquatic.Count * (_SkillSize + 1), 51),
-                    Skill = Template.Build.Skills_Aquatic[_Skills_Aquatic.Count],
-                    Slot = (SkillSlots)_Skills_Aquatic.Count,
+                    Location = new Point(27 + (this._Skills_Aquatic.Count * (this._SkillSize + 1)), 51),
+                    Skill = this.Template.Build.Skills_Aquatic[this._Skills_Aquatic.Count],
+                    Slot = (SkillSlots)this._Skills_Aquatic.Count,
                     Aquatic = true,
                 });
 
-                var control = _Skills_Aquatic[_Skills_Aquatic.Count - 1];
-                control.Click += Control_Click;
+                var control = this._Skills_Aquatic[this._Skills_Aquatic.Count - 1];
+                control.Click += this.Control_Click;
             }
 
-            var p = _Width - (_Skills_Aquatic.Count * (_SkillSize + 1));
-            _Skills_Terrestrial = new List<Skill_Control>();
-            foreach (API.Skill skill in Template.Build.Skills_Terrestrial)
+            var p = this._Width - (this._Skills_Aquatic.Count * (this._SkillSize + 1));
+            this._Skills_Terrestrial = new List<Skill_Control>();
+            foreach (API.Skill skill in this.Template.Build.Skills_Terrestrial)
             {
-                _Skills_Terrestrial.Add(new Skill_Control(Parent)
+                this._Skills_Terrestrial.Add(new Skill_Control(this.Parent)
                 {
-                    Location = new Point(p + _Skills_Terrestrial.Count * (_SkillSize + 1), 51),
-                    Skill = Template.Build.Skills_Terrestrial[_Skills_Terrestrial.Count],
-                    Slot = (SkillSlots)_Skills_Terrestrial.Count,
+                    Location = new Point(p + (this._Skills_Terrestrial.Count * (this._SkillSize + 1)), 51),
+                    Skill = this.Template.Build.Skills_Terrestrial[this._Skills_Terrestrial.Count],
+                    Slot = (SkillSlots)this._Skills_Terrestrial.Count,
                 });
 
-                var control = _Skills_Terrestrial[_Skills_Terrestrial.Count - 1];
-                control.Click += Control_Click;
+                var control = this._Skills_Terrestrial[this._Skills_Terrestrial.Count - 1];
+                control.Click += this.Control_Click;
             }
 
-            SkillSelector = new SkillSelector_Control()
+            this.SkillSelector = new SkillSelector_Control()
             {
-                Parent = Parent,
-                //Size  =  new Point(100, 250),
+                Parent = this.Parent,
+
+                // Size  =  new Point(100, 250),
                 Visible = false,
-                ZIndex = ZIndex + 3,
+                ZIndex = this.ZIndex + 3,
             };
 
-            _Legends_Aquatic = new List<Skill_Control>();
-            _Legends_Aquatic.Add(new Skill_Control(Parent)
+            this._Legends_Aquatic = new List<Skill_Control>();
+            this._Legends_Aquatic.Add(new Skill_Control(this.Parent)
             {
-                Skill = Template.Build.Legends_Aquatic[0].Skill,
+                Skill = this.Template.Build.Legends_Aquatic[0].Skill,
                 Slot = SkillSlots.AquaticLegend1,
                 Aquatic = true,
                 Scale = 0.8,
                 Location = new Point(27, 0),
             });
-            _Legends_Aquatic.Add(new Skill_Control(Parent)
+            this._Legends_Aquatic.Add(new Skill_Control(this.Parent)
             {
-                Skill = Template.Build.Legends_Aquatic[1].Skill,
+                Skill = this.Template.Build.Legends_Aquatic[1].Skill,
                 Slot = SkillSlots.AquaticLegend1,
                 Aquatic = true,
                 Scale = 0.8,
                 Location = new Point(36 + 26 + 27, 0),
             });
 
-            _Legends_Aquatic[0].Click += Legend;
-            _Legends_Aquatic[1].Click += Legend;
+            this._Legends_Aquatic[0].Click += this.Legend;
+            this._Legends_Aquatic[1].Click += this.Legend;
 
-            _Legends_Terrestrial = new List<Skill_Control>();
-            _Legends_Terrestrial.Add(new Skill_Control(Parent)
+            this._Legends_Terrestrial = new List<Skill_Control>();
+            this._Legends_Terrestrial.Add(new Skill_Control(this.Parent)
             {
-                Skill = Template.Build.Legends_Terrestrial[0].Skill,
+                Skill = this.Template.Build.Legends_Terrestrial[0].Skill,
                 Slot = SkillSlots.TerrestrialLegend1,
                 Aquatic = false,
                 Scale = 0.8,
                 Location = new Point(p, 0),
             });
-            _Legends_Terrestrial.Add(new Skill_Control(Parent)
+            this._Legends_Terrestrial.Add(new Skill_Control(this.Parent)
             {
-                Skill = Template.Build.Legends_Terrestrial[1].Skill,
+                Skill = this.Template.Build.Legends_Terrestrial[1].Skill,
                 Slot = SkillSlots.TerrestrialLegend1,
                 Aquatic = false,
                 Scale = 0.8,
                 Location = new Point(p + 36 + 26, 0),
             });
 
-            _Legends_Terrestrial[0].Click += Legend;
-            _Legends_Terrestrial[1].Click += Legend;
+            this._Legends_Terrestrial[0].Click += this.Legend;
+            this._Legends_Terrestrial[1].Click += this.Legend;
 
-            LegendSelector = new SkillSelector_Control()
+            this.LegendSelector = new SkillSelector_Control()
             {
-                Parent = Parent,
-                //Size  =  new Point(100, 250),
+                Parent = this.Parent,
+
+                // Size  =  new Point(100, 250),
                 Visible = false,
-                ZIndex = ZIndex + 3,
+                ZIndex = this.ZIndex + 3,
             };
-            LegendSelector.SkillChanged += LegendSelector_SkillChanged;
-            SkillSelector.SkillChanged += OnSkillChanged;
-            Input.Mouse.LeftMouseButtonPressed += OnGlobalClick;
-            BuildsManager.ModuleInstance.Selected_Template_Changed += ApplyBuild;
+            this.LegendSelector.SkillChanged += this.LegendSelector_SkillChanged;
+            this.SkillSelector.SkillChanged += this.OnSkillChanged;
+            Input.Mouse.LeftMouseButtonPressed += this.OnGlobalClick;
+            BuildsManager.ModuleInstance.Selected_Template_Changed += this.ApplyBuild;
         }
 
         private void Control_Click(object sender, MouseEventArgs mouse)
         {
             var control = (Skill_Control)sender;
 
-            if (CanClick)
+            if (this.CanClick)
             {
-                if (!SkillSelector.Visible || SkillSelector.currentObject != control)
+                if (!this.SkillSelector.Visible || this.SkillSelector.currentObject != control)
                 {
-                    SkillSelector.Visible = true;
-                    SkillSelector.Skill_Control = control;
-                    SkillSelector.Location = control.Location.Add(new Point(-2, control.Height));
+                    this.SkillSelector.Visible = true;
+                    this.SkillSelector.Skill_Control = control;
+                    this.SkillSelector.Location = control.Location.Add(new Point(-2, control.Height));
 
                     List<API.Skill> Skills = new List<API.Skill>();
-                    if (Template.Build.Profession != null)
+                    if (this.Template.Build.Profession != null)
                     {
-                        if(Template.Build.Profession.Id == "Revenant")
+                        if (this.Template.Build.Profession.Id == "Revenant")
                         {
-                            var legend = control.Aquatic ? Template.Build.Legends_Aquatic[0] : Template.Build.Legends_Terrestrial[0];
+                            var legend = control.Aquatic ? this.Template.Build.Legends_Aquatic[0] : this.Template.Build.Legends_Terrestrial[0];
 
                             if (legend != null && legend.Utilities != null)
                             {
@@ -1341,27 +1394,41 @@ private void UpdateLayout()
                                         {
                                             Skills.Add(iSkill);
                                         }
+
                                         break;
                                 }
                             }
                         }
-                        else {
-                            foreach (API.Skill iSkill in Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
+                        else
+                        {
+                            foreach (API.Skill iSkill in this.Template.Build.Profession.Skills.OrderBy(e => e.Specialization).ThenBy(e => e.Categories.Count > 0 ? e.Categories[0] : "Unkown").ToList())
                             {
-                                if (iSkill.Specialization == 0 || Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
+                                if (iSkill.Specialization == 0 || this.Template.Build.SpecLines.Find(e => e.Specialization != null && e.Specialization.Id == iSkill.Specialization) != null)
                                 {
                                     switch (control.Slot)
                                     {
                                         case SkillSlots.Heal:
-                                            if (iSkill.Slot == API.skillSlot.Heal) Skills.Add(iSkill);
+                                            if (iSkill.Slot == API.skillSlot.Heal)
+                                            {
+                                                Skills.Add(iSkill);
+                                            }
+
                                             break;
 
                                         case SkillSlots.Elite:
-                                            if (iSkill.Slot == API.skillSlot.Elite) Skills.Add(iSkill);
+                                            if (iSkill.Slot == API.skillSlot.Elite)
+                                            {
+                                                Skills.Add(iSkill);
+                                            }
+
                                             break;
 
                                         default:
-                                            if (iSkill.Slot == API.skillSlot.Utility) Skills.Add(iSkill);
+                                            if (iSkill.Slot == API.skillSlot.Utility)
+                                            {
+                                                Skills.Add(iSkill);
+                                            }
+
                                             break;
                                     }
                                 }
@@ -1369,13 +1436,13 @@ private void UpdateLayout()
                         }
                     }
 
-                    SkillSelector.Skills = Skills;
-                    SkillSelector.Aquatic = control.Aquatic;
-                    SkillSelector.currentObject = control;
+                    this.SkillSelector.Skills = Skills;
+                    this.SkillSelector.Aquatic = control.Aquatic;
+                    this.SkillSelector.currentObject = control;
                 }
                 else
                 {
-                    SkillSelector.Visible = false;
+                    this.SkillSelector.Visible = false;
                 }
             }
         }
@@ -1384,264 +1451,293 @@ private void UpdateLayout()
         {
             base.OnClick(e);
 
-            var rect0 = new Rectangle(new Point(36, 15), new Point(25, 25)).Scale(Scale);
-            var rect1 = new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28) + 63, 15), new Point(25, 25)).Scale(Scale);
+            var rect0 = new Rectangle(new Point(36, 15), new Point(25, 25)).Scale(this.Scale);
+            var rect1 = new Rectangle(new Point(this._Width - ((this._Skills_Aquatic.Count * (this._SkillSize + 1)) + 28) + 63, 15), new Point(25, 25)).Scale(this.Scale);
 
-            if(rect0.Contains(RelativeMousePosition) || rect1.Contains(RelativeMousePosition))
+            if (rect0.Contains(this.RelativeMousePosition) || rect1.Contains(this.RelativeMousePosition))
             {
-                Template.Build?.SwapLegends();
-                SetTemplate();
+                this.Template.Build?.SwapLegends();
+                this.SetTemplate();
             }
         }
 
         public override void DoUpdate(GameTime gameTime)
         {
             base.DoUpdate(gameTime);
-            if (!CanClick) CanClick = true;
+            if (!this.CanClick)
+            {
+                this.CanClick = true;
+            }
         }
+
         private void LegendSelector_SkillChanged(object sender, SkillChangedEvent e)
         {
             var ctrl = e.Skill_Control;
-            var legend = Template.Build.Legends_Terrestrial[0];
+            var legend = this.Template.Build.Legends_Terrestrial[0];
 
-            if (ctrl == _Legends_Terrestrial[0])
+            if (ctrl == this._Legends_Terrestrial[0])
             {
-                Template.Build.Legends_Terrestrial[0] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
-                legend = Template.Build.Legends_Terrestrial[0];
+                this.Template.Build.Legends_Terrestrial[0] = this.Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = this.Template.Build.Legends_Terrestrial[0];
 
                 if (legend != null)
                 {
-                    Template.Build.Skills_Terrestrial[0] = legend.Heal;
-                    Template.Build.Skills_Terrestrial[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Terrestrial[1]?.PaletteId);
-                    Template.Build.Skills_Terrestrial[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Terrestrial[2]?.PaletteId);
-                    Template.Build.Skills_Terrestrial[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Terrestrial[3]?.PaletteId);
-                    Template.Build.Skills_Terrestrial[4] = legend.Elite;
+                    this.Template.Build.Skills_Terrestrial[0] = legend.Heal;
+                    this.Template.Build.Skills_Terrestrial[1] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.Skills_Terrestrial[1]?.PaletteId);
+                    this.Template.Build.Skills_Terrestrial[2] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.Skills_Terrestrial[2]?.PaletteId);
+                    this.Template.Build.Skills_Terrestrial[3] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.Skills_Terrestrial[3]?.PaletteId);
+                    this.Template.Build.Skills_Terrestrial[4] = legend.Elite;
                 }
             }
-            else if (ctrl == _Legends_Terrestrial[1])
+            else if (ctrl == this._Legends_Terrestrial[1])
             {
-                Template.Build.Legends_Terrestrial[1] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
-                legend = Template.Build.Legends_Terrestrial[1];
+                this.Template.Build.Legends_Terrestrial[1] = this.Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = this.Template.Build.Legends_Terrestrial[1];
 
                 if (legend != null)
                 {
-                    Template.Build.InactiveSkills_Terrestrial[0] = legend.Heal;
-                    Template.Build.InactiveSkills_Terrestrial[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Terrestrial[1]?.PaletteId);
-                    Template.Build.InactiveSkills_Terrestrial[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Terrestrial[2]?.PaletteId);
-                    Template.Build.InactiveSkills_Terrestrial[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Terrestrial[3]?.PaletteId);
-                    Template.Build.InactiveSkills_Terrestrial[4] = legend.Elite;
+                    this.Template.Build.InactiveSkills_Terrestrial[0] = legend.Heal;
+                    this.Template.Build.InactiveSkills_Terrestrial[1] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.InactiveSkills_Terrestrial[1]?.PaletteId);
+                    this.Template.Build.InactiveSkills_Terrestrial[2] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.InactiveSkills_Terrestrial[2]?.PaletteId);
+                    this.Template.Build.InactiveSkills_Terrestrial[3] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.InactiveSkills_Terrestrial[3]?.PaletteId);
+                    this.Template.Build.InactiveSkills_Terrestrial[4] = legend.Elite;
                 }
             }
-            else if (ctrl == _Legends_Aquatic[0])
+            else if (ctrl == this._Legends_Aquatic[0])
             {
-                Template.Build.Legends_Aquatic[0] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
-                legend = Template.Build.Legends_Aquatic[0];
+                this.Template.Build.Legends_Aquatic[0] = this.Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = this.Template.Build.Legends_Aquatic[0];
 
                 if (legend != null)
                 {
-                    Template.Build.Skills_Aquatic[0] = legend.Heal;
-                    Template.Build.Skills_Aquatic[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Aquatic[1]?.PaletteId);
-                    Template.Build.Skills_Aquatic[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Aquatic[2]?.PaletteId);
-                    Template.Build.Skills_Aquatic[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.Skills_Aquatic[3]?.PaletteId);
-                    Template.Build.Skills_Aquatic[4] = legend.Elite;
+                    this.Template.Build.Skills_Aquatic[0] = legend.Heal;
+                    this.Template.Build.Skills_Aquatic[1] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.Skills_Aquatic[1]?.PaletteId);
+                    this.Template.Build.Skills_Aquatic[2] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.Skills_Aquatic[2]?.PaletteId);
+                    this.Template.Build.Skills_Aquatic[3] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.Skills_Aquatic[3]?.PaletteId);
+                    this.Template.Build.Skills_Aquatic[4] = legend.Elite;
                 }
             }
-            else if (ctrl == _Legends_Aquatic[1])
+            else if (ctrl == this._Legends_Aquatic[1])
             {
-                Template.Build.Legends_Aquatic[1] = Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
-                legend = Template.Build.Legends_Aquatic[1];
+                this.Template.Build.Legends_Aquatic[1] = this.Template.Profession.Legends.Find(leg => leg.Skill.Id == e.Skill.Id);
+                legend = this.Template.Build.Legends_Aquatic[1];
 
                 if (legend != null)
                 {
-                    Template.Build.InactiveSkills_Aquatic[0] = legend.Heal;
-                    Template.Build.InactiveSkills_Aquatic[1] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Aquatic[1]?.PaletteId);
-                    Template.Build.InactiveSkills_Aquatic[2] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Aquatic[2]?.PaletteId);
-                    Template.Build.InactiveSkills_Aquatic[3] = legend.Utilities.Find(skill => skill.PaletteId == Template.Build.InactiveSkills_Aquatic[3]?.PaletteId);
-                    Template.Build.InactiveSkills_Aquatic[4] = legend.Elite;
+                    this.Template.Build.InactiveSkills_Aquatic[0] = legend.Heal;
+                    this.Template.Build.InactiveSkills_Aquatic[1] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.InactiveSkills_Aquatic[1]?.PaletteId);
+                    this.Template.Build.InactiveSkills_Aquatic[2] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.InactiveSkills_Aquatic[2]?.PaletteId);
+                    this.Template.Build.InactiveSkills_Aquatic[3] = legend.Utilities.Find(skill => skill.PaletteId == this.Template.Build.InactiveSkills_Aquatic[3]?.PaletteId);
+                    this.Template.Build.InactiveSkills_Aquatic[4] = legend.Elite;
                 }
-            } 
+            }
 
             ctrl.Skill = e.Skill;
-            SetTemplate();
-            Template.SetChanged();
-            LegendSelector.Visible = false;
-            CanClick = false;
+            this.SetTemplate();
+            this.Template.SetChanged();
+            this.LegendSelector.Visible = false;
+            this.CanClick = false;
         }
 
         private void Legend(object sender, MouseEventArgs e)
         {
             var ctrl = (Skill_Control)sender;
-            if (Template.Profession?.Id == "Revenant")
+            if (this.Template.Profession?.Id == "Revenant")
             {
                 List<API.Skill> legends = new List<API.Skill>();
-                foreach(API.Legend legend in Template.Profession.Legends)
+                foreach (API.Legend legend in this.Template.Profession.Legends)
                 {
-                    if(legend.Specialization == 0 || Template.Specialization?.Id == legend.Specialization)
+                    if (legend.Specialization == 0 || this.Template.Specialization?.Id == legend.Specialization)
                     {
                         legends.Add(legend.Skill);
                     }
                 }
 
-                LegendSelector.Skills = legends;
-                LegendSelector.Visible = true;
-                LegendSelector.Aquatic = false;
-                LegendSelector.currentObject = ctrl;
+                this.LegendSelector.Skills = legends;
+                this.LegendSelector.Visible = true;
+                this.LegendSelector.Aquatic = false;
+                this.LegendSelector.currentObject = ctrl;
 
-                LegendSelector.Skill_Control = ctrl;
-                LegendSelector.Location = ctrl.Location.Add(new Point(-2, (int) (ctrl.Height * ctrl.Scale)));
-                CanClick = false;
+                this.LegendSelector.Skill_Control = ctrl;
+                this.LegendSelector.Location = ctrl.Location.Add(new Point(-2, (int)(ctrl.Height * ctrl.Scale)));
+                this.CanClick = false;
             }
         }
 
         public void ApplyBuild(object sender, EventArgs e)
         {
-            SetTemplate();
+            this.SetTemplate();
         }
 
         private void OnSkillChanged(object sender, SkillChangedEvent e)
         {
             if (e.Skill_Control.Aquatic)
             {
-                foreach (Skill_Control skill_Control in _Skills_Aquatic)
+                foreach (Skill_Control skill_Control in this._Skills_Aquatic)
                 {
-                    if (skill_Control.Skill == e.Skill) skill_Control.Skill = null;
+                    if (skill_Control.Skill == e.Skill)
+                    {
+                        skill_Control.Skill = null;
+                    }
                 }
 
-                for (int i = 0; i < Template.Build.Skills_Aquatic.Count; i++)
+                for (int i = 0; i < this.Template.Build.Skills_Aquatic.Count; i++)
                 {
-                    if (Template.Build.Skills_Aquatic[i] == e.Skill) Template.Build.Skills_Aquatic[i] = null;
+                    if (this.Template.Build.Skills_Aquatic[i] == e.Skill)
+                    {
+                        this.Template.Build.Skills_Aquatic[i] = null;
+                    }
                 }
 
-                Template.Build.Skills_Aquatic[(int)e.Skill_Control.Slot] = e.Skill;
+                this.Template.Build.Skills_Aquatic[(int)e.Skill_Control.Slot] = e.Skill;
                 e.Skill_Control.Skill = e.Skill;
             }
             else
             {
-                foreach (Skill_Control skill_Control in _Skills_Terrestrial)
+                foreach (Skill_Control skill_Control in this._Skills_Terrestrial)
                 {
-                    if (skill_Control.Skill == e.Skill) skill_Control.Skill = null;
+                    if (skill_Control.Skill == e.Skill)
+                    {
+                        skill_Control.Skill = null;
+                    }
                 }
 
-                for (int i = 0; i < Template.Build.Skills_Terrestrial.Count; i++)
+                for (int i = 0; i < this.Template.Build.Skills_Terrestrial.Count; i++)
                 {
-                    if (Template.Build.Skills_Terrestrial[i] == e.Skill) Template.Build.Skills_Terrestrial[i] = null;
+                    if (this.Template.Build.Skills_Terrestrial[i] == e.Skill)
+                    {
+                        this.Template.Build.Skills_Terrestrial[i] = null;
+                    }
                 }
 
-                Template.Build.Skills_Terrestrial[(int)e.Skill_Control.Slot] = e.Skill;
+                this.Template.Build.Skills_Terrestrial[(int)e.Skill_Control.Slot] = e.Skill;
                 e.Skill_Control.Skill = e.Skill;
             }
 
-            Template.SetChanged();
+            this.Template.SetChanged();
         }
+
         private void OnGlobalClick(object sender, MouseEventArgs m)
         {
-            if (!SkillSelector.MouseOver) SkillSelector.Hide();
-            if (!LegendSelector.MouseOver) LegendSelector.Hide();
+            if (!this.SkillSelector.MouseOver)
+            {
+                this.SkillSelector.Hide();
+            }
+
+            if (!this.LegendSelector.MouseOver)
+            {
+                this.LegendSelector.Hide();
+            }
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
+            spriteBatch.DrawOnCtrl(
+                this,
+                this._AquaTexture,
+                new Rectangle(new Point(0, 50), new Point(25, 25)).Scale(this.Scale),
+                this._AquaTexture.Bounds,
+                Color.White,
+                0f,
+                default);
 
-            spriteBatch.DrawOnCtrl(this,
-                                    _AquaTexture,
-                                    new Rectangle(new Point(0, 50), new Point(25, 25)).Scale(Scale),
-                                    _AquaTexture.Bounds,
-                                    Color.White,
-                                    0f,
-                                    default);
-
-            if (ShowProfessionSkills)
+            if (this.ShowProfessionSkills)
             {
-                spriteBatch.DrawOnCtrl(this,
-                                        _SwapTexture,
-                                        new Rectangle(new Point(36 + 27, 15), new Point(25, 25)).Scale(Scale),
-                                        _SwapTexture.Bounds,
-                                        Color.White,
-                                        0f,
-                                        default);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    this._SwapTexture,
+                    new Rectangle(new Point(36 + 27, 15), new Point(25, 25)).Scale(this.Scale),
+                    this._SwapTexture.Bounds,
+                    Color.White,
+                    0f,
+                    default);
             }
 
-            spriteBatch.DrawOnCtrl(this,
-                                    _TerrestrialTexture,
-                                    new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28), 50), new Point(25, 25)).Scale(Scale),
-                                    _TerrestrialTexture.Bounds,
-                                    Color.White,
-                                    0f,
-                                    default);
+            spriteBatch.DrawOnCtrl(
+                this,
+                this._TerrestrialTexture,
+                new Rectangle(new Point(this._Width - ((this._Skills_Aquatic.Count * (this._SkillSize + 1)) + 28), 50), new Point(25, 25)).Scale(this.Scale),
+                this._TerrestrialTexture.Bounds,
+                Color.White,
+                0f,
+                default);
 
-            if (ShowProfessionSkills)
+            if (this.ShowProfessionSkills)
             {
-                spriteBatch.DrawOnCtrl(this,
-                                    _SwapTexture,
-                                    new Rectangle(new Point(_Width - (_Skills_Aquatic.Count * (_SkillSize + 1) + 28) + 63, 15), new Point(25, 25)).Scale(Scale),
-                                    _SwapTexture.Bounds,
-                                    Color.White,
-                                    0f,
-                                    default);
+                spriteBatch.DrawOnCtrl(
+                    this,
+                    this._SwapTexture,
+                    new Rectangle(new Point(this._Width - ((this._Skills_Aquatic.Count * (this._SkillSize + 1)) + 28) + 63, 15), new Point(25, 25)).Scale(this.Scale),
+                    this._SwapTexture.Bounds,
+                    Color.White,
+                    0f,
+                    default);
             }
         }
+
         protected override void DisposeControl()
         {
-            BuildsManager.ModuleInstance.Selected_Template_Changed -= ApplyBuild;
-            LegendSelector.SkillChanged -= LegendSelector_SkillChanged;
-            SkillSelector.SkillChanged -= OnSkillChanged;
-            Input.Mouse.LeftMouseButtonPressed -= OnGlobalClick;
+            BuildsManager.ModuleInstance.Selected_Template_Changed -= this.ApplyBuild;
+            this.LegendSelector.SkillChanged -= this.LegendSelector_SkillChanged;
+            this.SkillSelector.SkillChanged -= this.OnSkillChanged;
+            Input.Mouse.LeftMouseButtonPressed -= this.OnGlobalClick;
 
-            _Legends_Terrestrial[0].Click -= Legend;
-            _Legends_Terrestrial[1].Click -= Legend;
-            _Legends_Aquatic[0].Click -= Legend;
-            _Legends_Aquatic[1].Click -= Legend;
+            this._Legends_Terrestrial[0].Click -= this.Legend;
+            this._Legends_Terrestrial[1].Click -= this.Legend;
+            this._Legends_Aquatic[0].Click -= this.Legend;
+            this._Legends_Aquatic[1].Click -= this.Legend;
 
-            foreach(Skill_Control skill in _Skills_Terrestrial) { skill.Click -= Control_Click; }
-            foreach(Skill_Control skill in _Skills_Aquatic) { skill.Click -= Control_Click; }
-            _Skills_Terrestrial.DisposeAll();
-            _Skills_Aquatic.DisposeAll();
+            foreach (Skill_Control skill in this._Skills_Terrestrial) { skill.Click -= this.Control_Click; }
+            foreach (Skill_Control skill in this._Skills_Aquatic) { skill.Click -= this.Control_Click; }
+            this._Skills_Terrestrial.DisposeAll();
+            this._Skills_Aquatic.DisposeAll();
 
-            CustomTooltip.Dispose();
+            this.CustomTooltip.Dispose();
 
             base.DisposeControl();
         }
+
         public void SetTemplate()
         {
             var i = 0;
-            ShowProfessionSkills = Template.Profession?.Id == "Revenant";
+            this.ShowProfessionSkills = this.Template.Profession?.Id == "Revenant";
 
-            if (!ShowProfessionSkills)
+            if (!this.ShowProfessionSkills)
             {
-                Location = _OGLocation.Add(new Point(0, -16));
+                this.Location = this._OGLocation.Add(new Point(0, -16));
             }
             else
             {
-                Location = _OGLocation;
+                this.Location = this._OGLocation;
             }
 
             i = 0;
-            foreach(Skill_Control sCtrl in _Skills_Aquatic)
+            foreach (Skill_Control sCtrl in this._Skills_Aquatic)
             {
-                sCtrl.Skill = Template.Build.Skills_Aquatic[i];
-                sCtrl.Location = new Point(sCtrl.Location.X, ShowProfessionSkills ? 51 : 51 / 2 + 5);
+                sCtrl.Skill = this.Template.Build.Skills_Aquatic[i];
+                sCtrl.Location = new Point(sCtrl.Location.X, this.ShowProfessionSkills ? 51 : (51 / 2) + 5);
                 i++;
             }
 
             i = 0;
-            foreach(Skill_Control sCtrl in _Skills_Terrestrial)
+            foreach (Skill_Control sCtrl in this._Skills_Terrestrial)
             {
-                sCtrl.Skill = Template.Build.Skills_Terrestrial[i];
-                sCtrl.Location = new Point(sCtrl.Location.X, ShowProfessionSkills ? 51 : 51 / 2 + 5);
+                sCtrl.Skill = this.Template.Build.Skills_Terrestrial[i];
+                sCtrl.Location = new Point(sCtrl.Location.X, this.ShowProfessionSkills ? 51 : (51 / 2) + 5);
                 i++;
             }
 
-            _Legends_Terrestrial[0].Skill = Template.Build.Legends_Terrestrial[0]?.Skill;
-            _Legends_Terrestrial[1].Skill = Template.Build.Legends_Terrestrial[1]?.Skill;
+            this._Legends_Terrestrial[0].Skill = this.Template.Build.Legends_Terrestrial[0]?.Skill;
+            this._Legends_Terrestrial[1].Skill = this.Template.Build.Legends_Terrestrial[1]?.Skill;
 
-            _Legends_Aquatic[0].Skill = Template.Build.Legends_Aquatic[0]?.Skill;
-            _Legends_Aquatic[1].Skill = Template.Build.Legends_Aquatic[1]?.Skill;
+            this._Legends_Aquatic[0].Skill = this.Template.Build.Legends_Aquatic[0]?.Skill;
+            this._Legends_Aquatic[1].Skill = this.Template.Build.Legends_Aquatic[1]?.Skill;
 
-            _Legends_Terrestrial[0].Visible = ShowProfessionSkills;
-            _Legends_Terrestrial[1].Visible = ShowProfessionSkills;
+            this._Legends_Terrestrial[0].Visible = this.ShowProfessionSkills;
+            this._Legends_Terrestrial[1].Visible = this.ShowProfessionSkills;
 
-            _Legends_Aquatic[0].Visible = ShowProfessionSkills;
-            _Legends_Aquatic[1].Visible = ShowProfessionSkills;
+            this._Legends_Aquatic[0].Visible = this.ShowProfessionSkills;
+            this._Legends_Aquatic[1].Visible = this.ShowProfessionSkills;
 
         }
     }
@@ -1679,27 +1775,28 @@ private void UpdateLayout()
         private int Build_Height = 125 + (150 * 3);
 
         private double _Scale = 1;
+
         public double Scale
         {
-            get => _Scale;
+            get => this._Scale;
             set
             {
-                _Scale = value;
+                this._Scale = value;
 
-                var p = new Point(Location.X, Location.Y);
-                var s = new Point(Size.X, Size.Y);
+                var p = new Point(this.Location.X, this.Location.Y);
+                var s = new Point(this.Size.X, this.Size.Y);
 
-                Size = new Point((int)(_Width * Scale), (int)(_Height * Scale));
+                this.Size = new Point((int)(this._Width * this.Scale), (int)(this._Height * this.Scale));
 
-                foreach(Specialization_Control spec in Specializations)
+                foreach (Specialization_Control spec in this.Specializations)
                 {
                     spec.Scale = value;
                 }
 
-                SkillBar.Scale = value;
+                this.SkillBar.Scale = value;
 
-                UpdateLayout();
-                OnResized(new ResizedEventArgs(p, s));
+                this.UpdateLayout();
+                this.OnResized(new ResizedEventArgs(p, s));
             }
         }
 
@@ -1709,58 +1806,60 @@ private void UpdateLayout()
 
         public Control_Build(Container parent)
         {
-            Parent = parent;
-            Size = new Point((int)(_Width * Scale), (int)(_Height * Scale));
+            this.Parent = parent;
+            this.Size = new Point((int)(this._Width * this.Scale), (int)(this._Height * this.Scale));
 
-            CustomTooltip = new CustomTooltip(Parent)
+            this.CustomTooltip = new CustomTooltip(this.Parent)
             {
                 ClipsBounds = false,
                 HeaderColor = new Color(255, 204, 119, 255),
             };
 
-            //BackgroundColor = Color.Honeydew;
-            Click += OnClick;
+            // BackgroundColor = Color.Honeydew;
+            this.Click += this.OnClick;
 
-            _SpecSideSelector_Hovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
-            _SpecSideSelector = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector);
+            this._SpecSideSelector_Hovered = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector_Hovered);
+            this._SpecSideSelector = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecSideSelector);
 
-            _EliteFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
-            _SpecHighlightFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
-            _SpecFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
-            _EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
+            this._EliteFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.EliteFrame).GetRegion(0, 4, 625, 130);
+            this._SpecHighlightFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecHighlight).GetRegion(12, 5, 103, 116);
+            this._SpecFrame = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.SpecFrame).GetRegion(0, 0, 647, 136);
+            this._EmptyTraitLine = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.PlaceHolder_Traitline).GetRegion(0, 0, 647, 136);
 
-            _PlaceHolderTexture = BuildsManager.ModuleInstance.TextureManager._Icons[(int)_Icons.Refresh];
-            _EmptyTexture = BuildsManager.ModuleInstance.TextureManager._Icons[(int)_Icons.Bug];
-            _Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
-            _Background = _EmptyTraitLine;
+            this._PlaceHolderTexture = BuildsManager.ModuleInstance.TextureManager._Icons[(int)_Icons.Refresh];
+            this._EmptyTexture = BuildsManager.ModuleInstance.TextureManager._Icons[(int)_Icons.Bug];
+            this._Line = BuildsManager.ModuleInstance.TextureManager.getControlTexture(_Controls.Line).GetRegion(new Rectangle(22, 15, 85, 5));
+            this._Background = this._EmptyTraitLine;
 
-            SkillBar = new SkillBar_Control(Parent)
+            this.SkillBar = new SkillBar_Control(this.Parent)
             {
                 _Location = new Point(0, 0),
-                Size = new Point(_Width, Skillbar_Height),
+                Size = new Point(this._Width, this.Skillbar_Height),
             };
 
-            Specializations = new List<Specialization_Control>();
-            for (int i = 0; i < Template.Build.SpecLines.Count; i++)
+            this.Specializations = new List<Specialization_Control>();
+            for (int i = 0; i < this.Template.Build.SpecLines.Count; i++)
             {
-                Specializations.Add(new Specialization_Control(Parent, i, new Point(0, 5 + Skillbar_Height + i * 134), CustomTooltip)
+                this.Specializations.Add(new Specialization_Control(this.Parent, i, new Point(0, 5 + this.Skillbar_Height + (i * 134)), this.CustomTooltip)
                 {
-                    ZIndex = ZIndex + 1,
+                    ZIndex = this.ZIndex + 1,
                     Elite = i == 2,
                 });
             }
 
-            UpdateTemplate();
+            this.UpdateTemplate();
         }
 
         protected override void DisposeControl()
         {
             base.DisposeControl();
 
-            Click -= OnClick;
-            CustomTooltip?.Dispose();
+            this.Click -= this.OnClick;
+            this.CustomTooltip?.Dispose();
         }
+
         public EventHandler Changed;
+
         private void OnChanged()
         {
             this.Changed?.Invoke(this, EventArgs.Empty);
@@ -1768,26 +1867,24 @@ private void UpdateLayout()
 
         private void OnClick(object sender, MouseEventArgs m)
         {
-
         }
 
         private void UpdateTemplate()
         {
-            for (int i = 0; i < Template.Build.SpecLines.Count; i++)
+            for (int i = 0; i < this.Template.Build.SpecLines.Count; i++)
             {
-                Template.Build.SpecLines[i].Control = Specializations[i];
-                //SkillBar.SetTemplate();
+                this.Template.Build.SpecLines[i].Control = this.Specializations[i];
+
+                // SkillBar.SetTemplate();
             }
         }
 
         private void UpdateLayout()
         {
-
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-
         }
 
         public void SetTemplate()

@@ -1,12 +1,7 @@
-﻿using Blish_HUD.Modules.Managers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Kenedia.Modules.BuildsManager
+﻿namespace Kenedia.Modules.BuildsManager
 {
+    using Blish_HUD.Modules.Managers;
+
     public class LocalTextureX
     {
         public static DirectoriesManager DirectoriesManager;

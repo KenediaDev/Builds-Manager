@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Gw2Sharp.WebApi.V2.Models;
-using Microsoft.Xna.Framework.Graphics;
-using System.IO;
-using Blish_HUD;
-using Blish_HUD.Controls;
-using System.Text.RegularExpressions;
-using System.Runtime.CompilerServices;
-using Blish_HUD.Modules.Managers;
-using Blish_HUD.Content;
-
-namespace Kenedia.Modules.BuildsManager
+﻿namespace Kenedia.Modules.BuildsManager
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
+    using Blish_HUD;
+    using Blish_HUD.Content;
+    using Blish_HUD.Controls;
+    using Gw2Sharp.WebApi.V2.Models;
+    using Microsoft.Xna.Framework.Graphics;
+
     public enum API_ImageStates
     {
         Unkown,
@@ -23,6 +20,7 @@ namespace Kenedia.Modules.BuildsManager
         Download_Queued,
         Load_Queued,
     }
+
     public enum IconTargets
     {
         Icon,
@@ -30,18 +28,21 @@ namespace Kenedia.Modules.BuildsManager
         ProfessionIcon,
         ProfessionIconBig,
     }
+
     public class WebDownload_Image
     {
         public string Url;
         public string Path;
         public Action OnDownloadComplete;
     }
+
     public class Load_Image
     {
         public subtExtension Target;
         public string Path;
         public Action OnLoadComplete;
     }
+
     public class ObjectExtension
     {
         public subtExtension Icon = new subtExtension();
@@ -49,6 +50,7 @@ namespace Kenedia.Modules.BuildsManager
         public subtExtension ProfessionIcon = new subtExtension();
         public subtExtension ProfessionIconBig = new subtExtension();
     }
+
     public class subtExtension
     {
         public API_ImageStates ImageState = API_ImageStates.Unkown;
@@ -70,6 +72,7 @@ namespace Kenedia.Modules.BuildsManager
         }
 
     }
+
     public static class API_Extension
     {
         public static readonly ConditionalWeakTable<GW2API.BaseObject, ObjectExtension> Flags = new ConditionalWeakTable<GW2API.BaseObject, ObjectExtension>();
@@ -79,23 +82,27 @@ namespace Kenedia.Modules.BuildsManager
             return BuildsManager.ModuleInstance.TextureManager._Icons[0];
         }
 
-        //Item
+        // Item
         public static Texture2D getIcon(this GW2API.Item o, string path = null, Object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
+
         public static Texture2D getIcon(this GW2API.Trait o, string path = null, Object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
+
         public static Texture2D getIcon(this GW2API.Skill o, string path = null, Object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
+
         public static Texture2D getIcon(this GW2API.Specialization o, string path = null, Object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Icon != null ? o.Icon.Path : path, targetControl);
         }
+
         public static Texture2D getBackground(this GW2API.Specialization o, string path = null, Object targetControl = null)
         {
             return GetTextureFile(o, path == null && o != null && o.Background != null ? o.Background.Path : path, targetControl, IconTargets.Background);
@@ -114,7 +121,7 @@ namespace Kenedia.Modules.BuildsManager
     public class APIDownload_Image
     {
         public API_Image Parent;
-        public string display_text = "";
+        public string display_text = string.Empty;
         public string url;
         public string path;
     }
@@ -131,14 +138,19 @@ namespace Kenedia.Modules.BuildsManager
 
         private string _iconPath;
         private string _fileName;
+
         public string fileName
         {
             get
             {
-                if (_fileName != null) return _fileName;
-                _fileName = Regex.Match(Url, "[0-9]*.png").ToString();
+                if (this._fileName != null)
+                {
+                    return this._fileName;
+                }
 
-                return _fileName;
+                this._fileName = Regex.Match(this.Url, "[0-9]*.png").ToString();
+
+                return this._fileName;
             }
         }
 
@@ -146,13 +158,14 @@ namespace Kenedia.Modules.BuildsManager
         {
             get
             {
-                return folderPath + @"/" + fileName;
+                return this.folderPath + @"/" + this.fileName;
             }
         }
 
         public Texture2D _Texture;
         public Texture2D Texture;
-        bool fetchImage()
+
+        private bool fetchImage()
         {
             return false;
         }
@@ -161,6 +174,7 @@ namespace Kenedia.Modules.BuildsManager
     public class GW2API
     {
         public static string BasePath;
+
         public class BaseObject
         {
             public int? Id;
@@ -181,10 +195,12 @@ namespace Kenedia.Modules.BuildsManager
                 public List<int> StatChoices;
                 public iType Type;
             }
+
             public class iIcon
             {
                 public string Url;
             }
+
             public class iRarity
             {
                 public bool isSet;
@@ -201,34 +217,38 @@ namespace Kenedia.Modules.BuildsManager
             public iType Type;
             public iRarity Rarity;
             public ItemRarity __Rarity;
+
             public ItemRarity _Rarity
             {
                 get
                 {
-                    if (Rarity.isSet) return __Rarity;
-
-                    if (Rarity != null)
+                    if (this.Rarity.isSet)
                     {
-                        switch (Rarity.Value)
+                        return this.__Rarity;
+                    }
+
+                    if (this.Rarity != null)
+                    {
+                        switch (this.Rarity.Value)
                         {
-                            case 0: __Rarity = ItemRarity.Unknown; break;
-                            case 1: __Rarity = ItemRarity.Junk; break;
-                            case 2: __Rarity = ItemRarity.Basic; break;
-                            case 3: __Rarity = ItemRarity.Fine; break;
-                            case 4: __Rarity = ItemRarity.Masterwork; break;
-                            case 5: __Rarity = ItemRarity.Rare; break;
-                            case 6: __Rarity = ItemRarity.Exotic; break;
-                            case 7: __Rarity = ItemRarity.Ascended; break;
-                            case 8: __Rarity = ItemRarity.Legendary; break;
+                            case 0: this.__Rarity = ItemRarity.Unknown; break;
+                            case 1: this.__Rarity = ItemRarity.Junk; break;
+                            case 2: this.__Rarity = ItemRarity.Basic; break;
+                            case 3: this.__Rarity = ItemRarity.Fine; break;
+                            case 4: this.__Rarity = ItemRarity.Masterwork; break;
+                            case 5: this.__Rarity = ItemRarity.Rare; break;
+                            case 6: this.__Rarity = ItemRarity.Exotic; break;
+                            case 7: this.__Rarity = ItemRarity.Ascended; break;
+                            case 8: this.__Rarity = ItemRarity.Legendary; break;
                         }
                     }
 
-                    Rarity.isSet = true;
-                    return __Rarity;
+                    this.Rarity.isSet = true;
+                    return this.__Rarity;
                 }
             }
 
-            //public API_Image api_Image;
+            // public API_Image api_Image;
 
             public Texture2D Texture;
         }
@@ -238,11 +258,13 @@ namespace Kenedia.Modules.BuildsManager
             public string Value;
             public string RawValue;
         }
+
         public class intType
         {
             public int Value;
             public string RawValue;
         }
+
         public class Slot
         {
             public int Value;
@@ -268,11 +290,13 @@ namespace Kenedia.Modules.BuildsManager
             public int? ApplyCount;
             public int? Duration;
         }
+
         public class Flag
         {
             public string Value;
             public string RawValue;
         }
+
         public class intFlag
         {
             public int Value;
@@ -312,6 +336,7 @@ namespace Kenedia.Modules.BuildsManager
             public double? AttributeAdjustment;
             public string Description;
         }
+
         public class intDetails
         {
             public intType Type;
@@ -333,6 +358,7 @@ namespace Kenedia.Modules.BuildsManager
         {
             public int Id;
         }
+
         public class ProfessionWeapon
         {
             public int Specialization;
@@ -351,6 +377,7 @@ namespace Kenedia.Modules.BuildsManager
             public int Code;
             public IReadOnlyDictionary<string, ProfessionWeapon> Weapons;
         }
+
         public class Item : BaseObject
         {
             public string Description;
@@ -433,11 +460,13 @@ namespace Kenedia.Modules.BuildsManager
 
             return statName;
         }
+
         public enum traitType
         {
             Minor = 1,
             Major = 2,
         }
+
         public enum skillSlot
         {
             Weapon_1 = 1,
@@ -454,6 +483,7 @@ namespace Kenedia.Modules.BuildsManager
             Utility = 12,
             Elite = 13,
         }
+
         public enum armorSlot
         {
             Helm,
@@ -463,6 +493,7 @@ namespace Kenedia.Modules.BuildsManager
             Leggings,
             Boots,
         }
+
         public enum weaponHand
         {
             Mainhand,
@@ -471,6 +502,7 @@ namespace Kenedia.Modules.BuildsManager
             Offhand,
             Aquatic,
         }
+
         public enum weaponSlot
         {
             Axe = weaponHand.DualWielded,
@@ -493,6 +525,7 @@ namespace Kenedia.Modules.BuildsManager
             Speargun = weaponHand.Aquatic,
             Trident = weaponHand.Aquatic,
         }
+
         public enum trinketType
         {
             Back,
@@ -500,17 +533,20 @@ namespace Kenedia.Modules.BuildsManager
             Accessory,
             Ring,
         }
+
         public enum armorWeight
         {
             Heavy = 1,
             Medium,
             Light,
         }
+
         public enum upgradeType
         {
             Rune = 3,
             Sigil,
         }
+
         public enum weaponType
         {
             Unkown = -1,
@@ -548,13 +584,15 @@ namespace Kenedia.Modules.BuildsManager
         public class Icon : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    _Texture?.Dispose();
-                    //_AsyncTexture?.Dispose();
+                    this.disposed = true;
+                    this._Texture?.Dispose();
+
+                    // _AsyncTexture?.Dispose();
                 }
             }
 
@@ -569,41 +607,41 @@ namespace Kenedia.Modules.BuildsManager
             {
                 get
                 {
-                    if (_Texture == null && !BuildsManager.ModuleInstance.FetchingAPI)
+                    if (this._Texture == null && !BuildsManager.ModuleInstance.FetchingAPI)
                     {
-                        _Texture = new AsyncTexture2D(ContentService.Textures.TransparentPixel);
+                        this._Texture = new AsyncTexture2D(ContentService.Textures.TransparentPixel);
 
                         Task.Run(() =>
                         {
-                            var fs = new FileStream(BuildsManager.ModuleInstance.Paths.BasePath + Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                            var fs = new FileStream(BuildsManager.ModuleInstance.Paths.BasePath + this.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                             GameService.Graphics.QueueMainThreadRender((graphicsDevice) =>
                             {
                                 var texture = TextureUtil.FromStreamPremultiplied(graphicsDevice, fs);
 
-                                if (ImageRegion != null)
+                                if (this.ImageRegion != null)
                                 {
                                     double factor = 1;
 
-                                    if (DefaultBounds != default)
+                                    if (this.DefaultBounds != default)
                                     {
-                                        factor = (double)texture.Width / (double)DefaultBounds.Width;
+                                        factor = (double)texture.Width / (double)this.DefaultBounds.Width;
                                     }
 
-                                    ImageRegion = ImageRegion.Scale(factor);
+                                    this.ImageRegion = this.ImageRegion.Scale(factor);
 
-                                    if (texture.Bounds.Width > 0 && ImageRegion.Width > 0 && texture.Bounds.Contains(ImageRegion))
+                                    if (texture.Bounds.Width > 0 && this.ImageRegion.Width > 0 && texture.Bounds.Contains(this.ImageRegion))
                                     {
-                                        texture = texture.GetRegion(ImageRegion);
+                                        texture = texture.GetRegion(this.ImageRegion);
                                     }
                                 }
 
-                                _Texture.SwapTexture(texture);
+                                this._Texture.SwapTexture(texture);
                                 fs.Close();
                             });
                         });
                     }
 
-                    return _Texture;
+                    return this._Texture;
                 }
             }
         }
@@ -612,12 +650,13 @@ namespace Kenedia.Modules.BuildsManager
         public class Item : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon?.Dispose();
+                    this.disposed = true;
+                    this.Icon?.Dispose();
                 }
             }
 
@@ -626,46 +665,53 @@ namespace Kenedia.Modules.BuildsManager
             public Icon Icon;
             public string ChatLink;
         }
+
         public class EquipmentItem : Item
         {
             public double AttributeAdjustment;
         }
+
         public class ArmorItem : EquipmentItem
         {
             public armorSlot Slot;
             public armorWeight ArmorWeight;
 
         }
+
         public class WeaponItem : EquipmentItem
         {
             public weaponType WeaponType;
             public weaponSlot Slot;
         }
+
         public class TrinketItem : EquipmentItem
         {
             public trinketType TrinketType;
         }
+
         public class RuneItem : Item
         {
             public upgradeType Type = upgradeType.Rune;
             public List<string> Bonuses;
         }
+
         public class SigilItem : Item
         {
             public upgradeType Type = upgradeType.Sigil;
-            public string Description; //InfixUpgrade.Buff.Description
+            public string Description; // InfixUpgrade.Buff.Description
         }
         #endregion
 
         public class Skill : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon?.Dispose();
+                    this.disposed = true;
+                    this.Icon?.Dispose();
                 }
             }
 
@@ -680,24 +726,26 @@ namespace Kenedia.Modules.BuildsManager
             public List<string> Flags;
             public List<string> Categories;
         }
+
         public class Legend : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Heal?.Dispose();
-                    Elite?.Dispose();
-                    Swap?.Dispose();
-                    Skill?.Dispose();
+                    this.disposed = true;
+                    this.Heal?.Dispose();
+                    this.Elite?.Dispose();
+                    this.Swap?.Dispose();
+                    this.Skill?.Dispose();
 
-                    Utilities?.DisposeAll();
+                    this.Utilities?.DisposeAll();
                 }
             }
 
-            public string Name; 
+            public string Name;
             public int Id;
             public List<Skill> Utilities;
             public Skill Heal;
@@ -710,12 +758,13 @@ namespace Kenedia.Modules.BuildsManager
         public class Trait : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon?.Dispose();
+                    this.disposed = true;
+                    this.Icon?.Dispose();
                 }
             }
 
@@ -732,18 +781,19 @@ namespace Kenedia.Modules.BuildsManager
         public class Specialization : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon?.Dispose();
-                    Background?.Dispose();
-                    ProfessionIcon?.Dispose();
-                    ProfessionIconBig?.Dispose();
-                    WeaponTrait?.Dispose();
-                    MinorTraits?.DisposeAll();
-                    MajorTraits?.DisposeAll();
+                    this.disposed = true;
+                    this.Icon?.Dispose();
+                    this.Background?.Dispose();
+                    this.ProfessionIcon?.Dispose();
+                    this.ProfessionIconBig?.Dispose();
+                    this.WeaponTrait?.Dispose();
+                    this.MinorTraits?.DisposeAll();
+                    this.MajorTraits?.DisposeAll();
                 }
             }
 
@@ -760,26 +810,29 @@ namespace Kenedia.Modules.BuildsManager
             public List<Trait> MinorTraits = new List<Trait>();
             public List<Trait> MajorTraits = new List<Trait>();
         }
+
         public class ProfessionWeapon
         {
             public int Specialization;
             public weaponType Weapon;
             public List<weaponHand> Wielded;
         }
+
         public class Profession : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon?.Dispose();
-                    IconBig?.Dispose();
+                    this.disposed = true;
+                    this.Icon?.Dispose();
+                    this.IconBig?.Dispose();
 
-                    Specializations?.DisposeAll();
-                    Skills?.DisposeAll();
-                    Legends?.DisposeAll();
+                    this.Specializations?.DisposeAll();
+                    this.Skills?.DisposeAll();
+                    this.Legends?.DisposeAll();
                 }
             }
 
@@ -796,12 +849,13 @@ namespace Kenedia.Modules.BuildsManager
         public class StatAttribute : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon?.Dispose();
+                    this.disposed = true;
+                    this.Icon?.Dispose();
                 }
             }
 
@@ -811,16 +865,18 @@ namespace Kenedia.Modules.BuildsManager
             public int Value;
             public Icon Icon;
         }
+
         public class Stat : IDisposable
         {
             private bool disposed = false;
+
             public void Dispose()
             {
-                if (!disposed)
+                if (!this.disposed)
                 {
-                    disposed = true;
-                    Icon.Dispose();
-                    Attributes?.DisposeAll();
+                    this.disposed = true;
+                    this.Icon.Dispose();
+                    this.Attributes?.DisposeAll();
                 }
             }
 

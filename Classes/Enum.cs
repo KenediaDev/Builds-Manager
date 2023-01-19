@@ -110,6 +110,7 @@
         SwordAndShield,
         QuestionMark,
     }
+
     public enum _EquipSlotTextures
     {
         Helmet,
@@ -131,6 +132,7 @@
         Accessoire1,
         Accessoire2,
     }
+
     public enum _EquipmentTextures
     {
         Helmet,
@@ -141,7 +143,8 @@
         Boots,
         Mainhand_Weapon,
         Offhand_Weapon,
-        //Aquabreather,
+
+        // Aquabreather,
         AquaticWeapon = 9,
         Back,
         Amulet,
@@ -154,6 +157,7 @@
         Axe,
         Pickaxe,
     }
+
     public enum _Stats
     {
         BoonDuration = 2,
@@ -216,6 +220,7 @@
         Dragons = 1697,
         Ritualists = 1694,
     }
+
     public enum _EquipmentSlots
     {
         Unkown = -1,
@@ -231,7 +236,8 @@
         Weapon2_MainHand,
         Weapon2_OffHand,
         AquaticWeapon2,
-        //   Aquabreather,
+
+        // Aquabreather,
         Back,
         Amulet,
         Ring1,
@@ -239,6 +245,7 @@
         Accessoire1,
         Accessoire2,
     }
+
     public enum _ArmorSlot
     {
         Unkown = -1,
@@ -249,6 +256,7 @@
         Leggings = 7,
         Boots = 4,
     }
+
     public enum _ArmorWeight
     {
         Unkown = -1,
@@ -294,6 +302,7 @@
         Import,
         Import_Hovered,
     }
+
     public enum _Icons
     {
         Bug,
@@ -321,21 +330,22 @@
         Lock_Locked,
         SingleSpinner,
     }
+
     public enum _RevenantLegends
     {
-        //      Legend1 = 1,
+        // Legend1 = 1,
         LegendaryDragonStance = 1,
 
-        //    Legend2 = 2,
+        // Legend2 = 2,
         LegendaryAssassinStance = 2,
 
-        //    Legend3 = 3,
+        // Legend3 = 3,
         LegendaryDwarfStance = 3,
 
-        //    Legend4 = 4,
+        // Legend4 = 4,
         LegendaryDemonStance = 4,
 
-        //     Legend5 = 5,
+        // Legend5 = 5,
         LegendaryRenegadeStance = 5,
 
         // Legend6 = 6,

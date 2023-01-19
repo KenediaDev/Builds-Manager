@@ -9,6 +9,7 @@
     <RootNamespace>Kenedia.Modules.BuildsManager</RootNamespace>
     <AssemblyName>BuildsManager</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>latest</LangVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -57,7 +58,94 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="App.config" />
+    <None Include="Content\bin\Windows\Content\atlas\ui-atlas.xnb" />
+    <None Include="Content\bin\Windows\Content\atlas\ui.xnb" />
+    <None Include="Content\bin\Windows\Content\common\button-states.xnb" />
+    <None Include="Content\bin\Windows\Content\common\error.xnb" />
+    <None Include="Content\bin\Windows\Content\common\menomonia.ttf" />
+    <None Include="Content\bin\Windows\Content\common\menomonia.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\alphamask.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\distancedissolve.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\glow.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\gw2master.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\marker.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\menuitem.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\menuitem2.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\silhouette.xnb" />
+    <None Include="Content\bin\Windows\Content\effects\trail.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\consolas-10-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\consolas-10.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\consolas-12-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\consolas-12.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\consolas-8-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\consolas-8.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia-8-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-11-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-11-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-11-italic.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-11-italic_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-11-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-11-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-12-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-12-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-12-italic.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-12-italic_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-12-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-12-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-14-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-14-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-14-italic.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-14-italic_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-14-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-14-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-16-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-16-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-16-italic.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-16-italic_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-16-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-16-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-18-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-18-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-18-italic.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-18-italic_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-18-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-18-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-20-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-20-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-20-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-20-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-22-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-22-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-22-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-22-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-24-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-24-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-24-bold_1.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-24-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-24-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-32-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-32-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-32-regular_1.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-34-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-34-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-34-regular_1.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-36-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-36-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-36-bold_1.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-36-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-36-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-36-regular_1.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-8-bold.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-8-bold_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-8-italic.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-8-italic_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-8-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\menomonia\menomonia-8-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\newkrytan\newkrytan-12-regular.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\newkrytan\newkrytan-12-regular_0.xnb" />
+    <None Include="Content\bin\Windows\Content\fonts\newkrytan\newkrytan-12-regular_1.xnb" />
     <None Include="manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -93,42 +181,56 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Blish HUD, Version=0.11.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\BlishHUD.0.11.6\lib\net472\Blish HUD.exe</HintPath>
+    <Reference Include="Blish HUD, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\BlishHUD.1.0.0\lib\net472\Blish HUD.exe</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Gapotchenko.FX, Version=2021.1.5.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
-      <HintPath>packages\Gapotchenko.FX.2021.1.5\lib\net472\Gapotchenko.FX.dll</HintPath>
+    <Reference Include="Gapotchenko.FX, Version=2022.2.7.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
+      <HintPath>packages\Gapotchenko.FX.2022.2.7\lib\net472\Gapotchenko.FX.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Gapotchenko.FX.Diagnostics.Process, Version=2021.1.5.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
-      <HintPath>packages\Gapotchenko.FX.Diagnostics.Process.2021.1.5\lib\net472\Gapotchenko.FX.Diagnostics.Process.dll</HintPath>
+    <Reference Include="Gapotchenko.FX.Diagnostics.CommandLine, Version=2022.2.7.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
+      <HintPath>packages\Gapotchenko.FX.Diagnostics.CommandLine.2022.2.7\lib\net472\Gapotchenko.FX.Diagnostics.CommandLine.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Gapotchenko.FX.Threading, Version=2021.1.5.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
-      <HintPath>packages\Gapotchenko.FX.Threading.2021.1.5\lib\net472\Gapotchenko.FX.Threading.dll</HintPath>
+    <Reference Include="Gapotchenko.FX.Diagnostics.Process, Version=2022.2.7.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
+      <HintPath>packages\Gapotchenko.FX.Diagnostics.Process.2022.2.7\lib\net472\Gapotchenko.FX.Diagnostics.Process.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Gapotchenko.FX.Text, Version=2022.2.7.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
+      <HintPath>packages\Gapotchenko.FX.Text.2022.2.7\lib\net472\Gapotchenko.FX.Text.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Gapotchenko.FX.Threading, Version=2022.2.7.4096, Culture=neutral, PublicKeyToken=a750ee378eaf756f, processorArchitecture=MSIL">
+      <HintPath>packages\Gapotchenko.FX.Threading.2022.2.7\lib\net472\Gapotchenko.FX.Threading.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Gw2Sharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\Gw2Sharp.1.7.0\lib\netstandard2.0\Gw2Sharp.dll</HintPath>
+      <HintPath>packages\Gw2Sharp.1.7.3\lib\netstandard2.0\Gw2Sharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.5.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.7.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=6.14.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.JsonWebTokens.6.14.1\lib\net472\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+    <Reference Include="Microsoft.IdentityModel.Abstractions, Version=6.25.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Abstractions.6.25.1\lib\net472\Microsoft.IdentityModel.Abstractions.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel.Logging, Version=6.14.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Logging.6.14.1\lib\net472\Microsoft.IdentityModel.Logging.dll</HintPath>
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=6.25.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.JsonWebTokens.6.25.1\lib\net472\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.14.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.IdentityModel.Tokens.6.14.1\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=6.25.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Logging.6.25.1\lib\net472\Microsoft.IdentityModel.Logging.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.25.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IdentityModel.Tokens.6.25.1\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="MonoGame.Extended, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\MonoGame.Extended.3.8.0\lib\netstandard2.0\MonoGame.Extended.dll</HintPath>
       <Private>False</Private>
@@ -137,12 +239,12 @@
       <HintPath>packages\MonoGame.Framework.WindowsDX.3.8.0.1641\lib\net452\MonoGame.Framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="NAudio.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=e279aa5131008a41, processorArchitecture=MSIL">
-      <HintPath>packages\NAudio.Core.2.0.0\lib\netstandard2.0\NAudio.Core.dll</HintPath>
+    <Reference Include="NAudio.Core, Version=2.1.0.0, Culture=neutral, PublicKeyToken=e279aa5131008a41, processorArchitecture=MSIL">
+      <HintPath>packages\NAudio.Core.2.1.0\lib\netstandard2.0\NAudio.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="NAudio.Wasapi, Version=2.0.0.0, Culture=neutral, PublicKeyToken=e279aa5131008a41, processorArchitecture=MSIL">
-      <HintPath>packages\NAudio.Wasapi.2.0.0\lib\netstandard2.0\NAudio.Wasapi.dll</HintPath>
+    <Reference Include="NAudio.Wasapi, Version=2.1.0.0, Culture=neutral, PublicKeyToken=e279aa5131008a41, processorArchitecture=MSIL">
+      <HintPath>packages\NAudio.Wasapi.2.1.0\lib\netstandard2.0\NAudio.Wasapi.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -154,106 +256,124 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="protobuf-net, Version=3.0.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>packages\protobuf-net.3.0.101\lib\net461\protobuf-net.dll</HintPath>
+      <HintPath>packages\protobuf-net.3.1.26\lib\net462\protobuf-net.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="protobuf-net.Core, Version=3.0.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>packages\protobuf-net.Core.3.0.101\lib\net461\protobuf-net.Core.dll</HintPath>
+      <HintPath>packages\protobuf-net.Core.3.1.26\lib\net462\protobuf-net.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SemVer, Version=1.2.2.0, Culture=neutral, PublicKeyToken=a89bb7dc6f7a145c, processorArchitecture=MSIL">
       <HintPath>packages\SemanticVersioning.1.2.2\lib\net45\SemVer.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.4.0.1\lib\net45\SharpDX.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.Direct2D1, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.Direct2D1.4.0.1\lib\net45\SharpDX.Direct2D1.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.Direct2D1, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.Direct2D1.4.2.0\lib\net45\SharpDX.Direct2D1.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.Direct3D11, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.Direct3D11.4.0.1\lib\net45\SharpDX.Direct3D11.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.Direct3D11, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.Direct3D11.4.2.0\lib\net45\SharpDX.Direct3D11.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.Direct3D9, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.Direct3D9.4.0.1\lib\net45\SharpDX.Direct3D9.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.Direct3D9, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.Direct3D9.4.2.0\lib\net45\SharpDX.Direct3D9.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.DXGI, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.DXGI.4.0.1\lib\net45\SharpDX.DXGI.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.DXGI, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.DXGI.4.2.0\lib\net45\SharpDX.DXGI.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.Mathematics, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.Mathematics.4.0.1\lib\net45\SharpDX.Mathematics.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.MediaFoundation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.MediaFoundation.4.0.1\lib\net45\SharpDX.MediaFoundation.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.MediaFoundation, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.MediaFoundation.4.2.0\lib\net45\SharpDX.MediaFoundation.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.XAudio2, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.XAudio2.4.0.1\lib\net45\SharpDX.XAudio2.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.XAudio2, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.XAudio2.4.2.0\lib\net45\SharpDX.XAudio2.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SharpDX.XInput, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <HintPath>packages\SharpDX.XInput.4.0.1\lib\net45\SharpDX.XInput.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="SharpDX.XInput, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>packages\SharpDX.XInput.4.2.0\lib\net45\SharpDX.XInput.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.AppContext" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Collections.Immutable, Version=1.2.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Collections.Immutable.1.7.1\lib\net461\System.Collections.Immutable.dll</HintPath>
+    <Reference Include="System.Collections.Immutable, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Collections.Immutable.7.0.0\lib\net462\System.Collections.Immutable.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Console" />
     <Reference Include="System.Design" />
+    <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=6.14.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>packages\System.IdentityModel.Tokens.Jwt.6.14.1\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    <Reference Include="System.Globalization.Calendars" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=6.25.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\System.IdentityModel.Tokens.Jwt.6.25.1\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    <Reference Include="System.IO" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.ZipFile" />
+    <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.IO.FileSystem.Primitives" />
+    <Reference Include="System.Linq" />
+    <Reference Include="System.Linq.Expressions" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Sockets" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Resources.Extensions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Resources.Extensions.6.0.0\lib\net461\System.Resources.Extensions.dll</HintPath>
+    <Reference Include="System.Reflection" />
+    <Reference Include="System.Resources.Extensions, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Resources.Extensions.7.0.0\lib\net462\System.Resources.Extensions.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <Reference Include="System.Security" />
-    <Reference Include="System.Text.Encodings.Web, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Text.Encodings.Web.5.0.0\lib\net461\System.Text.Encodings.Web.dll</HintPath>
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Primitives, Version=4.10.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.ServiceModel.Primitives.4.10.0\lib\net461\System.ServiceModel.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Encodings.Web.7.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Text.Json, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Text.Json.5.0.0\lib\net461\System.Text.Json.dll</HintPath>
+    <Reference Include="System.Text.Json, Version=7.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Text.Json.7.0.1\lib\net462\System.Text.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
       <Private>False</Private>
@@ -264,6 +384,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.ReaderWriter" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -278,12 +399,295 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ref\data\builds.json" />
+    <None Include="ref\data\legends.json" />
+    <None Include="ref\data\runes.json" />
+    <None Include="ref\data\sigils.json" />
+    <None Include="ref\data\skillpalettes.json" />
     <None Include="ref\_instructions.txt" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ref\155985.png" />
     <Content Include="ref\603447.png" />
-    <Content Include="ref\test\603447.png" />
+    <Content Include="ref\textures\backgrounds\0.png" />
+    <Content Include="ref\textures\backgrounds\1.png" />
+    <Content Include="ref\textures\backgrounds\2.png" />
+    <Content Include="ref\textures\backgrounds\3.png" />
+    <Content Include="ref\textures\controls\0.png" />
+    <Content Include="ref\textures\controls\1.png" />
+    <Content Include="ref\textures\controls\10.png" />
+    <Content Include="ref\textures\controls\11.png" />
+    <Content Include="ref\textures\controls\12.png" />
+    <Content Include="ref\textures\controls\13.png" />
+    <Content Include="ref\textures\controls\14.png" />
+    <Content Include="ref\textures\controls\15.png" />
+    <Content Include="ref\textures\controls\16.png" />
+    <Content Include="ref\textures\controls\17.png" />
+    <Content Include="ref\textures\controls\18.png" />
+    <Content Include="ref\textures\controls\19.png" />
+    <Content Include="ref\textures\controls\2.png" />
+    <Content Include="ref\textures\controls\20.png" />
+    <Content Include="ref\textures\controls\21.png" />
+    <Content Include="ref\textures\controls\22.png" />
+    <Content Include="ref\textures\controls\23.png" />
+    <Content Include="ref\textures\controls\24.png" />
+    <Content Include="ref\textures\controls\25.png" />
+    <Content Include="ref\textures\controls\26.png" />
+    <Content Include="ref\textures\controls\27.png" />
+    <Content Include="ref\textures\controls\28.png" />
+    <Content Include="ref\textures\controls\29.png" />
+    <Content Include="ref\textures\controls\3.png" />
+    <Content Include="ref\textures\controls\30.png" />
+    <Content Include="ref\textures\controls\31.png" />
+    <Content Include="ref\textures\controls\32.png" />
+    <Content Include="ref\textures\controls\33.png" />
+    <Content Include="ref\textures\controls\34.png" />
+    <Content Include="ref\textures\controls\4.png" />
+    <Content Include="ref\textures\controls\5.png" />
+    <Content Include="ref\textures\controls\6.png" />
+    <Content Include="ref\textures\controls\7.png" />
+    <Content Include="ref\textures\controls\8.png" />
+    <Content Include="ref\textures\controls\9.png" />
+    <Content Include="ref\textures\emblems\0.png" />
+    <Content Include="ref\textures\emblems\1.png" />
+    <Content Include="ref\textures\emblems\784276.png" />
+    <Content Include="ref\textures\encounters\Adina.png" />
+    <Content Include="ref\textures\encounters\Bandit Trio.png" />
+    <Content Include="ref\textures\encounters\Boneskinner.png" />
+    <Content Include="ref\textures\encounters\Cairn.png" />
+    <Content Include="ref\textures\encounters\Conjured Amalgamate.png" />
+    <Content Include="ref\textures\encounters\Deimos.png" />
+    <Content Include="ref\textures\encounters\Desmina.png" />
+    <Content Include="ref\textures\encounters\Dhuum.png" />
+    <Content Include="ref\textures\encounters\Escort.png" />
+    <Content Include="ref\textures\encounters\Gorseval.png" />
+    <Content Include="ref\textures\encounters\Keep Construct.png" />
+    <Content Include="ref\textures\encounters\Largos.png" />
+    <Content Include="ref\textures\encounters\Matthias.png" />
+    <Content Include="ref\textures\encounters\Mursaat_Overseer.png" />
+    <Content Include="ref\textures\encounters\Qadim the Peerless.png" />
+    <Content Include="ref\textures\encounters\Qadim.png" />
+    <Content Include="ref\textures\encounters\Sabetha.png" />
+    <Content Include="ref\textures\encounters\Sabir.png" />
+    <Content Include="ref\textures\encounters\Samarog.png" />
+    <Content Include="ref\textures\encounters\Slothasor.png" />
+    <Content Include="ref\textures\encounters\Statuettes.png" />
+    <Content Include="ref\textures\encounters\Vale Guardian.png" />
+    <Content Include="ref\textures\encounters\Whisper of Jormag.png" />
+    <Content Include="ref\textures\encounters\Xera.png" />
+    <Content Include="ref\textures\equipment slots\0.png" />
+    <Content Include="ref\textures\equipment slots\1.png" />
+    <Content Include="ref\textures\equipment slots\10.png" />
+    <Content Include="ref\textures\equipment slots\11.png" />
+    <Content Include="ref\textures\equipment slots\12.png" />
+    <Content Include="ref\textures\equipment slots\13.png" />
+    <Content Include="ref\textures\equipment slots\14.png" />
+    <Content Include="ref\textures\equipment slots\15.png" />
+    <Content Include="ref\textures\equipment slots\16.png" />
+    <Content Include="ref\textures\equipment slots\17.png" />
+    <Content Include="ref\textures\equipment slots\18.png" />
+    <Content Include="ref\textures\equipment slots\19.png" />
+    <Content Include="ref\textures\equipment slots\2.png" />
+    <Content Include="ref\textures\equipment slots\3.png" />
+    <Content Include="ref\textures\equipment slots\4.png" />
+    <Content Include="ref\textures\equipment slots\5.png" />
+    <Content Include="ref\textures\equipment slots\6.png" />
+    <Content Include="ref\textures\equipment slots\7.png" />
+    <Content Include="ref\textures\equipment slots\8.png" />
+    <Content Include="ref\textures\equipment slots\9.png" />
+    <Content Include="ref\textures\icons\0.png" />
+    <Content Include="ref\textures\icons\1.png" />
+    <Content Include="ref\textures\icons\10.png" />
+    <Content Include="ref\textures\icons\11.png" />
+    <Content Include="ref\textures\icons\12.png" />
+    <Content Include="ref\textures\icons\13.png" />
+    <Content Include="ref\textures\icons\14.png" />
+    <Content Include="ref\textures\icons\15.png" />
+    <Content Include="ref\textures\icons\16.png" />
+    <Content Include="ref\textures\icons\17.png" />
+    <Content Include="ref\textures\icons\18.png" />
+    <Content Include="ref\textures\icons\19.png" />
+    <Content Include="ref\textures\icons\2.png" />
+    <Content Include="ref\textures\icons\20.png" />
+    <Content Include="ref\textures\icons\21.png" />
+    <Content Include="ref\textures\icons\22.png" />
+    <Content Include="ref\textures\icons\23.png" />
+    <Content Include="ref\textures\icons\3.png" />
+    <Content Include="ref\textures\icons\4.png" />
+    <Content Include="ref\textures\icons\5.png" />
+    <Content Include="ref\textures\icons\6.png" />
+    <Content Include="ref\textures\icons\7.png" />
+    <Content Include="ref\textures\icons\8.png" />
+    <Content Include="ref\textures\icons\9.png" />
+    <Content Include="ref\textures\professions gray\1.png" />
+    <Content Include="ref\textures\professions gray\2.png" />
+    <Content Include="ref\textures\professions gray\3.png" />
+    <Content Include="ref\textures\professions gray\4.png" />
+    <Content Include="ref\textures\professions gray\5.png" />
+    <Content Include="ref\textures\professions gray\6.png" />
+    <Content Include="ref\textures\professions gray\7.png" />
+    <Content Include="ref\textures\professions gray\8.png" />
+    <Content Include="ref\textures\professions gray\9.png" />
+    <Content Include="ref\textures\professions white\1.png" />
+    <Content Include="ref\textures\professions white\2.png" />
+    <Content Include="ref\textures\professions white\3.png" />
+    <Content Include="ref\textures\professions white\4.png" />
+    <Content Include="ref\textures\professions white\5.png" />
+    <Content Include="ref\textures\professions white\6.png" />
+    <Content Include="ref\textures\professions white\7.png" />
+    <Content Include="ref\textures\professions white\8.png" />
+    <Content Include="ref\textures\professions white\9.png" />
+    <Content Include="ref\textures\professions\1.png" />
+    <Content Include="ref\textures\professions\2.png" />
+    <Content Include="ref\textures\professions\3.png" />
+    <Content Include="ref\textures\professions\4.png" />
+    <Content Include="ref\textures\professions\5.png" />
+    <Content Include="ref\textures\professions\6.png" />
+    <Content Include="ref\textures\professions\7.png" />
+    <Content Include="ref\textures\professions\8.png" />
+    <Content Include="ref\textures\professions\9.png" />
+    <Content Include="ref\textures\specializations gray\18.png" />
+    <Content Include="ref\textures\specializations gray\27.png" />
+    <Content Include="ref\textures\specializations gray\34.png" />
+    <Content Include="ref\textures\specializations gray\40.png" />
+    <Content Include="ref\textures\specializations gray\43.png" />
+    <Content Include="ref\textures\specializations gray\48.png" />
+    <Content Include="ref\textures\specializations gray\5.png" />
+    <Content Include="ref\textures\specializations gray\52.png" />
+    <Content Include="ref\textures\specializations gray\55.png" />
+    <Content Include="ref\textures\specializations gray\56.png" />
+    <Content Include="ref\textures\specializations gray\57.png" />
+    <Content Include="ref\textures\specializations gray\58.png" />
+    <Content Include="ref\textures\specializations gray\59.png" />
+    <Content Include="ref\textures\specializations gray\60.png" />
+    <Content Include="ref\textures\specializations gray\61.png" />
+    <Content Include="ref\textures\specializations gray\62.png" />
+    <Content Include="ref\textures\specializations gray\63.png" />
+    <Content Include="ref\textures\specializations gray\64.png" />
+    <Content Include="ref\textures\specializations gray\65.png" />
+    <Content Include="ref\textures\specializations gray\66.png" />
+    <Content Include="ref\textures\specializations gray\67.png" />
+    <Content Include="ref\textures\specializations gray\68.png" />
+    <Content Include="ref\textures\specializations gray\69.png" />
+    <Content Include="ref\textures\specializations gray\7.png" />
+    <Content Include="ref\textures\specializations gray\70.png" />
+    <Content Include="ref\textures\specializations gray\71.png" />
+    <Content Include="ref\textures\specializations gray\72.png" />
+    <Content Include="ref\textures\specializations white\18.png" />
+    <Content Include="ref\textures\specializations white\27.png" />
+    <Content Include="ref\textures\specializations white\34.png" />
+    <Content Include="ref\textures\specializations white\40.png" />
+    <Content Include="ref\textures\specializations white\43.png" />
+    <Content Include="ref\textures\specializations white\48.png" />
+    <Content Include="ref\textures\specializations white\5.png" />
+    <Content Include="ref\textures\specializations white\52.png" />
+    <Content Include="ref\textures\specializations white\55.png" />
+    <Content Include="ref\textures\specializations white\56.png" />
+    <Content Include="ref\textures\specializations white\57.png" />
+    <Content Include="ref\textures\specializations white\58.png" />
+    <Content Include="ref\textures\specializations white\59.png" />
+    <Content Include="ref\textures\specializations white\60.png" />
+    <Content Include="ref\textures\specializations white\61.png" />
+    <Content Include="ref\textures\specializations white\62.png" />
+    <Content Include="ref\textures\specializations white\63.png" />
+    <Content Include="ref\textures\specializations white\64.png" />
+    <Content Include="ref\textures\specializations white\65.png" />
+    <Content Include="ref\textures\specializations white\66.png" />
+    <Content Include="ref\textures\specializations white\67.png" />
+    <Content Include="ref\textures\specializations white\68.png" />
+    <Content Include="ref\textures\specializations white\69.png" />
+    <Content Include="ref\textures\specializations white\7.png" />
+    <Content Include="ref\textures\specializations white\70.png" />
+    <Content Include="ref\textures\specializations white\71.png" />
+    <Content Include="ref\textures\specializations white\72.png" />
+    <Content Include="ref\textures\specializations\18.png" />
+    <Content Include="ref\textures\specializations\27.png" />
+    <Content Include="ref\textures\specializations\34.png" />
+    <Content Include="ref\textures\specializations\40.png" />
+    <Content Include="ref\textures\specializations\43.png" />
+    <Content Include="ref\textures\specializations\48.png" />
+    <Content Include="ref\textures\specializations\5.png" />
+    <Content Include="ref\textures\specializations\52.png" />
+    <Content Include="ref\textures\specializations\55.png" />
+    <Content Include="ref\textures\specializations\56.png" />
+    <Content Include="ref\textures\specializations\57.png" />
+    <Content Include="ref\textures\specializations\58.png" />
+    <Content Include="ref\textures\specializations\59.png" />
+    <Content Include="ref\textures\specializations\60.png" />
+    <Content Include="ref\textures\specializations\61.png" />
+    <Content Include="ref\textures\specializations\62.png" />
+    <Content Include="ref\textures\specializations\63.png" />
+    <Content Include="ref\textures\specializations\64.png" />
+    <Content Include="ref\textures\specializations\65.png" />
+    <Content Include="ref\textures\specializations\66.png" />
+    <Content Include="ref\textures\specializations\67.png" />
+    <Content Include="ref\textures\specializations\68.png" />
+    <Content Include="ref\textures\specializations\69.png" />
+    <Content Include="ref\textures\specializations\7.png" />
+    <Content Include="ref\textures\specializations\70.png" />
+    <Content Include="ref\textures\specializations\71.png" />
+    <Content Include="ref\textures\specializations\72.png" />
+    <Content Include="ref\textures\stat icons\1035.png" />
+    <Content Include="ref\textures\stat icons\1037.png" />
+    <Content Include="ref\textures\stat icons\1038.png" />
+    <Content Include="ref\textures\stat icons\1064.png" />
+    <Content Include="ref\textures\stat icons\1066.png" />
+    <Content Include="ref\textures\stat icons\1097.png" />
+    <Content Include="ref\textures\stat icons\1098.png" />
+    <Content Include="ref\textures\stat icons\11.png" />
+    <Content Include="ref\textures\stat icons\1114.png" />
+    <Content Include="ref\textures\stat icons\1115.png" />
+    <Content Include="ref\textures\stat icons\1119.png" />
+    <Content Include="ref\textures\stat icons\1125.png" />
+    <Content Include="ref\textures\stat icons\1128.png" />
+    <Content Include="ref\textures\stat icons\1130.png" />
+    <Content Include="ref\textures\stat icons\1134.png" />
+    <Content Include="ref\textures\stat icons\1139.png" />
+    <Content Include="ref\textures\stat icons\1145.png" />
+    <Content Include="ref\textures\stat icons\1162.png" />
+    <Content Include="ref\textures\stat icons\1163.png" />
+    <Content Include="ref\textures\stat icons\1220.png" />
+    <Content Include="ref\textures\stat icons\1329.png" />
+    <Content Include="ref\textures\stat icons\1337.png" />
+    <Content Include="ref\textures\stat icons\1345.png" />
+    <Content Include="ref\textures\stat icons\1430.png" />
+    <Content Include="ref\textures\stat icons\1436.png" />
+    <Content Include="ref\textures\stat icons\1486.png" />
+    <Content Include="ref\textures\stat icons\1538.png" />
+    <Content Include="ref\textures\stat icons\1694.png" />
+    <Content Include="ref\textures\stat icons\1697.png" />
+    <Content Include="ref\textures\stat icons\19.png" />
+    <Content Include="ref\textures\stat icons\20.png" />
+    <Content Include="ref\textures\stat icons\21.png" />
+    <Content Include="ref\textures\stat icons\37.png" />
+    <Content Include="ref\textures\stat icons\38.png" />
+    <Content Include="ref\textures\stat icons\583.png" />
+    <Content Include="ref\textures\stat icons\584.png" />
+    <Content Include="ref\textures\stat icons\585.png" />
+    <Content Include="ref\textures\stat icons\586.png" />
+    <Content Include="ref\textures\stat icons\588.png" />
+    <Content Include="ref\textures\stat icons\656.png" />
+    <Content Include="ref\textures\stat icons\657.png" />
+    <Content Include="ref\textures\stat icons\658.png" />
+    <Content Include="ref\textures\stat icons\659.png" />
+    <Content Include="ref\textures\stat icons\660.png" />
+    <Content Include="ref\textures\stat icons\690.png" />
+    <Content Include="ref\textures\stat icons\icons.png" />
+    <Content Include="ref\textures\stats\10.png" />
+    <Content Include="ref\textures\stats\11.png" />
+    <Content Include="ref\textures\stats\12.png" />
+    <Content Include="ref\textures\stats\13.png" />
+    <Content Include="ref\textures\stats\2.png" />
+    <Content Include="ref\textures\stats\3.png" />
+    <Content Include="ref\textures\stats\4.png" />
+    <Content Include="ref\textures\stats\5.png" />
+    <Content Include="ref\textures\stats\6.png" />
+    <Content Include="ref\textures\stats\7.png" />
+    <Content Include="ref\textures\stats\8.png" />
+    <Content Include="ref\textures\stats\9.png" />
+    <Content Include="ref\textures\stats\icons.png" />
+    <Content Include="ref\textures\store\993583.png" />
+    <Content Include="ref\textures\store\993584.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Strings\common.de.resx" />
@@ -293,6 +697,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>common.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -314,7 +722,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\MonoGame.Framework.WindowsDX.3.8.0.1641\build\MonoGame.Framework.WindowsDX.targets'))" />
-    <Error Condition="!Exists('packages\BlishHUD.0.11.6\build\BlishHUD.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\BlishHUD.0.11.6\build\BlishHUD.targets'))" />
+    <Error Condition="!Exists('packages\BlishHUD.1.0.0\build\BlishHUD.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\BlishHUD.1.0.0\build\BlishHUD.targets'))" />
   </Target>
-  <Import Project="packages\BlishHUD.0.11.6\build\BlishHUD.targets" Condition="Exists('packages\BlishHUD.0.11.6\build\BlishHUD.targets')" />
+  <Import Project="packages\BlishHUD.1.0.0\build\BlishHUD.targets" Condition="Exists('packages\BlishHUD.1.0.0\build\BlishHUD.targets')" />
 </Project>
